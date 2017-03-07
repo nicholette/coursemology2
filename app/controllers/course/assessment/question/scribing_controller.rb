@@ -4,7 +4,8 @@ class Course::Assessment::Question::ScribingController < \
   load_and_authorize_resource :scribing_question,
                               class: Course::Assessment::Question::Scribing,
                               through: :assessment, parent: false
-  def new
+
+  # def new
     # @scribing_questions = Scribing.all
     # respond_to do |format|
     #   format.html
@@ -12,6 +13,10 @@ class Course::Assessment::Question::ScribingController < \
     # end
     # @template = 'course/assessment/question/scribing/new.json.jbuilder'
     # render partial: 'index'
+  # end
+
+  def new
+    @template = 'course/assessment/question/programming/new.json.jbuilder'
   end
 
   def create
@@ -74,14 +79,14 @@ class Course::Assessment::Question::ScribingController < \
   #
   # private
   #
-  # def scribing_question_params
-  #   params.require(:question_scribing).permit(
-  #     :title, :description, :staff_only_comments, :maximum_grade,
-  #     :attempt_limit,
-  #     # *attachment_params,
-  #     skill_ids: []
-  #   )
-  # end
+  def scribing_question_params
+    params.require(:question_scribing).permit(
+      :title, :description, :staff_only_comments, :maximum_grade,
+      :attempt_limit,
+      # *attachment_params,
+      skill_ids: []
+    )
+  end
   #
   # def render_success_json(message, redirect_to_edit)
   #   @response = { message: message, redirect_to_edit: redirect_to_edit }

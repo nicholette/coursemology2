@@ -1,5 +1,5 @@
-if check_import_job?
-  json.import_job_url job_path(@scribing_question.import_job)
+# if check_import_job?
+  # json.import_job_url job_path(@scribing_question.import_job)
 
   if response[:redirect_to_edit]
     json.redirect_edit do
@@ -9,7 +9,7 @@ if check_import_job?
       json.page_title @scribing_question.display_title + ' - ' + page_title
     end
   end
-end
+# end
 
 json.redirect_assessment course_assessment_path(current_course, @assessment)
 json.message response[:message]

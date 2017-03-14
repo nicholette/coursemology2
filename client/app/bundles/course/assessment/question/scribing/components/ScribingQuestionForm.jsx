@@ -46,21 +46,6 @@ function validation(data, pathOfKeysToData, intl) {
     hasError = true;
   }
 
-  // Check language
-  if (!data.get('language_id')) {
-    questionErrors.language_id =
-      intl.formatMessage(translations.cannotBeBlankValidationError);
-    hasError = true;
-  }
-
-  // Check time limit
-  const timeLimit = data.get('time_limit');
-  if (timeLimit && (timeLimit > 10 || timeLimit <= 0)) {
-    questionErrors.time_limit =
-      intl.formatMessage(translations.timeLimitRangeValidationError);
-    hasError = true;
-  }
-
   // Check attempt_limit
   const value = data.get('attempt_limit');
   if (value && value <= 0) {

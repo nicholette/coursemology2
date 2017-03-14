@@ -7,7 +7,7 @@ json.question do
   end
 
   json.published_assessment @assessment.published?
-  # json.attempt_limit @scribing_question.attempt_limit
+  json.attempt_limit @scribing_question.attempt_limit
 
   # check what are packages for, and how it relates to attachments
   # if @scribing_question.attachment.present? && @scribing_question.attachment.persisted?

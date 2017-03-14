@@ -38,15 +38,9 @@ export const initialState = Immutable.fromJS({
 
 function questionReducer(state, action) {
   const { type } = action;
-
   switch (type) {
     case actionTypes.SCRIBING_QUESTION_UPDATE: {
-      const { field, newValue } = action;
-
-      if (field === 'autograded' && newValue === false) {
-        return state.set(field, newValue).set('edit_online', true);
-      }
-
+      const { field, newValue } = action
       return state.set(field, newValue).deleteIn(['error', field]);
     }
     case actionTypes.SKILLS_UPDATE: {
@@ -90,7 +84,7 @@ export default function scribingQuestionReducer(state = initialState, action) {
 
   switch (type) {
     case actionTypes.SKILLS_UPDATE:
-    case actionTypes.PROGRAMMING_QUESTION_UPDATE: {
+    case actionTypes.SCRIBING_QUESTION_UPDATE: {
       return state.set('question', questionReducer(state.get('question'), action));
     }
     // case actionTypes.EDITOR_MODE_UPDATE: {

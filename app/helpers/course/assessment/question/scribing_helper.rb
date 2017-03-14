@@ -46,9 +46,9 @@ module Course::Assessment::Question::ScribingHelper
     end
   end
 
-  def check_import_job?
-    @scribing_question.import_job && @scribing_question.import_job.status != 'completed'
-  end
+  # def check_import_job?
+  #   @scribing_question.import_job && @scribing_question.import_job.status != 'completed'
+  # end
 
   private
 

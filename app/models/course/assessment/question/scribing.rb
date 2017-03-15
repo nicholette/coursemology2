@@ -8,9 +8,6 @@ class Course::Assessment::Question::Scribing < ActiveRecord::Base
 
   def attempt(submission, last_attempt = nil)
     answer = submission.scribing_answers.build(submission: submission, question: question)
-    if last_attempt
-      answer.scribe = last_attempt.scribe
-    end
     answer.acting_as
   end
 end

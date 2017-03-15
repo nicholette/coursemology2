@@ -2,12 +2,37 @@
 require 'rails_helper'
 
 RSpec.describe Course::Assessment::Question::Scribing, type: :model do
-
   it { is_expected.to act_as(Course::Assessment::Question) }
 
-  it 'has one document file' do
-    expect(subject).to have_one(:document_file).
-      class_name(Course::Assessment::Question::ScribingDocumentFile.name).dependent(:destroy)
-  end
+  let(:instance) { Instance.default }
+  with_tenant(:instance) do
+    describe '#attempt' do
+      let(:course) { create(:course) }
+      let(:student_user) { create(:course_student, course: course).user }
+      let(:assessment) { create(:assessment, course: course) }
+      let(:question) { create(:course_assessment_question_scribings, assessment: assessment) }
+      let(:submission) { create(:submission, assessment: assessment, creator: student_user) }
+      subject { question }
 
+      it 'returns an Answer' do
+        expect(subject.attempt(submission)).to be_a(Course::Assessment::Answer)
+      end
+
+      it 'associates the answer with the submission' do
+        answer = subject.attempt(submission)
+        expect(submission.scribing_answers).to include(answer.actable)
+      end
+
+      context 'when last_attempt is given' do
+        let(:last_attempt) { build(:course_assessment_answer_scribings) }
+
+        it 'builds a new answer with old answer_scribing' do
+          answer = subject.attempt(submission, last_attempt).actable
+          answer.save!
+
+          expect(last_attempt.answer_scribing).to eq(answer.answer_scribing)
+        end
+      end
+    end
+  end
 end

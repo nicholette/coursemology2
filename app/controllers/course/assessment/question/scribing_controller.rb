@@ -11,9 +11,6 @@ class Course::Assessment::Question::ScribingController < \
 
   def create
     @template = 'course/assessment/question/scribing/new.json.jbuilder'
-    # @scribing_question.package_type =
-    #   programming_question_params.key?(:file) ? :zip_upload : :online_editor
-    # process_package
 
     respond_to do |format|
       if @scribing_question.save

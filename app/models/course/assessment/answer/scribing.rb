@@ -1,29 +1,10 @@
 # frozen_string_literal: true
 class Course::Assessment::Answer::Scribing < ActiveRecord::Base
-  # # The table name for this model is singular.
-  # self.table_name = table_name.singularize
-
   acts_as :answer, class_name: Course::Assessment::Answer.name
-
-  # has_one :document_file, class_name: Course::Assessment::Answer::ScribingDocumentFile.name,
-  #         dependent: :destroy, foreign_key: :answer_id, inverse_of: :answer
-
-
-  # accepts_nested_attributes_for :files, allow_destroy: true
 
   def to_partial_path
     'course/assessment/answer/scribing/scribing'.freeze
   end
-
-  # Specific implementation of Course::Assessment::Answer#reset_answer
-  # def reset_answer
-  #   self.class.transaction do
-  #     files.clear
-  #     question.specific.copy_template_files_to(self)
-  #     raise ActiveRecord::Rollback unless save
-  #   end
-  #   acting_as
-  # end
 
   MAX_ATTEMPTING_TIMES = 1000
   # Returns the attempting times left for current answer.

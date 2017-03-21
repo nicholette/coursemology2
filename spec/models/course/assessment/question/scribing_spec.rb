@@ -22,17 +22,6 @@ RSpec.describe Course::Assessment::Question::Scribing, type: :model do
         answer = subject.attempt(submission)
         expect(submission.scribing_answers).to include(answer.actable)
       end
-
-      context 'when last_attempt is given' do
-        let(:last_attempt) { build(:course_assessment_answer_scribings) }
-
-        it 'builds a new answer with old answer_scribing' do
-          answer = subject.attempt(submission, last_attempt).actable
-          answer.save!
-
-          expect(last_attempt.answer_scribing).to eq(answer.answer_scribing)
-        end
-      end
     end
   end
 end

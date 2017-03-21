@@ -43,8 +43,6 @@ RSpec.describe Course::Assessment::Question::ScribingController do
         end
 
         it 'returns the correct failure message' do
-          assessment
-          byebug
           subject
           body = JSON.parse(response.body)
           expect(body['message']).to eq(

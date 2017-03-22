@@ -1,11 +1,8 @@
-import Immutable from 'immutable';
-import { combineReducers } from 'redux-immutable';
-import scribingQuestionReducer, { initialState as scribingQuestionState } from './scribingQuestionReducer';
-
-export const initialStates = Immutable.fromJS({
-  scribingQuestion: scribingQuestionState,
-});
+import { combineReducers } from 'redux';
+import { reducer as formReducer } from 'redux-form';
+import scribingQuestionReducer from './scribingQuestionReducer';
 
 export default combineReducers({
   scribingQuestion: scribingQuestionReducer,
+  form: formReducer,
 });

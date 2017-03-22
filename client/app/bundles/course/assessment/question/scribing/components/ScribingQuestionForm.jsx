@@ -1,5 +1,3 @@
-import Immutable from 'immutable';
-
 import React, { PropTypes } from 'react';
 import { injectIntl, intlShape } from 'react-intl';
 import SelectField from 'material-ui/SelectField';
@@ -15,7 +13,46 @@ import styles from './ScribingQuestionForm.scss';
 import translations from './ScribingQuestionForm.intl';
 
 const propTypes = {
-  data: PropTypes.instanceOf(Immutable.Map).isRequired,
+  data: PropTypes.shape({
+    question: PropTypes.shape({
+      id: PropTypes.number,
+      title: PropTypes.string,
+      description: PropTypes.string,
+      staff_only_comments: PropTypes.string,
+      maximum_grade: PropTypes.number,
+      weight: PropTypes.number,
+      skills_ids: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.number,
+        title: PropTypes.string,
+      })),
+      skills: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.number,
+        title: PropTypes.string,
+        course_id: PropTypes.number,
+        description: PropTypes.string,
+        creator_id: PropTypes.number,
+        updater_id: PropTypes.number,
+        created_at: PropTypes.date,
+        updated_at: PropTypes.date,
+      })),
+      error: PropTypes.shape({
+        title: PropTypes.string,
+        skills_id: PropTypes.string,
+        maximum_grade: PropTypes.string,
+      }),
+      published_assessment: PropTypes.bool,
+      attempt_limit: PropTypes.number,
+    }),
+    is_loading: PropTypes.bool,
+    has_errors: PropTypes.bool,
+    show_submission_message: PropTypes.bool,
+    submission_message: PropTypes.string,
+    form_data: PropTypes.shape({
+      method: PropTypes.string.isRequired,
+      path: PropTypes.string.isRequired,
+      auth_token: PropTypes.string.isRequired,
+    })
+  }).isRequired,
   actions: React.PropTypes.shape({
     submitForm: PropTypes.func.isRequired,
     updateScribingQuestion: PropTypes.func.isRequired,
@@ -33,7 +70,7 @@ function validation(data, pathOfKeysToData, intl) {
   let hasError = false;
 
   // Check maximum grade
-  const maximumGrade = data.get('maximum_grade');
+  const maximumGrade = data.maximum_grade;
   if (!maximumGrade) {
     questionErrors.maximum_grade =
       intl.formatMessage(translations.cannotBeBlankValidationError);
@@ -45,21 +82,12 @@ function validation(data, pathOfKeysToData, intl) {
   }
 
   // Check attempt_limit
-  const value = data.get('attempt_limit');
+  const value = data.attempt_limit;
   if (value && value <= 0) {
     questionErrors.attempt_limit =
       intl.formatMessage(translations.lessThanEqualZeroValidationError);
     hasError = true;
   }
-
-  // Check file uploaded when no previous package exists
-  // if (!data.get('edit_online')) {
-  //   if (data.get('package') === null && data.get('package_filename') === null) {
-  //     questionErrors.package_filename =
-  //       intl.formatMessage(translations.noPackageValidationError);
-  //     hasError = true;
-  //   }
-  // }
 
   if (hasError) {
     errors.push({
@@ -90,17 +118,17 @@ class ScribingQuestionForm extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.summernoteEditors.attr('contenteditable', !nextProps.data.get('is_loading'));
+    this.summernoteEditors.attr('contenteditable', !nextProps.data.is_loading);
   }
 
   onSelectSkills = (id) => {
-    const currentSkills = this.props.data.getIn(['question', 'skill_ids']);
-    const currentSkillsWithoutId = currentSkills.filterNot(v => v.get('id') === id);
+    const currentSkills = this.props.data.question.skill_ids;
+    const currentSkillsWithoutId = currentSkills.filterNot(v => v.id === id);
 
     if (currentSkills.size === currentSkillsWithoutId.size) {
       // id is for a new skill to be added
-      const newSkill = this.props.data.getIn(['question', 'skills'])
-        .filter(v => v.get('id') === id).first();
+      const newSkill = this.props.data.question.skills
+        .filter(v => v.id === id).first();
 
       if (newSkill) {
         this.props.actions.updateSkills(currentSkills.push(newSkill));
@@ -111,18 +139,12 @@ class ScribingQuestionForm extends React.Component {
     }
   }
 
-  // onPackageUploadFileChange = (e) => {
-  //   const files = e.target.files;
-  //   const filename = files.length === 0 ? null : files[0].name;
-  //   this.handleChange('package_filename', filename);
-  // }
-
   onSubmit = (e) => {
     e.preventDefault();
     if (!this.validationCheck()) return;
 
-    const url = this.props.data.getIn(['form_data', 'path']);
-    const method = this.props.data.getIn(['form_data', 'method']);
+    const url = this.props.data.form_data.path;
+    const method = this.props.data.form_data.method;
     const formData = new FormData(this.form);
 
     const failureMessage = this.props.intl.formatMessage(translations.submitFailureMessage);
@@ -132,7 +154,7 @@ class ScribingQuestionForm extends React.Component {
 
   validationCheck() {
     const { data, intl } = this.props;
-    const question = data.get('question');
+    const question = data.question;
     const errors = validation(question, ['question'], intl);
 
     this.props.actions.setValidationErrors(errors);
@@ -149,21 +171,11 @@ class ScribingQuestionForm extends React.Component {
   }
 
   submitButtonText() {
-    if (this.props.data.get('is_loading')) {
+    if (this.props.data.is_loading) {
       return this.props.intl.formatMessage(translations.loadingMessage);
     }
 
     return this.props.intl.formatMessage(translations.submitButton);
-  }
-
-  renderImportAlertView() {
-    const alertData = this.props.data.get('import_result').get('alert');
-
-    if (alertData) {
-      return <div className={alertData.get('class')}>{alertData.get('message')}</div>;
-    }
-
-    return null;
   }
 
   renderInputField(label, field, required, type, value, error = null, placeholder = null) {
@@ -177,7 +189,7 @@ class ScribingQuestionForm extends React.Component {
           errorText={error}
           floatingLabelText={(required ? '* ' : '') + label}
           floatingLabelFixed
-          disabled={this.props.data.get('is_loading')}
+          disabled={this.props.data.is_loading}
           value={value}
           fullWidth
         />
@@ -192,7 +204,7 @@ class ScribingQuestionForm extends React.Component {
         label={label}
         required={required}
         value={value}
-        disabled={this.props.data.get('is_loading')}
+        disabled={this.props.data.is_loading}
         name={ScribingQuestionForm.getInputName(field)}
         inputId={ScribingQuestionForm.getInputId(field)}
         onChange={this.summernoteHandler(field)}
@@ -214,7 +226,7 @@ class ScribingQuestionForm extends React.Component {
           floatingLabelFixed
           openOnFocus
           fullWidth
-          disabled={this.props.data.get('is_loading')}
+          disabled={this.props.data.is_loading}
           errorText={error}
           menuStyle={{ maxHeight: '80vh', overflowY: 'scroll' }}
         />
@@ -223,7 +235,7 @@ class ScribingQuestionForm extends React.Component {
           multiple
           value={value.map(opt => opt.id)}
           style={{ display: 'none' }}
-          disabled={this.props.data.get('is_loading')}
+          disabled={this.props.data.is_loading}
           onChange={(e) => { this.onSelectSkills(parseInt(e.target.value, 10) || e.target.value); }}
         >
           { options.map(opt => <option value={opt.id} key={opt.id}>{opt.title}</option>) }
@@ -247,7 +259,7 @@ class ScribingQuestionForm extends React.Component {
           floatingLabelFixed
           value={value}
           onChange={(e, key, id) => { onChange(id); }}
-          disabled={this.props.data.get('is_loading')}
+          disabled={this.props.data.is_loading}
           errorText={error}
           fullWidth
         >
@@ -257,7 +269,7 @@ class ScribingQuestionForm extends React.Component {
           name={ScribingQuestionForm.getInputName(field)}
           value={value || ''}
           style={{ display: 'none' }}
-          disabled={this.props.data.get('is_loading')}
+          disabled={this.props.data.is_loading}
           onChange={(e) => { onChange(parseInt(e.target.value, 10) || null); }}
         >
           {selectOptions}
@@ -267,21 +279,20 @@ class ScribingQuestionForm extends React.Component {
   }
 
   render() {
-    const question = this.props.data.get('question');
-    const formData = this.props.data.get('form_data');
+    const question = this.props.data.question;
+    const formData = this.props.data.form_data;
     const showAttemptLimit = true;
 
-    const skillsOptions = question.get('skills').toJS();
-    const skillsValues = question.get('skill_ids').toJS();
+    const skillsOptions = question.skills;
+    const skillsValues = question.skill_ids;
 
     return (
       <div>
-        { this.renderImportAlertView() }
         {
-          this.props.data.get('save_errors') ?
+          this.props.data.save_errors ?
             <div className="alert alert-danger">
               {
-                this.props.data.get('save_errors').map((errorMessage, index) => <div key={index}>{errorMessage}</div>)
+                this.props.data.save_errors.map((errorMessage, index) => <div key={index}>{errorMessage}</div>)
               }
             </div>
             :
@@ -289,35 +300,35 @@ class ScribingQuestionForm extends React.Component {
         }
         <form
           id="scribing-question-form"
-          action={formData.get('path')}
+          action={formData.path}
           method="post"
           encType="multipart/form-data"
           onSubmit={this.onSubmit}
           ref={(form) => { this.form = form; }}
         >
-          <input type="hidden" name="authenticity_token" value={formData.get('auth_token')} />
+          <input type="hidden" name="authenticity_token" value={formData.auth_token} />
 
           <div className={styles.inputContainer}>
             <div className={styles.titleInput}>
               {
                 this.renderInputField(
                   this.props.intl.formatMessage(translations.titleFieldLabel),
-                  'title', false, 'text', question.get('title') || '',
-                  this.props.data.getIn(['question', 'error', 'title']))
+                  'title', false, 'text', question.title || '',
+                  this.props.data.question.error && this.props.data.question.error.title)
               }
             </div>
             <div className={styles.descriptionInput}>
               {
                 this.renderSummernoteField(
                   this.props.intl.formatMessage(translations.descriptionFieldLabel),
-                  'description', false, question.get('description') || '')
+                  'description', false, question.description || '')
               }
             </div>
             <div className={styles.staffCommentsInput}>
               {
                 this.renderSummernoteField(
                   this.props.intl.formatMessage(translations.staffOnlyCommentsFieldLabel),
-                  'staff_only_comments', false, question.get('staff_only_comments') || '')
+                  'staff_only_comments', false, question.staff_only_comments || '')
              }
             </div>
             <div className={styles.skillsInput}>
@@ -325,7 +336,7 @@ class ScribingQuestionForm extends React.Component {
                 this.renderMultiSelectSkillsField(
                   this.props.intl.formatMessage(translations.skillsFieldLabel),
                   'skill_ids', skillsValues, skillsOptions,
-                  this.props.data.getIn(['question', 'error', 'skill_ids']))
+                  this.props.data.question.error && this.props.data.question.error.skill_ids)
               }
             </div>
             <div className={styles.maximumGradeInput}>
@@ -333,8 +344,8 @@ class ScribingQuestionForm extends React.Component {
                 this.renderInputField(
                   this.props.intl.formatMessage(translations.maximumGradeFieldLabel),
                   'maximum_grade', true, 'number',
-                  ScribingQuestionForm.convertNull(question.get('maximum_grade')),
-                  this.props.data.getIn(['question', 'error', 'maximum_grade']))
+                  ScribingQuestionForm.convertNull(question.maximum_grade),
+                  this.props.data.question.error && this.props.data.question.error.maximum_grade)
               }
             </div>
             {
@@ -344,8 +355,8 @@ class ScribingQuestionForm extends React.Component {
                     this.renderInputField(
                       this.props.intl.formatMessage(translations.attemptLimitFieldLabel),
                       'attempt_limit', false, 'number',
-                      ScribingQuestionForm.convertNull(question.get('attempt_limit')),
-                      this.props.data.getIn(['question', 'error', 'attempt_limit']),
+                      ScribingQuestionForm.convertNull(question.attempt_limit),
+                      this.props.data.question.error && this.props.data.question.error.attempt_limit,
                       this.props.intl.formatMessage(translations.attemptLimitPlaceholderMessage))
                   }
                 </div>
@@ -355,14 +366,14 @@ class ScribingQuestionForm extends React.Component {
           </div>
 
           <Snackbar
-            open={this.props.data.get('has_errors')}
+            open={this.props.data.has_errors}
             message={this.props.intl.formatMessage(translations.resolveErrorsMessage)}
             autoHideDuration={5000}
             onRequestClose={() => { this.props.actions.clearHasError(); }}
           />
           <Snackbar
-            open={this.props.data.get('show_submission_message')}
-            message={this.props.data.get('submission_message')}
+            open={this.props.data.show_submission_message}
+            message={this.props.data.submission_message}
             autoHideDuration={2000}
             onRequestClose={() => { this.props.actions.clearSubmissionMessage(); }}
           />
@@ -373,8 +384,8 @@ class ScribingQuestionForm extends React.Component {
             primary
             id="scribing-question-form-submit"
             type="submit"
-            disabled={this.props.data.get('is_loading')}
-            icon={this.props.data.get('is_loading') ? <i className="fa fa-spinner fa-lg fa-spin" /> : null}
+            disabled={this.props.data.is_loading}
+            icon={this.props.data.is_loading ? <i className="fa fa-spinner fa-lg fa-spin" /> : null}
           />
         </form>
       </div>

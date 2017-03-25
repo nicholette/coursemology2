@@ -10,17 +10,25 @@ class Course::Assessment::Question::ScribingController < \
   end
 
   def create
-    @template = 'course/assessment/question/scribing/new.json.jbuilder'
-
-    respond_to do |format|
-      if @scribing_question.save
-        format.json { render_success_json t('.success'), true }
-      else
-        format.json { render_failure_json t('.failure') }
-      end
+    if @scribing_question.save
+      render partial: 'scribing_question', locals: { scribiing_question: @scribing_question }
+    else
+      render json: { errors: @scribing_question.errors }, status: :bad_request
     end
   end
 
+  # def create
+  #   @template = 'course/assessment/question/scribing/new.json.jbuilder'
+  #
+  #   respond_to do |format|
+  #     if @scribing_question.save
+  #       format.json { render_success_json t('.success'), true }
+  #     else
+  #       format.json { render_failure_json t('.failure') }
+  #     end
+  #   end
+  # end
+  #
   def edit
     @template = 'course/assessment/question/scribing/edit.json.jbuilder'
   end

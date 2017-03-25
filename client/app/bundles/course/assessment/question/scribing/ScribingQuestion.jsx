@@ -1,13 +1,19 @@
 import React, { PropTypes } from 'react';
+import { injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
+import { getFormValues } from 'redux-form';
 
 import ScribingQuestionForm from './components/ScribingQuestionForm';
 import * as scribingQuestionActionCreators from './actions/scribingQuestionActionCreators';
+import { formNames } from './constants/scribingQuestionConstants';
 
 
 function mapStateToProps(state) {
-  return state;
+  return {
+    ...state,
+    formValues: getFormValues(formNames.SCRIBING_QUESTION)(state)
+  };
 }
 
 const propTypes = {
@@ -41,23 +47,29 @@ const propTypes = {
     has_errors: PropTypes.bool,
     show_submission_message: PropTypes.bool,
     submission_message: PropTypes.string,
-    form_data: PropTypes.shape({
-      method: PropTypes.string,
-      path: PropTypes.string,
-      auth_token: PropTypes.string,
-    })
+    // form_data: PropTypes.shape({
+    //   method: PropTypes.string,
+    //   path: PropTypes.string,
+    //   auth_token: PropTypes.string,
+    // }),
+    // handleSubmit: PropTypes.func.isRequired,
+    // onSubmit: PropTypes.func.isRequired,
+    // intl: intlShape.isRequired,
+    disabled: PropTypes.bool,
   }).isRequired,
+  formValues: PropTypes.object,
 };
 
 const ScribingQuestion = (props) => {
-  const { dispatch, scribingQuestion } = props;
+  const { dispatch, scribingQuestion, formValues } = props;
   const actions = bindActionCreators(scribingQuestionActionCreators, dispatch);
-
+  
   return (
     <ScribingQuestionForm
       {...{
         actions,
         data: scribingQuestion,
+        formValues,
       }}
     />
   );

@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
-import { injectIntl, intlShape } from 'react-intl';
+import { defineMessages, FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import { reduxForm, Field, Form } from 'redux-form';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import TextField from 'material-ui/TextField';
@@ -11,6 +12,12 @@ import ChipInput from '../../../../../../lib/components/ChipInput';
 
 import styles from './ScribingQuestionForm.scss';
 import translations from './ScribingQuestionForm.intl';
+
+import { createResponse, updateResponse } from '../actions/responses';
+import { onChangeScribingQuestion, updateSkills, createScribingQuestion, updateScribingQuestion } from '../actions/scribingQuestionActionCreators';
+
+import { formNames } from '../constants/scribingQuestionConstants.jsx';
+import formTranslations from 'lib/translations/form';
 
 const propTypes = {
   data: PropTypes.shape({
@@ -38,7 +45,7 @@ const propTypes = {
       error: PropTypes.shape({
         title: PropTypes.string,
         skills_id: PropTypes.string,
-        maximum_grade: PropTypes.string,
+        maximum_grade: PropTypes.number,
       }),
       published_assessment: PropTypes.bool,
       attempt_limit: PropTypes.number,
@@ -47,22 +54,40 @@ const propTypes = {
     has_errors: PropTypes.bool,
     show_submission_message: PropTypes.bool,
     submission_message: PropTypes.string,
-    form_data: PropTypes.shape({
-      method: PropTypes.string.isRequired,
-      path: PropTypes.string.isRequired,
-      auth_token: PropTypes.string.isRequired,
-    })
+    // form_data: PropTypes.shape({
+    //   method: PropTypes.string.isRequired,
+    //   path: PropTypes.string.isRequired,
+    //   auth_token: PropTypes.string.isRequired,
+    // })
   }).isRequired,
-  actions: React.PropTypes.shape({
-    submitForm: PropTypes.func.isRequired,
-    updateScribingQuestion: PropTypes.func.isRequired,
-    updateSkills: PropTypes.func.isRequired,
-    setValidationErrors: PropTypes.func.isRequired,
-    clearHasError: PropTypes.func.isRequired,
-    clearSubmissionMessage: PropTypes.func.isRequired,
-  }),
-  intl: intlShape.isRequired,
+  // actions: React.PropTypes.shape({
+  //   submitForm: PropTypes.func.isRequired,
+  //   updateScribingQuestion: PropTypes.func.isRequired,
+  //   updateSkills: PropTypes.func.isRequired,
+  //   setValidationErrors: PropTypes.func.isRequired,
+  //   clearHasError: PropTypes.func.isRequired,
+  //   clearSubmissionMessage: PropTypes.func.isRequired,
+  // }),
+  // intl: intlShape.isRequired,
+  formValues: PropTypes.object,
+  // handleSubmit: PropTypes.func.isRequired,
+  // onSubmit: PropTypes.func.isRequired,
+  // disabled: PropTypes.bool,
 };
+
+// const validate = (values) => {
+//   // const errors = {};
+
+//   // const requiredFields = ['maximum_grade'];
+//   // requiredFields.forEach((field) => {
+//   //   if (!values[field]) {
+//   //     errors[field] = formTranslations.required;
+//   //   }
+//   // });
+
+//   // return errors;
+// };
+
 
 function validation(data, pathOfKeysToData, intl) {
   const errors = [];
@@ -100,9 +125,9 @@ function validation(data, pathOfKeysToData, intl) {
 }
 
 class ScribingQuestionForm extends React.Component {
-
   static getInputName(field) {
-    return `question_scribing[${field}]`;
+    return `question_scribing.${field}`;
+    // return field;
   }
 
   static getInputId(field) {
@@ -119,6 +144,88 @@ class ScribingQuestionForm extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     this.summernoteEditors.attr('contenteditable', !nextProps.data.is_loading);
+  }
+
+  static buildAnswer(answer) {
+    const { options, ...answerFields } = answer;
+    if (answerFields.question.question_type === questionTypes.MULTIPLE_CHOICE) {
+      const selected_option = options.find(option => option.selected);
+      if (selected_option) {
+        answerFields.selected_option = selected_option.question_option_id.toString();
+      }
+    }
+    return { ...answerFields, options: options.sort(sorts.byWeight) };
+  }
+
+  /**
+   * Transforms the data from the server into the shaped used by the form.
+   */
+  static buildInitialValues({ sections }) {
+    if (!sections) { return {}; }
+    const byQuestionWeight = (a, b) => a.question.weight - b.question.weight;
+    const buildSection = ({ answers, ...sectionFields }) => (
+      { ...sectionFields, answers: answers.sort(byQuestionWeight).map(ResponseShow.buildAnswer) }
+    );
+    return { sections: sections.sort(sorts.byWeight).map(buildSection) };
+  }
+
+  static formatAnswer(answer) {
+    const { id, text_response, options, selected_option, question } = answer;
+    const isMultipleChoice =
+      question.question_type === questionTypes.MULTIPLE_CHOICE && selected_option;
+    const reduceOption = ({ id: optionId, selected, question_option_id }) => ({
+      id: optionId,
+      selected: isMultipleChoice ? (question_option_id.toString() === selected_option) : selected,
+    });
+    return ({ id, text_response, options_attributes: options.map(reduceOption) });
+  }
+
+  /**
+   * Transforms the form data into the JSON shape that the endpoint expects to receive.
+   */
+  formatScribingResponseData(data) {
+    const answers_attributes = data.sections.reduce((accumulator, section) => (
+      accumulator.concat(section.answers.map(ResponseShow.formatAnswer))
+    ), []);
+    return { response: { answers_attributes, submit: data.submit } };
+  }
+
+  handleCreateResponse = (data) => {
+    const { dispatch } = this.props;
+    const scribingId = this.props.data.question.id;
+
+    return dispatch(
+      createResponse(scribingId)
+    );
+  }
+
+  handleUpdateResponse = (data) => {
+    const { dispatch, params: { responseId } } = this.props;
+    const { saveSuccess, saveFailure, submitSuccess, submitFailure } = translations;
+    const payload = ResponseShow.formatSurveyResponseData(data);
+    const successMessage = <FormattedMessage {...(data.submit ? submitSuccess : saveSuccess)} />;
+    const failureMessage = <FormattedMessage {...(data.submit ? submitFailure : saveFailure)} />;
+
+    return dispatch(
+      updateResponse(responseId, payload, successMessage, failureMessage)
+    );
+  }
+
+  handleCreateQuestion = (data) => {
+    const { dispatch } = this.props;
+    console.log('data', data);
+    return dispatch(
+      createScribingQuestion(data)
+    );
+  }
+
+  handleUpdateQuestion = (data) => {
+    const { dispatch } = this.props;
+    const scribingId = this.props.data.question.id;
+
+    return dispatch(
+      updateScribingQuestion(scribingId, data)
+    );
   }
 
   onSelectSkills = (id) => {
@@ -139,18 +246,18 @@ class ScribingQuestionForm extends React.Component {
     }
   }
 
-  onSubmit = (e) => {
-    e.preventDefault();
-    if (!this.validationCheck()) return;
-
-    const url = this.props.data.form_data.path;
-    const method = this.props.data.form_data.method;
-    const formData = new FormData(this.form);
-
-    const failureMessage = this.props.intl.formatMessage(translations.submitFailureMessage);
-
-    this.props.actions.submitForm(url, method, formData, failureMessage);
-  }
+  // onSubmit = (e) => {
+  //   e.preventDefault();
+  //   if (!this.validationCheck()) return;
+  //
+  //   const url = this.props.data.form_data.path;
+  //   const method = this.props.data.form_data.method;
+  //   const formData = new FormData(this.form);
+  //
+  //   const failureMessage = this.props.intl.formatMessage(translations.submitFailureMessage);
+  //
+  //   this.props.actions.submitForm(url, method, formData, failureMessage);
+  // }
 
   validationCheck() {
     const { data, intl } = this.props;
@@ -162,13 +269,13 @@ class ScribingQuestionForm extends React.Component {
     return errors.length === 0;
   }
 
-  handleChange(field, value) {
-    this.props.actions.updateScribingQuestion(field, value === '' ? null : value);
-  }
+  // handleChange(field, value) {
+  //   this.props.actions.onChangeScribingQuestion(field, value === '' ? null : value);
+  // }
 
-  summernoteHandler(field) {
-    return e => this.props.actions.updateScribingQuestion(field, e === '' ? null : e);
-  }
+  // summernoteHandler(field) {
+  //   return e => this.props.actions.onChangeScribingQuestion(field, e === '' ? null : e);
+  // }
 
   submitButtonText() {
     if (this.props.data.is_loading) {
@@ -179,57 +286,131 @@ class ScribingQuestionForm extends React.Component {
   }
 
   renderInputField(label, field, required, type, value, error = null, placeholder = null) {
-    return (
-      <div title={placeholder}>
-        <TextField
-          type={type}
-          name={ScribingQuestionForm.getInputName(field)}
-          id={ScribingQuestionForm.getInputId(field)}
-          onChange={(e, newValue) => { this.handleChange(field, newValue); }}
-          errorText={error}
-          floatingLabelText={(required ? '* ' : '') + label}
-          floatingLabelFixed
-          disabled={this.props.data.is_loading}
-          value={value}
-          fullWidth
-        />
-      </div>
-    );
+    console.log('form state', this.props.formValues);
+    // console.log(this.props.handleSubmit);
+    console.log(ScribingQuestionForm.getInputName(field));
+    return (<Field
+      name={ScribingQuestionForm.getInputName(field)}
+      floatingLabelText={(required ? '* ' : '') + label}
+      floatingLabelFixed
+      fullWidth
+      component={TextField}
+    />);
+
+    /*
+      <Field
+        name={ScribingQuestionForm.getInputName(field)}
+        id={ScribingQuestionForm.getInputId(field)}
+        component={(props) => (
+          <TextField
+            type={type}
+            name={ScribingQuestionForm.getInputName(field)}
+            id={ScribingQuestionForm.getInputId(field)}
+            onChange={(e, newValue) => {this.handleChange()}}
+            errorText={error}
+            floatingLabelText={(required ? '* ' : '') + label}
+            floatingLabelFixed
+            disabled={this.props.data.is_loading}
+            value={value}
+            fullWidth
+          />
+        )}
+      />*/
+    
+    // <div title={placeholder}>
+    //   <TextField
+    //     type={type}
+    //     name={ScribingQuestionForm.getInputName(field)}
+    //     id={ScribingQuestionForm.getInputId(field)}
+    //     onChange={(e, newValue) => { this.handleChange(field, newValue); }}
+    //     errorText={error}
+    //     floatingLabelText={(required ? '* ' : '') + label}
+    //     floatingLabelFixed
+    //     disabled={this.props.data.is_loading}
+    //     value={value}
+    //     fullWidth
+    //   />
+    // </div>
+    //);
   }
 
   renderSummernoteField(label, field, required, value) {
     return (
-      <MaterialSummernote
-        field={field}
-        label={label}
-        required={required}
-        value={value}
-        disabled={this.props.data.is_loading}
+      <Field
         name={ScribingQuestionForm.getInputName(field)}
-        inputId={ScribingQuestionForm.getInputId(field)}
-        onChange={this.summernoteHandler(field)}
+        id={ScribingQuestionForm.getInputId(field)}
+        component={(props) => {
+          return (
+            <MaterialSummernote
+              field={field}
+              label={label}
+              required={required}
+              value={value}
+              disabled={this.props.data.is_loading}
+              name={ScribingQuestionForm.getInputName(field)}
+              inputId={ScribingQuestionForm.getInputId(field)}
+              onChange={()=>{}}
+            />
+          )
+        }}
       />
     );
+    // return (
+    //   <MaterialSummernote
+    //     field={field}
+    //     label={label}
+    //     required={required}
+    //     value={value}
+    //     disabled={this.props.data.is_loading}
+    //     name={ScribingQuestionForm.getInputName(field)}
+    //     inputId={ScribingQuestionForm.getInputId(field)}
+    //     onChange={this.summernoteHandler(field)}
+    //   />
+    // );
   }
 
   renderMultiSelectSkillsField(label, field, value, options, error) {
     return (
       <div key={field}>
-        <ChipInput
+        <Field
+          name={ScribingQuestionForm.getInputName(field)}
           id={ScribingQuestionForm.getInputId(field)}
-          value={value}
-          dataSource={options}
-          dataSourceConfig={{ value: 'id', text: 'title' }}
-          onRequestAdd={(chip) => { this.onSelectSkills(chip.id); }}
-          onRequestDelete={this.onSelectSkills}
-          floatingLabelText={label}
-          floatingLabelFixed
-          openOnFocus
-          fullWidth
-          disabled={this.props.data.is_loading}
-          errorText={error}
-          menuStyle={{ maxHeight: '80vh', overflowY: 'scroll' }}
+          component={(props) => {
+            return (
+              <ChipInput
+                id={ScribingQuestionForm.getInputId(field)}
+                value={value}
+                dataSource={options}
+                dataSourceConfig={{ value: 'id', text: 'title' }}
+                onRequestAdd={(chip) => { this.onSelectSkills(chip.id); }}
+                onRequestDelete={this.onSelectSkills}
+                floatingLabelText={label}
+                floatingLabelFixed
+                openOnFocus
+                fullWidth
+                disabled={this.props.data.is_loading}
+                errorText={error}
+                menuStyle={{ maxHeight: '80vh', overflowY: 'scroll' }}
+              />
+            )
+          }}
         />
+
+        {/*<ChipInput*/}
+          {/*id={ScribingQuestionForm.getInputId(field)}*/}
+          {/*value={value}*/}
+          {/*dataSource={options}*/}
+          {/*dataSourceConfig={{ value: 'id', text: 'title' }}*/}
+          {/*onRequestAdd={(chip) => { this.onSelectSkills(chip.id); }}*/}
+          {/*onRequestDelete={this.onSelectSkills}*/}
+          {/*floatingLabelText={label}*/}
+          {/*floatingLabelFixed*/}
+          {/*openOnFocus*/}
+          {/*fullWidth*/}
+          {/*disabled={this.props.data.is_loading}*/}
+          {/*errorText={error}*/}
+          {/*menuStyle={{ maxHeight: '80vh', overflowY: 'scroll' }}*/}
+        {/*/>*/}
         <select
           name={`${ScribingQuestionForm.getInputName(field)}[]`}
           multiple
@@ -244,41 +425,8 @@ class ScribingQuestionForm extends React.Component {
     );
   }
 
-  renderDropdownSelectField(label, field, required, value, options, error, onChange) {
-    const selectOptions = options.map(opt =>
-      <option value={opt.id || ''} key={opt.id}>{opt.name}</option>
-    );
-    const selectFieldOptions = options.map(opt =>
-      <MenuItem value={opt.id} key={opt.id} primaryText={opt.name} />
-    );
-
-    return (
-      <div key={field}>
-        <SelectField
-          floatingLabelText={(required ? '* ' : '') + label}
-          floatingLabelFixed
-          value={value}
-          onChange={(e, key, id) => { onChange(id); }}
-          disabled={this.props.data.is_loading}
-          errorText={error}
-          fullWidth
-        >
-          {selectFieldOptions}
-        </SelectField>
-        <select
-          name={ScribingQuestionForm.getInputName(field)}
-          value={value || ''}
-          style={{ display: 'none' }}
-          disabled={this.props.data.is_loading}
-          onChange={(e) => { onChange(parseInt(e.target.value, 10) || null); }}
-        >
-          {selectOptions}
-        </select>
-      </div>
-    );
-  }
-
   render() {
+    const { handleSubmit, intl, disabled } = this.props;
     const question = this.props.data.question;
     const formData = this.props.data.form_data;
     const showAttemptLimit = true;
@@ -298,15 +446,24 @@ class ScribingQuestionForm extends React.Component {
             :
             null
         }
-        <form
-          id="scribing-question-form"
-          action={formData.path}
-          method="post"
-          encType="multipart/form-data"
-          onSubmit={this.onSubmit}
-          ref={(form) => { this.form = form; }}
-        >
-          <input type="hidden" name="authenticity_token" value={formData.auth_token} />
+        <Form onSubmit={handleSubmit(this.handleCreateQuestion)} encType="multipart/form-data">
+        <Field
+          name={'title'}
+          floatingLabelText={'title'}
+          floatingLabelFixed
+          fullWidth
+          component={TextField}
+        />
+        {/*<Form encType="multipart/form-data">*/}
+        {/*<form*/}
+          {/*id="scribing-question-form"*/}
+          {/*action={formData.path}*/}
+          {/*method="post"*/}
+          {/*encType="multipart/form-data"*/}
+          {/*onSubmit={this.onSubmit}*/}
+          {/*ref={(form) => { this.form = form; }}*/}
+        {/*>*/}
+          {/*<input type="hidden" name="authenticity_token" value={formData.auth_token} />*/}
 
           <div className={styles.inputContainer}>
             <div className={styles.titleInput}>
@@ -386,8 +543,10 @@ class ScribingQuestionForm extends React.Component {
             type="submit"
             disabled={this.props.data.is_loading}
             icon={this.props.data.is_loading ? <i className="fa fa-spinner fa-lg fa-spin" /> : null}
+            onClick={()=>{console.log('clicked');}}
           />
-        </form>
+        {/*</form>*/}
+        </Form>
       </div>
     );
   }
@@ -395,4 +554,7 @@ class ScribingQuestionForm extends React.Component {
 
 ScribingQuestionForm.propTypes = propTypes;
 
-export default injectIntl(ScribingQuestionForm);
+export default reduxForm({
+  form: formNames.SCRIBING_QUESTION,
+})(injectIntl(ScribingQuestionForm));
+

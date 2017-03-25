@@ -8,6 +8,7 @@ export default ({ scribingQuestion }) => {
     applyMiddleware(thunkMiddleware)
   )(createStore);
 
+  // For testing: print state in console `window.store.getState()`
   window.store = storeCreator(rootReducer, initialStates);
 
   return storeCreator(rootReducer, initialStates);

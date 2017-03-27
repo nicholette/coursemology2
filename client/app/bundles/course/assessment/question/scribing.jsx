@@ -6,22 +6,14 @@ import ScribingQuestion from './scribing/ScribingQuestion';
 
 $(document).ready(() => {
   const mountNode = document.getElementById('scribing-question');
+
   if (mountNode) {
-    // const data = mountNode.getAttribute('data');
-    // const props = JSON.parse(data);
-    // const store = storeCreator(props);
-    // 
-    
     const store = storeCreator({ scribingQuestion: {} });
 
-    const Page = () => (
+    render(
       <ProviderWrapper {...{ store }}>
         <ScribingQuestion />
-      </ProviderWrapper>
-    );
-
-    render(
-      <Page />,
+      </ProviderWrapper>,
       mountNode
     );
   }

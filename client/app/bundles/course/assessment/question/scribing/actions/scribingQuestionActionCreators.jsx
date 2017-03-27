@@ -111,7 +111,7 @@
 // REDUX-FORM
 import CourseAPI from 'api/course';
 import { submit, arrayPush, SubmissionError } from 'redux-form';
-import actionTypes, { formNames } from '../constants/scribingQuestionConstants';
+import actionTypes, { formNames } from '../constants';
 
 export function submitForm() {
   return (dispatch) => {

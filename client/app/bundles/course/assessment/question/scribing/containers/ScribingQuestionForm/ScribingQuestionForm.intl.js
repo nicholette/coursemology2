@@ -72,6 +72,10 @@ export default defineMessages({
     id: 'course.assessment.question.scribing.scribingQuestionForm.positiveNumberValidationError',
     defaultMessage: 'Value must be positive.',
   },
+  valueMoreThanEqual1000Error: {
+    id: 'course.assessment.question.scribing.scribingQuestionForm.valueMoreThan1000Error',
+    defaultMessage: 'Value must be less than 1000.'
+  },
   lessThanEqualZeroValidationError: {
     id: 'course.assessment.question.scribing.scribingQuestionForm.lessThanEqualZeroValidationError',
     defaultMessage: 'Value must be greater than 0.',

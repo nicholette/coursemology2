@@ -188,10 +188,11 @@ class ScribingQuestionForm extends React.Component {
     return this.props.intl.formatMessage(translations.submitButton);
   }
 
-  renderInputField(label, field, required, type, value, error = null, placeholder = null) {
+  renderInputField(label, field, required, validate, type, value, error = null, placeholder = null) {
     return (<Field
       name={ScribingQuestionForm.getInputName(field)}
       id={ScribingQuestionForm.getInputId(field)}
+      validate={validate}
       floatingLabelText={(required ? '* ' : '') + label}
       floatingLabelFixed
       fullWidth
@@ -199,11 +200,12 @@ class ScribingQuestionForm extends React.Component {
     />);
   }
 
-  renderSummernoteField(label, field, required, value) {
+  renderSummernoteField(label, field, validate, value) {
     return (
       <Field
         name={ScribingQuestionForm.getInputName(field)}
         id={ScribingQuestionForm.getInputId(field)}
+        validate={validate}
         component={(props) => {
           return (
             <MaterialSummernote
@@ -263,15 +265,26 @@ class ScribingQuestionForm extends React.Component {
   }
 
   render() {
-    const { handleSubmit, formValues, intl, disabled, scribingId } = this.props;
+    const { handleSubmit, formValues, submitting,
+            invalid, submitFail,
+            intl, scribingId } = this.props;
     const question = this.props.data.question;
-    console.log('question', question);
     const formData = this.props.data.form_data;
     const showAttemptLimit = true;
     const onSubmit = scribingId ? this.handleUpdateQuestion : this.handleCreateQuestion;
 
     const skillsOptions = question.skills;
     const skillsValues = question.skill_ids;
+
+    // Field level validations
+    const required = value => value ? undefined : intl.formatMessage(translations.cannotBeBlankValidationError);
+    const lessThan1000 = value => value && value >= 1000 ? 
+      intl.formatMessage(translations.valueMoreThanEqual1000Error) :
+      undefined;
+    
+    const nonNegative = value => value && value < 0 ? 
+      intl.formatMessage(translations.positiveNumberValidationError) :
+      undefined;
 
     return (
       <div>
@@ -291,7 +304,7 @@ class ScribingQuestionForm extends React.Component {
               {
                 this.renderInputField(
                   this.props.intl.formatMessage(translations.titleFieldLabel),
-                  'title', false, 'text', question.title,
+                  'title', false, [], 'text', question.title || '',
                   this.props.data.question.error && this.props.data.question.error.title)
               }
             </div>
@@ -299,14 +312,14 @@ class ScribingQuestionForm extends React.Component {
               {
                 this.renderSummernoteField(
                   this.props.intl.formatMessage(translations.descriptionFieldLabel),
-                  'description', false, question.description || '')
+                  'description', [], question.description || '')
               }
             </div>
             <div className={styles.staffCommentsInput}>
               {
                 this.renderSummernoteField(
                   this.props.intl.formatMessage(translations.staffOnlyCommentsFieldLabel),
-                  'staff_only_comments', false, question.staff_only_comments || '')
+                  'staff_only_comments', [], question.staff_only_comments || '')
              }
             </div>
             <div className={styles.skillsInput}>
@@ -321,7 +334,7 @@ class ScribingQuestionForm extends React.Component {
               {
                 this.renderInputField(
                   this.props.intl.formatMessage(translations.maximumGradeFieldLabel),
-                  'maximum_grade', true, 'number',
+                  'maximum_grade', true, [ required, lessThan1000, nonNegative ], 'number',
                   ScribingQuestionForm.convertNull(question.maximum_grade),
                   this.props.data.question.error && this.props.data.question.error.maximum_grade)
               }
@@ -332,7 +345,7 @@ class ScribingQuestionForm extends React.Component {
                   {
                     this.renderInputField(
                       this.props.intl.formatMessage(translations.attemptLimitFieldLabel),
-                      'attempt_limit', false, 'number',
+                      'attempt_limit', false, [ nonNegative ], 'number',
                       ScribingQuestionForm.convertNull(question.attempt_limit),
                       this.props.data.question.error && this.props.data.question.error.attempt_limit,
                       this.props.intl.formatMessage(translations.attemptLimitPlaceholderMessage))
@@ -350,7 +363,7 @@ class ScribingQuestionForm extends React.Component {
             primary
             id="scribing-question-form-submit"
             type="submit"
-            disabled={this.props.data.is_loading}
+            disabled={this.props.data.is_loading || submitting}
             icon={this.props.data.is_loading ? <i className="fa fa-spinner fa-lg fa-spin" /> : null}
           />
         </Form>

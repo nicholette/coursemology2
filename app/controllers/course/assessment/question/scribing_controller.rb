@@ -7,13 +7,12 @@ class Course::Assessment::Question::ScribingController < \
 
   def new
     respond_to do |format|
-      format.html { render 'index' }
+      format.html { render 'new' }
     end
   end
 
   def show
     respond_to do |format|
-      format.html { render 'index' }
       format.json { render_scribing_question_json }
     end
   end
@@ -28,7 +27,7 @@ class Course::Assessment::Question::ScribingController < \
 
   def edit
     respond_to do |format|
-      format.html { render 'index' }
+      format.html { render 'edit' }
       format.json { render_scribing_question_json }
     end
   end

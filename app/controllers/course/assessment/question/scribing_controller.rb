@@ -73,25 +73,26 @@ class Course::Assessment::Question::ScribingController < \
   #   end
   # end
 
-  # def destroy
-  #   if @scribing_question.destroy
-  #     redirect_to course_assessment_path(current_course, @assessment),
-  #                 success: t('.success')
-  #   else
-  #     error = @scribing_question.errors.full_messages.to_sentence
-  #     redirect_to course_assessment_path(current_course, @assessment),
-  #                 danger: t('.failure', error: error)
-  #   end
-  # end
-  # 
-  
   def destroy
     if @scribing_question.destroy
-      head :ok
+      redirect_to course_assessment_path(current_course, @assessment),
+                  success: t('.success')
     else
-      head :bad_request
+      error = @scribing_question.errors.full_messages.to_sentence
+      redirect_to course_assessment_path(current_course, @assessment),
+                  danger: t('.failure', error: error)
     end
   end
+  
+  
+  # def destroy
+  #   if @scribing_question.destroy
+  #     head :ok
+  #     redirect_to course_assessment_path(current_course, @assessment)
+  #   else
+  #     head :bad_request
+  #   end
+  # end
 
   private
 

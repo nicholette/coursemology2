@@ -84,8 +84,7 @@ export function updateScribingQuestion(
 
         const courseId = getCourseId();
         const assessmentId = getAssessmentId();
-        console.log(`/courses/${courseId}/assessments/${assessmentId}/`);
-        window.location.href = `/courses/${courseId}/assessments/${assessmentId}/`;
+        window.location.href = `/courses/${courseId}/assessments/${assessmentId}`;
       })
       .catch((error) => {
         console.log('error', error);

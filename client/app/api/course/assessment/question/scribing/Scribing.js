@@ -2,32 +2,40 @@ import BaseScribingAPI from './Base';
 
 export default class ScribingsAPI extends BaseScribingAPI {
   /**
-   * survey_with_questions = {
-  *   id: number, title: string, description: string, start_at: datetime, ...etc
-  *      - Survey attributes
-  *   canCreateSection: bool,
-  *      - true if user can create sections for this survey
-  *   canViewResults: bool,
-  *      - true if user can view results for this survey
-  *   canUpdate: bool, canDelete: bool,
-  *      - true if user can update and delete this survey respectively
-  *   sections:
-  *     Array.<{
-  *       id: number, title: string, weight: number, ...etc
-  *         - Section attributes
-  *       questions: Array.<{ description: string, options: Array, question_type: string, ...etc }>,
-  *          - Array of questions belonging to the survey
-  *          - question_type is one of ['text', 'multiple_choice', 'multiple_response']
-  *     }>
+   * scribing_question = {
+  *   id: number, 
+  *   title: string, 
+  *   description: string, 
+  *   staff_only_comments: string,
+  *   maximum_grade: string,
+  *   weight: number,
+  *   skill_ids [],
+  *   skills: [],
+  *   published_assessment: boolean,
+  *   attempt_limit: number,
   * }
    */
+
+
+json.question do
+  json.(@scribing_question, :id, :title, :description, :staff_only_comments, :maximum_grade,
+    :weight)
+  json.skill_ids @scribing_question.skills.order('LOWER(title) ASC').as_json(only: [:id, :title])
+  json.skills current_course.assessment_skills.order('LOWER(title) ASC') do |skill|
+    json.(skill, :id, :title)
+  end
+
+  json.published_assessment @assessment.published?
+  json.attempt_limit @scribing_question.attempt_limit
+end
+
 
   /**
    * Fetches a Scribing question
    *
    * @param {number} scribingId
    * @return {Promise}
-   * success response: survey_with_questions
+   * success response: scribing_question
    */
   fetch(scribingId) {
     return this.getClient().get(`${this._getUrlPrefix()}/${scribingId}`);
@@ -36,9 +44,9 @@ export default class ScribingsAPI extends BaseScribingAPI {
   /**
    * Creates a Scribing question
    *
-   * @param {object} surveyFields - params in the format of { survey: { :title, :description, etc } }
+   * @param {object} scribingFields - params in the format of { question_scribing: { :title, :description, etc } }
    * @return {Promise}
-   * success response: survey_with_questions
+   * success response: scribing_question
    * error response: { errors: [{ attribute: string }] }
    */
   create(scribingFields) {
@@ -48,10 +56,10 @@ export default class ScribingsAPI extends BaseScribingAPI {
   /**
    * Updates a Scribing question
    *
-   * @param {number} surveyId
-   * @param {object} surveyFields - params in the format of { survey: { :title, :description, etc } }
+   * @param {number} scribingId
+   * @param {object} scribingFields - params in the format of { survey: { :title, :description, etc } }
    * @return {Promise}
-   * success response: survey_with_questions
+   * success response: scribing_question
    * error response: { errors: [{ attribute: string }] }
    */
   update(scribingId, scribingFields) {

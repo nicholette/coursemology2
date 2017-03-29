@@ -36,26 +36,6 @@ export default defineMessages({
     defaultMessage: 'The maximum times that the students can test their answers (does not apply to staff)',
     description: 'Placeholder message for attempt limit input field.',
   },
-  uploadedPackageLabel: {
-    id: 'course.assessment.question.scribing.scribingQuestionForm.uploadedPackageLabel',
-    defaultMessage: 'Uploaded package',
-    description: 'Label for the existing uploaded zip package.',
-  },
-  downloadPackageLabel: {
-    id: 'course.assessment.question.scribing.scribingQuestionForm.downloadPackageLabel',
-    defaultMessage: 'Download package',
-    description: 'Label for the downloading generated zip package.',
-  },
-  packageUpdatedBy: {
-    id: 'course.assessment.question.scribing.scribingQuestionForm.packageUpdatedBy',
-    defaultMessage: 'Updated by: {name}',
-    description: 'Shows the author who last modified the package through the online editor.',
-  },
-  packageUploadedBy: {
-    id: 'course.assessment.question.scribing.scribingQuestionForm.packageUploadedBy',
-    defaultMessage: 'Uploaded by: {name}',
-    description: 'Shows the author who last uploaded the zip package.',
-  },
   newPackageButton: {
     id: 'course.assessment.question.scribing.scribingQuestionForm.newPackageButton',
     defaultMessage: 'Choose new package',
@@ -65,11 +45,6 @@ export default defineMessages({
     id: 'course.assessment.question.scribing.scribingQuestionForm.noFileChosenMessage',
     defaultMessage: 'No file chosen',
     description: 'Message to be displayed when no file is chosen for a file input.',
-  },
-  uploadPackageButton: {
-    id: 'course.assessment.question.scribing.scribingQuestionForm.uploadPackageButton',
-    defaultMessage: 'Upload Package',
-    description: 'Button for uploading package.',
   },
   submitButton: {
     id: 'course.assessment.question.scribing.scribingQuestionForm.submitButton',
@@ -92,10 +67,6 @@ export default defineMessages({
   cannotBeBlankValidationError: {
     id: 'course.assessment.question.scribing.scribingQuestionForm.cannotBeBlankValidationError',
     defaultMessage: 'Cannot be blank.',
-  },
-  noPackageValidationError: {
-    id: 'course.assessment.question.scribing.scribingQuestionForm.noPackageValidationError',
-    defaultMessage: 'Package file required.',
   },
   positiveNumberValidationError: {
     id: 'course.assessment.question.scribing.scribingQuestionForm.positiveNumberValidationError',

@@ -2,7 +2,6 @@ import actionTypes from '../constants';
 
 export const initialState = {
   question: {
-    assessment_id: null,
     id: null,
     title: '',
     description: '',
@@ -14,6 +13,8 @@ export const initialState = {
     published_assessment: false,
     attempt_limit: null,
   },
+  isLoading: false,
+  save_errors: undefined,
 };
 
 function questionReducer(state, action) {
@@ -42,8 +43,9 @@ function questionReducer(state, action) {
 
 function apiReducer(state, action) {
   const { type } = action;
-
+  console.log(type, action.data);
   switch (type) {
+    case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST:
     case actionTypes.SUBMIT_FORM_LOADING: {
       const { isLoading } = action;
       return {
@@ -52,16 +54,22 @@ function apiReducer(state, action) {
         save_errors: undefined
       };
     }
+    case actionTypes.FETCH_SCRIBING_QUESTION_SUCCESS:
     case actionTypes.SUBMIT_FORM_SUCCESS: {
-      const { form_data, question } = action.data;
+      const { question } = action.data;
+      question.maximum_grade = parseInt(question.maximum_grade);
       return {
         ...state,
         question,
-        form_data,
-      }
+        is_loading: false,
+      };
     }
+    case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE:
     case actionTypes.SUBMIT_FORM_FAILURE: {
-      return state;
+      return {
+        ...state,
+        is_loading: false,
+      };
     }
     default: {
       return state;
@@ -80,45 +88,49 @@ export default function scribingQuestionReducer(state = initialState, action) {
         question: questionReducer(state.question, action)
       };
     }
+    case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST:
+    case actionTypes.FETCH_SCRIBING_QUESTION_SUCCESS:
+    case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE:
     case actionTypes.SUBMIT_FORM_LOADING:
     case actionTypes.SUBMIT_FORM_SUCCESS:
     case actionTypes.SUBMIT_FORM_FAILURE: {
+      console.log('here');
       return apiReducer(state, action);
     }
-    case actionTypes.VALIDATION_ERRORS_SET: {
-      const { errors } = action;
-      let newState = state;
+    // case actionTypes.VALIDATION_ERRORS_SET: {
+    //   const { errors } = action;
+    //   let newState = state;
 
-      errors.forEach((error) => {
-        newState = newState.error[error.path] = error.error;
-      });
+    //   errors.forEach((error) => {
+    //     newState = newState.error[error.path] = error.error;
+    //   });
 
-      return {
-        ...newState,
-        has_errors: errors.length !== 0
-      }
-    }
-    case actionTypes.HAS_ERROR_CLEAR: {
-      return {
-        ...state,
-        has_errors: false
-      };
-    }
-    case actionTypes.SUBMISSION_MESSAGE_SET: {
-      const { message } = action;
-      return {
-        ...state,
-        show_submission_message: true,
-        submission_message: message
-      };
-    }
-    case actionTypes.SUBMISSION_MESSAGE_CLEAR: {
-      return {
-        ...state,
-        show_submission_message: false,
-        submission_message: ''
-      };
-    }
+    //   return {
+    //     ...newState,
+    //     has_errors: errors.length !== 0
+    //   }
+    // }
+    // case actionTypes.HAS_ERROR_CLEAR: {
+    //   return {
+    //     ...state,
+    //     has_errors: false
+    //   };
+    // }
+    // case actionTypes.SUBMISSION_MESSAGE_SET: {
+    //   const { message } = action;
+    //   return {
+    //     ...state,
+    //     show_submission_message: true,
+    //     submission_message: message
+    //   };
+    // }
+    // case actionTypes.SUBMISSION_MESSAGE_CLEAR: {
+    //   return {
+    //     ...state,
+    //     show_submission_message: false,
+    //     submission_message: ''
+    //   };
+    // }
     default: {
       return state;
     }

@@ -12,13 +12,13 @@ import ChipInput from 'lib/components/ChipInput';
 import styles from './ScribingQuestionForm.scss';
 import translations from './ScribingQuestionForm.intl';
 
-import { createResponse, updateResponse } from '../../actions/responses';
-import { onChangeScribingQuestion, updateSkills, createScribingQuestion, updateScribingQuestion } from '../../actions/scribingQuestionActionCreators';
+import { fetchScribingQuestion, onChangeScribingQuestion, updateSkills, createScribingQuestion, updateScribingQuestion } from '../../actions/scribingQuestionActionCreators';
 
 import { formNames } from '../../constants';
 import formTranslations from 'lib/translations/form';
 
 const propTypes = {
+  dispatch: PropTypes.func.isRequired,
   data: PropTypes.shape({
     question: PropTypes.shape({
       id: PropTypes.number,
@@ -49,9 +49,11 @@ const propTypes = {
       published_assessment: PropTypes.bool,
       attempt_limit: PropTypes.number,
     }),
+    is_loading: PropTypes.bool,
   }).isRequired,
-  intl: intlShape.isRequired,
   formValues: PropTypes.object,
+  scribingId: PropTypes.string,
+  intl: intlShape.isRequired,
 };
 
 // const validate = (values) => {
@@ -117,6 +119,10 @@ class ScribingQuestionForm extends React.Component {
   }
 
   componentDidMount() {
+    const { dispatch, scribingId } = this.props;
+    if (scribingId) {
+      dispatch(fetchScribingQuestion(scribingId));
+    }
     this.summernoteEditors = $('#scribing-question-form .note-editor .note-editable');
   }
 
@@ -125,15 +131,20 @@ class ScribingQuestionForm extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    // return this.state.formErrors !== nextState.formErrors);
-    return false;
+    return this.props.data.is_loading !== nextProps.data.is_loading;
   }
 
   handleCreateQuestion = (data) => {
     const { dispatch } = this.props;
-    console.log('data', data);
     return dispatch(
       createScribingQuestion(data)
+    );
+  }
+
+  handleUpdateQuestion = (data) => {
+    const { dispatch, scribingId } = this.props;
+    return dispatch(
+      updateScribingQuestion(scribingId, data)
     );
   }
 
@@ -180,6 +191,7 @@ class ScribingQuestionForm extends React.Component {
   renderInputField(label, field, required, type, value, error = null, placeholder = null) {
     return (<Field
       name={ScribingQuestionForm.getInputName(field)}
+      id={ScribingQuestionForm.getInputId(field)}
       floatingLabelText={(required ? '* ' : '') + label}
       floatingLabelFixed
       fullWidth
@@ -197,7 +209,6 @@ class ScribingQuestionForm extends React.Component {
             <MaterialSummernote
               field={field}
               label={label}
-              required={required}
               value={value}
               disabled={this.props.data.is_loading}
               name={ScribingQuestionForm.getInputName(field)}
@@ -252,10 +263,12 @@ class ScribingQuestionForm extends React.Component {
   }
 
   render() {
-    const { handleSubmit, onSubmit, intl, disabled } = this.props;
+    const { handleSubmit, formValues, intl, disabled, scribingId } = this.props;
     const question = this.props.data.question;
+    console.log('question', question);
     const formData = this.props.data.form_data;
     const showAttemptLimit = true;
+    const onSubmit = scribingId ? this.handleUpdateQuestion : this.handleCreateQuestion;
 
     const skillsOptions = question.skills;
     const skillsValues = question.skill_ids;
@@ -272,13 +285,13 @@ class ScribingQuestionForm extends React.Component {
             :
             null
         }
-        <Form onSubmit={handleSubmit(this.handleCreateQuestion)} encType="multipart/form-data">
+        <Form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
           <div className={styles.inputContainer}>
             <div className={styles.titleInput}>
               {
                 this.renderInputField(
                   this.props.intl.formatMessage(translations.titleFieldLabel),
-                  'title', false, 'text', question.title || '',
+                  'title', false, 'text', question.title,
                   this.props.data.question.error && this.props.data.question.error.title)
               }
             </div>
@@ -350,5 +363,6 @@ ScribingQuestionForm.propTypes = propTypes;
 
 export default reduxForm({
   form: formNames.SCRIBING_QUESTION,
+  enableReinitialize: true,
 })(injectIntl(ScribingQuestionForm));
 

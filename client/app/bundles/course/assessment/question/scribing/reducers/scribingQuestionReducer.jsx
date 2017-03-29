@@ -43,9 +43,10 @@ function questionReducer(state, action) {
 
 function apiReducer(state, action) {
   const { type } = action;
-  console.log(type, action.data);
   switch (type) {
     case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST:
+    case actionTypes.CREATE_RESPONSE_REQUEST:
+    case actionTypes.UPDATE_SCRIBING_QUESTION_REQUEST:
     case actionTypes.SUBMIT_FORM_LOADING: {
       const { isLoading } = action;
       return {
@@ -55,6 +56,8 @@ function apiReducer(state, action) {
       };
     }
     case actionTypes.FETCH_SCRIBING_QUESTION_SUCCESS:
+    case actionTypes.CREATE_SURVEY_QUESTION_SUCCESS:
+    case actionTypes.UPDATE_SCRIBING_QUESTION_SUCCESS:
     case actionTypes.SUBMIT_FORM_SUCCESS: {
       const { question } = action.data;
       question.maximum_grade = parseInt(question.maximum_grade);
@@ -65,7 +68,10 @@ function apiReducer(state, action) {
       };
     }
     case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE:
+    case actionTypes.CREATE_SURVEY_QUESTION_FAILURE:
+    case actionTypes.UPDATE_SURVEY_QUESTION_FAILURE:
     case actionTypes.SUBMIT_FORM_FAILURE: {
+      console.log('action', action);
       return {
         ...state,
         is_loading: false,
@@ -94,7 +100,6 @@ export default function scribingQuestionReducer(state = initialState, action) {
     case actionTypes.SUBMIT_FORM_LOADING:
     case actionTypes.SUBMIT_FORM_SUCCESS:
     case actionTypes.SUBMIT_FORM_FAILURE: {
-      console.log('here');
       return apiReducer(state, action);
     }
     // case actionTypes.VALIDATION_ERRORS_SET: {

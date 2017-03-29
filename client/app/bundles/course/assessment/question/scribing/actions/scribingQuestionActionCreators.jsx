@@ -1,6 +1,5 @@
 import CourseAPI from 'api/course';
-import { browserHistory } from 'react-router';
-import { getCourseId, getAssessmentId } from 'lib/helpers/url-helpers';
+import { getCourseId, getAssessmentId, getScribingId } from 'lib/helpers/url-helpers';
 import { submit, arrayPush, SubmissionError } from 'redux-form';
 import actionTypes, { formNames } from '../constants';
 
@@ -30,7 +29,6 @@ export function fetchScribingQuestion(scribingId) {
     dispatch({ type: actionTypes.FETCH_SCRIBING_QUESTION_REQUEST });
     return CourseAPI.scribing.scribings.fetch(scribingId)
       .then((response) => {
-        console.log('successful fetch');
         dispatch({
           scribingId: CourseAPI.scribing.scribings.getScribingId(),
           type: actionTypes.FETCH_SCRIBING_QUESTION_SUCCESS,
@@ -55,17 +53,15 @@ export function createScribingQuestion(
     return CourseAPI.scribing.scribings.create(fields)
       .then((response) => {
         dispatch({
-          scribingId: CourseAPI.scribing.responses.getScribingId(),
+          scribingId: getScribingId(),
           type: actionTypes.CREATE_SCRIBING_QUESTION_SUCCESS,
           question: response.data,
         });
-        console.log('successful');
         const courseId = getCourseId();
-        const assignmentId = getAssignmentId();
-        browserHistory.push(`/courses/${courseId}/assignments/${assignmentId}`);
+        const assessmentId = getAssessmentId();
+        window.location.href = `/courses/${courseId}/assessments/${assessmentId}`;
       })
       .catch((error) => {
-        console.log('unsuccessful');
         dispatch({ type: actionTypes.CREATE_SCRIBING_QUESTION_FAILURE });
       });
   };
@@ -79,17 +75,20 @@ export function updateScribingQuestion(
     dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_REQUEST });
     return CourseAPI.scribing.scribings.update(questionId, data)
       .then((response) => {
+        console.log('successful update', response);
         dispatch({
-          scribingId: CourseAPI.scribing.responses.getScribingId(),
+          scribingId: getScribingId(),
           type: actionTypes.UPDATE_SCRIBING_QUESTION_SUCCESS,
           question: response.data,
         });
 
         const courseId = getCourseId();
-        const assignmentId = getAssignmentId();
-        browserHistory.push(`/courses/${courseId}/assignments/${assignmentId}`);
+        const assessmentId = getAssessmentId();
+        console.log(`/courses/${courseId}/assessments/${assessmentId}/`);
+        window.location.href = `/courses/${courseId}/assessments/${assessmentId}/`;
       })
       .catch((error) => {
+        console.log('error', error);
         dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE });
         if (error.response && error.response.data) {
           throw new SubmissionError(error.response.data.errors);
@@ -108,7 +107,7 @@ export function deleteScribingQuestion(
     return CourseAPI.scribing.scribings.delete(question.id)
       .then(() => {
         dispatch({
-          scribingId: CourseAPI.scribing.responses.getScribingId(),
+          scribingId: CourseAPI.scribing.scribings.getScribingId(),
           questionId: question.id,
           type: actionTypes.DELETE_SCRIBING_QUESTION_SUCCESS,
         });

@@ -19,7 +19,7 @@ function buildInitialValues(scribingQuestion) {
         description: scribingQuestion.question.description,
         staff_only_comments: scribingQuestion.question.staff_only_comments,
         maximum_grade: scribingQuestion.question.maximum_grade,
-        skills_ids: scribingQuestion.question.skills_ids,
+        skill_ids: scribingQuestion.question.skill_ids,
         skills: scribingQuestion.question.skills,
         published_assessment: scribingQuestion.published_assessment,
         attempt_limit: scribingQuestion.question.attempt_limit,
@@ -28,7 +28,6 @@ function buildInitialValues(scribingQuestion) {
 }
 
 function mapStateToProps({scribingQuestion, ...state}) {
-  console.log(buildInitialValues(scribingQuestion));
   return {
     ...state,
     scribingQuestion,
@@ -48,7 +47,7 @@ const propTypes = {
       staff_only_comments: PropTypes.string,
       maximum_grade: PropTypes.number,
       weight: PropTypes.number,
-      skills_ids: PropTypes.arrayOf(PropTypes.shape({
+      skill_ids: PropTypes.arrayOf(PropTypes.shape({
         id: PropTypes.number,
         title: PropTypes.string,
       })),
@@ -80,7 +79,7 @@ const propTypes = {
       staff_only_comments: PropTypes.string,
       maximum_grade: PropTypes.number,
       weight: PropTypes.number,
-      skills_ids: PropTypes.arrayOf(PropTypes.shape({
+      skill_ids: PropTypes.arrayOf(PropTypes.shape({
         id: PropTypes.number,
         title: PropTypes.string,
       })),

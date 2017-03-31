@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import CourseAPI from 'api/course';
 import { getCourseId, getAssessmentId, getScribingId } from 'lib/helpers/url-helpers';
 import { submit, arrayPush, SubmissionError } from 'redux-form';
@@ -44,11 +45,16 @@ export function fetchScribingQuestion(scribingId) {
   }
 }
 
-export function createScribingQuestion(
-  fields
-) {
+// Helper function to convert array of skills to array of skill_ids
+function getSkillIdsFromSkills(skills) {
+  const ids = _.map(skills, skill => skill.id)
+  return (ids.length > 0) ? ids : [''];
+}
+
+export function createScribingQuestion(fields) {
+  const parsedFields = _cloneDeep(fields);
+  parsedFields.question_scribing.skill_ids = getSkillIdsFromSkills(fields.question_scribing.skill_ids);
   return (dispatch) => {
-    console.log('1');
     dispatch({ type: actionTypes.CREATE_SCRIBING_QUESTION_REQUEST });
     return CourseAPI.scribing.scribings.create(fields)
       .then((response) => {
@@ -72,10 +78,11 @@ export function updateScribingQuestion(
   data
 ) {
   return (dispatch) => {
+    const parsedData = _.cloneDeep(data);
+    parsedData.question_scribing.skill_ids = getSkillIdsFromSkills(data.question_scribing.skill_ids);
     dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_REQUEST });
-    return CourseAPI.scribing.scribings.update(questionId, data)
+    return CourseAPI.scribing.scribings.update(questionId, parsedData)
       .then((response) => {
-        console.log('successful update', response);
         dispatch({
           scribingId: getScribingId(),
           type: actionTypes.UPDATE_SCRIBING_QUESTION_SUCCESS,

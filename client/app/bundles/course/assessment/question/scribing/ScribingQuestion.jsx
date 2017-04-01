@@ -20,7 +20,6 @@ function buildInitialValues(scribingQuestion) {
         staff_only_comments: scribingQuestion.question.staff_only_comments,
         maximum_grade: scribingQuestion.question.maximum_grade,
         skill_ids: scribingQuestion.question.skill_ids,
-        skills: scribingQuestion.question.skills,
         published_assessment: scribingQuestion.published_assessment,
         attempt_limit: scribingQuestion.question.attempt_limit,
       }
@@ -54,12 +53,6 @@ const propTypes = {
       skills: PropTypes.arrayOf(PropTypes.shape({
         id: PropTypes.number,
         title: PropTypes.string,
-        course_id: PropTypes.number,
-        description: PropTypes.string,
-        creator_id: PropTypes.number,
-        updater_id: PropTypes.number,
-        created_at: PropTypes.date,
-        updated_at: PropTypes.date,
       })),
       error: PropTypes.shape({
         title: PropTypes.string,
@@ -83,17 +76,6 @@ const propTypes = {
         id: PropTypes.number,
         title: PropTypes.string,
       })),
-      skills: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.number,
-        title: PropTypes.string,
-        course_id: PropTypes.number,
-        description: PropTypes.string,
-        creator_id: PropTypes.number,
-        updater_id: PropTypes.number,
-        created_at: PropTypes.date,
-        updated_at: PropTypes.date,
-      })),
-      published_assessment: PropTypes.bool,
       attempt_limit: PropTypes.number,
     }),
   }).isRequired,

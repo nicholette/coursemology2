@@ -35,12 +35,6 @@ const propTypes = {
       skills: PropTypes.arrayOf(PropTypes.shape({
         id: PropTypes.number,
         title: PropTypes.string,
-        course_id: PropTypes.number,
-        description: PropTypes.string,
-        creator_id: PropTypes.number,
-        updater_id: PropTypes.number,
-        created_at: PropTypes.date,
-        updated_at: PropTypes.date,
       })),
       error: PropTypes.shape({
         title: PropTypes.string,

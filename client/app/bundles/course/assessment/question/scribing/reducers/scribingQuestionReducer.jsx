@@ -71,7 +71,6 @@ function apiReducer(state, action) {
     case actionTypes.CREATE_SURVEY_QUESTION_FAILURE:
     case actionTypes.UPDATE_SURVEY_QUESTION_FAILURE:
     case actionTypes.SUBMIT_FORM_FAILURE: {
-      console.log('action', action);
       return {
         ...state,
         is_loading: false,

@@ -94,7 +94,6 @@ export function updateScribingQuestion(
         window.location.href = `/courses/${courseId}/assessments/${assessmentId}`;
       })
       .catch((error) => {
-        console.log('error', error);
         dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE });
         if (error.response && error.response.data) {
           throw new SubmissionError(error.response.data.errors);

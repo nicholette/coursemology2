@@ -89,7 +89,6 @@ class ScribingQuestionForm extends React.Component {
 
   handleUpdateQuestion = (data) => {
     const { dispatch, scribingId } = this.props;
-    console.log('data', data);
     return dispatch(
       updateScribingQuestion(scribingId, data)
     );
@@ -149,7 +148,6 @@ class ScribingQuestionForm extends React.Component {
           name={ScribingQuestionForm.getInputName(field)}
           id={ScribingQuestionForm.getInputId(field)}
           component={(props) => {
-            console.log(this.props.formValues);
             return (
               <ChipInput
                 id={ScribingQuestionForm.getInputId(field)}

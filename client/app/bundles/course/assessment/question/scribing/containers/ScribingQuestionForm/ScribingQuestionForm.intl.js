@@ -74,7 +74,7 @@ export default defineMessages({
   },
   valueMoreThanEqual1000Error: {
     id: 'course.assessment.question.scribing.scribingQuestionForm.valueMoreThan1000Error',
-    defaultMessage: 'Value must be less than 1000.'
+    defaultMessage: 'Value must be less than 1000.',
   },
   lessThanEqualZeroValidationError: {
     id: 'course.assessment.question.scribing.scribingQuestionForm.lessThanEqualZeroValidationError',

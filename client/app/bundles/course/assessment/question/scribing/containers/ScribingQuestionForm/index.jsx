@@ -1,11 +1,8 @@
 import React, { PropTypes } from 'react';
-import _ from 'lodash';
-import { defineMessages, FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import { injectIntl, intlShape } from 'react-intl';
 import { reduxForm, Field, Form } from 'redux-form';
 import TextField from 'lib/components/redux-form/TextField';
-import SelectField from 'lib/components/redux-form/SelectField';
 import RaisedButton from 'material-ui/RaisedButton';
-import Snackbar from 'material-ui/Snackbar';
 
 import MaterialSummernote from 'lib/components/MaterialSummernote';
 import ChipInput from 'lib/components/ChipInput';
@@ -13,10 +10,8 @@ import ChipInput from 'lib/components/ChipInput';
 import styles from './ScribingQuestionForm.scss';
 import translations from './ScribingQuestionForm.intl';
 
-import { fetchScribingQuestion, onChangeScribingQuestion, updateSkills, createScribingQuestion, updateScribingQuestion } from '../../actions/scribingQuestionActionCreators';
-
+import { fetchScribingQuestion, createScribingQuestion, updateScribingQuestion } from '../../actions/scribingQuestionActionCreators';
 import { formNames } from '../../constants';
-import formTranslations from 'lib/translations/form';
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
@@ -46,9 +41,11 @@ const propTypes = {
     }),
     is_loading: PropTypes.bool,
   }).isRequired,
-  formValues: PropTypes.object,
   scribingId: PropTypes.string,
   intl: intlShape.isRequired,
+  // Redux-form proptypes
+  handleSubmit: PropTypes.func.isRequired,
+  submitting: PropTypes.bool.isRequired,
 };
 
 class ScribingQuestionForm extends React.Component {
@@ -76,7 +73,7 @@ class ScribingQuestionForm extends React.Component {
     this.summernoteEditors.attr('contenteditable', !nextProps.data.is_loading);
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps) {
     return this.props.data.is_loading !== nextProps.data.is_loading;
   }
 
@@ -94,10 +91,6 @@ class ScribingQuestionForm extends React.Component {
     );
   }
 
-  summernoteHandler(field) {
-    return e => (this.props.form[field] = e === '' ? null : e);
-  }
-
   submitButtonText() {
     if (this.props.data.is_loading) {
       return this.props.intl.formatMessage(translations.loadingMessage);
@@ -106,16 +99,23 @@ class ScribingQuestionForm extends React.Component {
     return this.props.intl.formatMessage(translations.submitButton);
   }
 
-  renderInputField(label, field, required, validate, type, value, error = null, placeholder = null) {
-    return (<Field
-      name={ScribingQuestionForm.getInputName(field)}
-      id={ScribingQuestionForm.getInputId(field)}
-      validate={validate}
-      floatingLabelText={(required ? '* ' : '') + label}
-      floatingLabelFixed
-      fullWidth
-      component={TextField}
-    />);
+  renderInputField(label, field, required, validate,
+    type, value, placeholder = null) {
+    return (
+      <div title={placeholder}>
+        <Field
+          name={ScribingQuestionForm.getInputName(field)}
+          id={ScribingQuestionForm.getInputId(field)}
+          validate={validate}
+          floatingLabelText={(required ? '* ' : '') + label}
+          floatingLabelFixed
+          fullWidth
+          type={type}
+          component={TextField}
+          disabled={this.props.data.is_loading}
+        />
+      </div>
+    );
   }
 
   renderSummernoteField(label, field, validate, value) {
@@ -124,19 +124,17 @@ class ScribingQuestionForm extends React.Component {
         name={ScribingQuestionForm.getInputName(field)}
         id={ScribingQuestionForm.getInputId(field)}
         validate={validate}
-        component={(props) => {
-          return (
-            <MaterialSummernote
-              field={field}
-              label={label}
-              value={value}
-              disabled={this.props.data.is_loading}
-              name={ScribingQuestionForm.getInputName(field)}
-              inputId={ScribingQuestionForm.getInputId(field)}
-              onChange={props.input.onChange}
-            />
-          )
-        }}
+        component={props => (
+          <MaterialSummernote
+            field={field}
+            label={label}
+            value={value}
+            disabled={this.props.data.is_loading}
+            name={ScribingQuestionForm.getInputName(field)}
+            inputId={ScribingQuestionForm.getInputId(field)}
+            onChange={props.input.onChange}
+          />
+          )}
       />
     );
   }
@@ -147,34 +145,32 @@ class ScribingQuestionForm extends React.Component {
         <Field
           name={ScribingQuestionForm.getInputName(field)}
           id={ScribingQuestionForm.getInputId(field)}
-          component={(props) => {
-            return (
-              <ChipInput
-                id={ScribingQuestionForm.getInputId(field)}
-                value={props.input.value || []}
-                dataSource={options}
-                dataSourceConfig={{ value: 'id', text: 'title' }}
-                onRequestAdd={(addedChip) => {
-                  let values = props.input.value || [];
-                  values = values.slice();
-                  values.push(addedChip);
-                  props.input.onChange(values);
-                }}
-                onRequestDelete={(deletedChip) => {
-                  let values = props.input.value || [];
-                  values = values.filter(v => v.id !== deletedChip);
-                  props.input.onChange(values);
-                }}
-                floatingLabelText={label}
-                floatingLabelFixed
-                openOnFocus
-                fullWidth
-                disabled={this.props.data.is_loading}
-                errorText={error}
-                menuStyle={{ maxHeight: '80vh', overflowY: 'scroll' }}
-              />
-            )
-          }}
+          component={props => (
+            <ChipInput
+              id={ScribingQuestionForm.getInputId(field)}
+              value={props.input.value || []}
+              dataSource={options}
+              dataSourceConfig={{ value: 'id', text: 'title' }}
+              onRequestAdd={(addedChip) => {
+                let values = props.input.value || [];
+                values = values.slice();
+                values.push(addedChip);
+                props.input.onChange(values);
+              }}
+              onRequestDelete={(deletedChip) => {
+                let values = props.input.value || [];
+                values = values.filter(v => v.id !== deletedChip);
+                props.input.onChange(values);
+              }}
+              floatingLabelText={label}
+              floatingLabelFixed
+              openOnFocus
+              fullWidth
+              disabled={this.props.data.is_loading}
+              errorText={error}
+              menuStyle={{ maxHeight: '80vh', overflowY: 'scroll' }}
+            />
+            )}
         />
 
         <select
@@ -192,39 +188,31 @@ class ScribingQuestionForm extends React.Component {
   }
 
   render() {
-    const { handleSubmit, formValues, submitting,
-            invalid, submitFail,
+    const { handleSubmit, submitting,
             intl, scribingId } = this.props;
     const question = this.props.data.question;
-    const formData = this.props.data.form_data;
-    const showAttemptLimit = true;
     const onSubmit = scribingId ? this.handleUpdateQuestion : this.handleCreateQuestion;
 
     const skillsOptions = question.skills;
     const skillsValues = question.skill_ids;
 
     // Field level validations
-    const required = value => value ? undefined : intl.formatMessage(translations.cannotBeBlankValidationError);
-    const lessThan1000 = value => value && value >= 1000 ? 
-      intl.formatMessage(translations.valueMoreThanEqual1000Error) :
-      undefined;
-    
-    const nonNegative = value => value && value < 0 ? 
-      intl.formatMessage(translations.positiveNumberValidationError) :
-      undefined;
+    const required = value => (
+      value ? undefined : intl.formatMessage(translations.cannotBeBlankValidationError)
+    );
+    const lessThan1000 = value => (
+      value && value >= 1000 ?
+      intl.formatMessage(translations.valueMoreThanEqual1000Error) : undefined
+    );
+    const nonNegative = value => (
+      value && value < 0 ?
+      intl.formatMessage(translations.positiveNumberValidationError) : undefined
+    );
 
+    // TODO: Display submit fail response
+    // TODO: Display submitting message
     return (
       <div>
-        {
-          this.props.data.save_errors ?
-            <div className="alert alert-danger">
-              {
-                this.props.data.save_errors.map((errorMessage, index) => <div key={index}>{errorMessage}</div>)
-              }
-            </div>
-            :
-            null
-        }
         <Form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
           <div className={styles.inputContainer}>
             <div className={styles.titleInput}>
@@ -253,36 +241,28 @@ class ScribingQuestionForm extends React.Component {
               {
                 this.renderMultiSelectSkillsField(
                   this.props.intl.formatMessage(translations.skillsFieldLabel),
-                  'skill_ids', skillsValues, skillsOptions,
-                  this.props.data.question.error && this.props.data.question.error.skill_ids)
+                  'skill_ids', skillsValues, skillsOptions)
               }
             </div>
             <div className={styles.maximumGradeInput}>
               {
                 this.renderInputField(
                   this.props.intl.formatMessage(translations.maximumGradeFieldLabel),
-                  'maximum_grade', true, [ required, lessThan1000, nonNegative ], 'number',
-                  ScribingQuestionForm.convertNull(question.maximum_grade),
-                  this.props.data.question.error && this.props.data.question.error.maximum_grade)
+                  'maximum_grade', true, [required, lessThan1000, nonNegative], 'number',
+                  ScribingQuestionForm.convertNull(question.maximum_grade))
               }
             </div>
-            {
-              showAttemptLimit ?
-                <div className={styles.attemptLimitInput}>
-                  {
-                    this.renderInputField(
-                      this.props.intl.formatMessage(translations.attemptLimitFieldLabel),
-                      'attempt_limit', false, [ nonNegative ], 'number',
-                      ScribingQuestionForm.convertNull(question.attempt_limit),
-                      this.props.data.question.error && this.props.data.question.error.attempt_limit,
-                      this.props.intl.formatMessage(translations.attemptLimitPlaceholderMessage))
-                  }
-                </div>
-                :
-                null
-            }
+            <div className={styles.attemptLimitInput}>
+              {
+                  this.renderInputField(
+                    this.props.intl.formatMessage(translations.attemptLimitFieldLabel),
+                    'attempt_limit', false, [nonNegative], 'number',
+                    ScribingQuestionForm.convertNull(question.attempt_limit),
+                    this.props.intl.formatMessage(translations.attemptLimitPlaceholderMessage))
+                }
+            </div>
           </div>
-          
+
           <RaisedButton
             className={styles.submitButton}
             label={'Submit'}

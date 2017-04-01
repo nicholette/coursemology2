@@ -1,32 +1,30 @@
 import React, { PropTypes } from 'react';
-import { injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { getFormValues } from 'redux-form';
 
+import { getScribingId } from 'lib/helpers/url-helpers';
 import ScribingQuestionForm from './containers/ScribingQuestionForm';
 import * as scribingQuestionActionCreators from './actions/scribingQuestionActionCreators';
 import { formNames } from './constants';
-import { getScribingId } from 'lib/helpers/url-helpers';
-
 
 
 function buildInitialValues(scribingQuestion) {
-  return scribingQuestion.question ? 
-    {
-      question_scribing: {
-        title: scribingQuestion.question.title,
-        description: scribingQuestion.question.description,
-        staff_only_comments: scribingQuestion.question.staff_only_comments,
-        maximum_grade: scribingQuestion.question.maximum_grade,
-        skill_ids: scribingQuestion.question.skill_ids,
-        published_assessment: scribingQuestion.published_assessment,
-        attempt_limit: scribingQuestion.question.attempt_limit,
-      }
-    } : {};
+  return scribingQuestion.question ?
+  {
+    question_scribing: {
+      title: scribingQuestion.question.title,
+      description: scribingQuestion.question.description,
+      staff_only_comments: scribingQuestion.question.staff_only_comments,
+      maximum_grade: scribingQuestion.question.maximum_grade,
+      skill_ids: scribingQuestion.question.skill_ids,
+      published_assessment: scribingQuestion.published_assessment,
+      attempt_limit: scribingQuestion.question.attempt_limit,
+    },
+  } : {};
 }
 
-function mapStateToProps({scribingQuestion, ...state}) {
+function mapStateToProps({ scribingQuestion, ...state }) {
   return {
     ...state,
     scribingQuestion,

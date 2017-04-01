@@ -3,9 +3,9 @@ import BaseScribingAPI from './Base';
 export default class ScribingsAPI extends BaseScribingAPI {
   /**
    * scribing_question = {
-  *   id: number, 
-  *   title: string, 
-  *   description: string, 
+  *   id: number,
+  *   title: string,
+  *   description: string,
   *   staff_only_comments: string,
   *   maximum_grade: string,
   *   weight: number,
@@ -30,7 +30,8 @@ export default class ScribingsAPI extends BaseScribingAPI {
   /**
    * Creates a Scribing question
    *
-   * @param {object} scribingFields - params in the format of { question_scribing: { :title, :description, etc } }
+   * @param {object} scribingFields - params in the format of
+   *                                { question_scribing: { :title, :description, etc } }
    * @return {Promise}
    * success response: scribing_question
    * error response: { errors: [{ attribute: string }] }
@@ -43,7 +44,8 @@ export default class ScribingsAPI extends BaseScribingAPI {
    * Updates a Scribing question
    *
    * @param {number} scribingId
-   * @param {object} scribingFields - params in the format of { survey: { :title, :description, etc } }
+   * @param {object} scribingFields - params in the format of
+   *                                { survey: { :title, :description, etc } }
    * @return {Promise}
    * success response: scribing_question
    * error response: { errors: [{ attribute: string }] }

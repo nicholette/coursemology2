@@ -42,7 +42,10 @@
       "^lib(.*)$": "<rootDir>/app/lib$1",
       "^utils(.*)$": "<rootDir>/app/__test__/utils$1"
     },
-    "coveragePathIgnorePatterns": ["/node_modules/", "/__test__/"]
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/__test__/"
+    ]
   },
   "dependencies": {
     "@types/moment-timezone": "^0.2.34",
@@ -64,6 +67,7 @@
     "intl": "^1.2.5",
     "jquery-ui": "^1.12.1",
     "json-loader": "^0.5.4",
+    "lodash": "^4.17.4",
     "material-ui": "^0.17.0",
     "mirror-creator": "1.1.0",
     "mkdirp": "^0.5.1",

@@ -18,10 +18,12 @@ class Course::Assessment::Question::ScribingController < \
   end
 
   def create
-    if @scribing_question.save
-      render_scribing_question_json
-    else
-      render json: { errors: @scribing_question.errors }, status: :bad_request
+    respond_to do |format|
+      if @scribing_question.save
+        format.json { render_scribing_question_json }
+      else
+        format.json { render_failure_json t('.failure') }
+      end
     end
   end
 
@@ -33,10 +35,12 @@ class Course::Assessment::Question::ScribingController < \
   end
   
   def update
-    if @scribing_question.update_attributes(scribing_question_params)
-      render_scribing_question_json
-    else
-      render json: { errors: @scribing_question.errors }, status: :bad_request
+    respond_to do |format|
+      if @scribing_question.save
+        format.json { render_scribing_question_json }
+      else
+        format.json { render_failure_json t('.failure') }
+      end
     end
   end
 
@@ -63,5 +67,10 @@ class Course::Assessment::Question::ScribingController < \
       :attempt_limit,
       skill_ids: []
     )
+  end
+
+  def render_failure_json(message)
+    render json: { message: message, errors: @scribing_question.errors.full_messages },
+           status: :bad_request
   end
 end

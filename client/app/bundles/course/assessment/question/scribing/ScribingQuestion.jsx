@@ -74,6 +74,11 @@ const propTypes = {
         id: PropTypes.number,
         title: PropTypes.string,
       })),
+      attachment_reference: PropTypes.shape({
+        name: PropTypes.string,
+        path: PropTypes.string,
+        updater_name: PropTypes.string,
+      }),
       attempt_limit: PropTypes.number,
     }),
   }).isRequired,

@@ -64,7 +64,7 @@ class Course::Assessment::Question::ScribingController < \
   def scribing_question_params
     params.require(:question_scribing).permit(
       :title, :description, :staff_only_comments, :maximum_grade,
-      :attempt_limit,
+      :attempt_limit, attachment_reference_attributes: [:attachment_id, :name],
       skill_ids: []
     )
   end

@@ -193,7 +193,6 @@ Rails.application.routes.draw do
               resources :logs, only: [:index]
               scope module: :answer do
                 resources :answers, only: [] do
-                  resources :comments, only: [:create]
                   namespace :programming do
                     resources :files, only: [] do
                       resources :annotations, only: [:create]
@@ -201,6 +200,11 @@ Rails.application.routes.draw do
                   end
                 end
               end
+            end
+          end
+          scope module: :submission_question do
+            resources :submission_questions, only: [] do
+              resources :comments, only: [:create]
             end
           end
           concerns :conditional
@@ -322,9 +326,13 @@ Rails.application.routes.draw do
       scope module: :survey do
         resources :surveys, only: [:index, :create, :show, :update, :destroy] do
           get 'results', on: :member
+          post 'remind', on: :member
           post 'reorder_questions', on: :member
+          post 'reorder_sections', on: :member
           resources :questions, only: [:create, :update, :destroy]
-          resources :responses, only: [:create, :show, :edit, :update]
+          resources :responses, only: [:index, :create, :show, :edit, :update] do
+            post 'unsubmit', on: :member
+          end
           resources :sections, only: [:create, :update, :destroy]
         end
       end

@@ -1,14 +1,16 @@
+# frozen_string_literal: true
 class Course::DuplicationsController < Course::ComponentController
   before_action :authorize_duplication
 
-  def show
-  end
+  def show; end
 
   def create
-    if duplicate
-      redirect_to course_duplication_path(current_course), success: t('.duplicating')
-    else
-      redirect_to course_duplication_path(current_course), danger: t('.failed')
+    # When selectable duplication is implemented, pass in additional arrays for all_objects
+    # and selected_objects
+    job = Course::DuplicationJob.perform_later(current_course, duplication_job_options).job
+    respond_to do |format|
+      format.html { redirect_to(job_path(job)) }
+      format.json { render json: { redirect_url: job_path(job) } }
     end
   end
 
@@ -21,26 +23,14 @@ class Course::DuplicationsController < Course::ComponentController
   private
 
   def create_duplication_params # :nodoc
-    params.require(:duplication).permit(:new_course_start_date, :new_course_title)
+    params.require(:duplication).permit(:new_start_at, :new_title)
   end
 
-  # Duplicates the course via the service object
+  # Construct the options to be sent to the duplication job.
+  # This includes new_course's start_date and title, and current_user.
   #
-  # @return [Boolean] True if the duplication was successful.
-  def duplicate
-    duplication_service.duplicate
-  end
-
-  # Create a duplication service object for this object.
-  #
-  # @return [Course::DuplicationService]
-  def duplication_service
-    # when selectable duplication is implemented, pass in additional arrays for all_objects
-    # and selected_objects
-    @duplication_service ||= Course::DuplicationService.new(
-      current_course,
-      current_user,
-      create_duplication_params
-    )
+  # @return [Hash] Hash of options to be sent to the duplication job
+  def duplication_job_options
+    create_duplication_params.merge(current_user: current_user)
   end
 end

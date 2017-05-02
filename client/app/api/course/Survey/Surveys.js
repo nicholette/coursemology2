@@ -11,6 +11,14 @@ export default class SurveysAPI extends BaseSurveyAPI {
   *      - true if user can view results for this survey
   *   canUpdate: bool, canDelete: bool,
   *      - true if user can update and delete this survey respectively
+  *   allow_response_after_end: bool,
+  *      - true if user can respond to a survey after it expires
+  *   allow_modify_after_submit: bool,
+  *      - true if user can update survey after it has been submitted
+  *   hasStudentResponse: bool,
+  *      - true if there is at least one student response for the survey
+  *   response: Array.<{ id: number, submitted_at: string, canModify: bool, canSubmit: bool }>
+  *      - Response details if it exists. Otherwise, null.
   *   sections:
   *     Array.<{
   *       id: number, title: string, weight: number, ...etc
@@ -114,6 +122,17 @@ export default class SurveysAPI extends BaseSurveyAPI {
   }
 
   /**
+  * Sends emails to remind students to complete the survey.
+  *
+  * @return {Promise}
+  * success response: {}
+  * error response: {}
+  */
+  remind() {
+    return this.getClient().post(`${this._getUrlPrefix()}/${this.getSurveyId()}/remind`);
+  }
+
+  /**
   * Updates the ordering of questions within the survey.
   *
   * @param {Array.<Array.<number, Array.<number>>>} ordering
@@ -125,6 +144,18 @@ export default class SurveysAPI extends BaseSurveyAPI {
   */
   reorderQuestions(ordering) {
     return this.getClient().post(`${this._getUrlPrefix()}/${this.getSurveyId()}/reorder_questions`, ordering);
+  }
+
+  /**
+  * Updates the ordering of sections within the survey.
+  *
+  * @param {Array.<number>} ordering Ordered list of section ids
+  * @return {Promise}
+  * success response: survey_with_questions
+  * error response: {}
+  */
+  reorderSections(ordering) {
+    return this.getClient().post(`${this._getUrlPrefix()}/${this.getSurveyId()}/reorder_sections`, ordering);
   }
 
   _getUrlPrefix() {

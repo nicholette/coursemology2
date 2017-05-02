@@ -14,8 +14,9 @@ FactoryGirl.define do
     end
     points_awarded { rand(1..20) * 100 }
     draft_points_awarded nil
-    awarded_at { 1.day.ago }
-    awarder { creator }
+    awarded_at nil
+    # Set factory behavior to be consistent with model
+    awarder { manually_awarded? ? creator : nil }
     reason { 'Reason for manually-awarded experience points' if manually_awarded? }
 
     trait :inactive do

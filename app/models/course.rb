@@ -140,8 +140,8 @@ class Course < ActiveRecord::Base
   def initialize_duplicate(duplicator, other)
     self.start_at += duplicator.time_shift
     self.end_at += duplicator.time_shift
-    self.title = duplicator.new_course_title
-    self.creator = duplicator.current_user
+    self.title = duplicator.options[:new_title]
+    self.creator = duplicator.options[:current_user]
     self.registration_key = nil
     logo.duplicate_from(other.logo) if other.logo_url
 
@@ -169,9 +169,10 @@ class Course < ActiveRecord::Base
 
   # Set default values
   def set_defaults
-    self.start_at ||= Time.zone.now
-    self.end_at ||= 1.month.from_now
+    self.start_at ||= Time.zone.now.beginning_of_hour
+    self.end_at ||= self.start_at + 1.month
 
-    course_users.build(user: creator, role: :owner) if creator && course_users.empty?
+    return unless creator && course_users.empty?
+    course_users.build(user: creator, role: :owner, creator: creator, updater: updater)
   end
 end

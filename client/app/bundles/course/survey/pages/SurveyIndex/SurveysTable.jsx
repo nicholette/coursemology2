@@ -19,8 +19,12 @@ const styles = {
   buttonsColumn: {
     display: 'flex',
   },
-  resultsButton: {
+  button: {
     marginRight: 15,
+  },
+  wrap: {
+    whiteSpace: 'normal',
+    wordWrap: 'break-word',
   },
 };
 
@@ -67,24 +71,29 @@ class SurveysTable extends React.Component {
           adjustForCheckbox={false}
         >
           <TableRow>
-            <TableHeaderColumn colSpan={4}>
+            <TableHeaderColumn colSpan={6}>
               {intl.formatMessage(translations.title)}
             </TableHeaderColumn>
-            <TableHeaderColumn>{intl.formatMessage(translations.points)}</TableHeaderColumn>
-            <TableHeaderColumn colSpan={2}>
+            <TableHeaderColumn colSpan={3} style={styles.wrap}>
+              {intl.formatMessage(translations.basePoints)}
+            </TableHeaderColumn>
+            <TableHeaderColumn colSpan={3} style={styles.wrap}>
+              {intl.formatMessage(translations.bonusPoints)}
+            </TableHeaderColumn>
+            <TableHeaderColumn colSpan={5}>
               {intl.formatMessage(translations.opensAt)}
             </TableHeaderColumn>
-            <TableHeaderColumn colSpan={2}>
+            <TableHeaderColumn colSpan={5}>
               {intl.formatMessage(translations.expiresAt)}
             </TableHeaderColumn>
             {
               canCreate ?
-                <TableHeaderColumn>
+                <TableHeaderColumn colSpan={2}>
                   {intl.formatMessage(translations.published)}
                 </TableHeaderColumn> :
                 null
             }
-            <TableHeaderColumn colSpan={canCreate ? 3 : 2} />
+            <TableHeaderColumn colSpan={canCreate ? 14 : 4} />
           </TableRow>
         </TableHeader>
         <TableBody
@@ -94,33 +103,36 @@ class SurveysTable extends React.Component {
           {
             surveys.map(survey => (
               <TableRow key={survey.id}>
-                <TableRowColumn colSpan={4}>
+                <TableRowColumn colSpan={6}>
                   <Link to={`/courses/${courseId}/surveys/${survey.id}`}>
                     { survey.title }
                   </Link>
                 </TableRowColumn>
-                <TableRowColumn>
+                <TableRowColumn colSpan={3}>
                   { survey.base_exp }
                 </TableRowColumn>
-                <TableRowColumn colSpan={2}>
+                <TableRowColumn colSpan={3}>
+                  { survey.allow_response_after_end ? survey.time_bonus_exp : '-' }
+                </TableRowColumn>
+                <TableRowColumn colSpan={5}>
                   { intl.formatDate(survey.start_at, standardDateFormat) }
                 </TableRowColumn>
-                <TableRowColumn colSpan={2}>
+                <TableRowColumn colSpan={5}>
                   { survey.end_at ? intl.formatDate(survey.end_at, standardDateFormat) : [] }
                 </TableRowColumn>
                 {
                   canCreate ?
-                    <TableHeaderColumn>
+                    <TableHeaderColumn colSpan={2}>
                       { this.renderPublishToggle(survey) }
                     </TableHeaderColumn> :
                     null
                 }
-                <TableHeaderColumn colSpan={canCreate ? 3 : 2}>
+                <TableHeaderColumn colSpan={canCreate ? 14 : 4}>
                   <div style={styles.buttonsColumn}>
                     {
                       survey.canViewResults ?
                         <RaisedButton
-                          style={styles.resultsButton}
+                          style={styles.button}
                           label={<FormattedMessage {...translations.results} />}
                           onTouchTap={() => browserHistory.push(
                             `/courses/${courseId}/surveys/${survey.id}/results`
@@ -128,7 +140,28 @@ class SurveysTable extends React.Component {
                         /> :
                         null
                     }
-                    <RespondButton {...{ survey, courseId }} />
+                    {
+                      survey.canViewResults ?
+                        <RaisedButton
+                          style={styles.button}
+                          label={<FormattedMessage {...translations.responses} />}
+                          onTouchTap={() => browserHistory.push(
+                            `/courses/${courseId}/surveys/${survey.id}/responses`
+                          )}
+                        /> :
+                        null
+                    }
+                    <RespondButton
+                      courseId={courseId}
+                      surveyId={survey.id}
+                      responseId={survey.response && survey.response.id}
+                      canRespond={survey.canRespond}
+                      canModify={!!survey.response && survey.response.canModify}
+                      canSubmit={!!survey.response && survey.response.canSubmit}
+                      startAt={survey.start_at}
+                      endAt={survey.end_at}
+                      submittedAt={survey.response && survey.response.submitted_at}
+                    />
                   </div>
                 </TableHeaderColumn>
               </TableRow>

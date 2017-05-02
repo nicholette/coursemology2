@@ -1,9 +1,9 @@
 /**
- * Searches an array for the first object that has the given id and returns it.
+ * Searches an array for the first object that has the given id and returns its index.
  *
  * @param {Object[]} array
  * @param {String|Number} id
- * @return {Object}
+ * @return {Number}
  */
 export const findById = (array, id) => (
   array.findIndex(item => String(item.id) === String(id))
@@ -20,7 +20,11 @@ export const findById = (array, id) => (
  */
 export const updateOrAppend = (array, item) => {
   const index = findById(array, item.id);
-  return index === -1 ? [...array, item] : Object.assign([], array, { [index]: item });
+  if (index === -1) {
+    return [...array, item];
+  }
+  const updatedItem = { ...array[index], ...item };
+  return Object.assign([], array, { [index]: updatedItem });
 };
 
 /**

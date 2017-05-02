@@ -7,7 +7,9 @@ class Course::Survey::SurveysController < Course::ComponentController
   def index
     respond_to do |format|
       format.html
-      format.json
+      format.json do
+        @surveys = @surveys.includes(responses: { experience_points_record: :course_user })
+      end
     end
   end
 
@@ -49,6 +51,12 @@ class Course::Survey::SurveysController < Course::ComponentController
     end
   end
 
+  def remind
+    authorize!(:manage, @survey)
+    Course::Survey::ReminderService.send_closing_reminder(@survey)
+    head :ok
+  end
+
   private
 
   def load_sections
@@ -72,7 +80,12 @@ class Course::Survey::SurveysController < Course::ComponentController
   end
 
   def survey_params
-    params.require(:survey).
-      permit(:title, :description, :base_exp, :start_at, :end_at, :published)
+    fields = [
+      :title, :description, :base_exp, :time_bonus_exp, :start_at, :bonus_end_at, :end_at,
+      :published, :allow_response_after_end, :allow_modify_after_submit
+    ]
+    fields << :anonymous if action_name == 'create' || !@survey.anonymous ||
+                            !@survey.has_student_response?
+    params.require(:survey).permit(*fields)
   end
 end

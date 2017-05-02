@@ -47,7 +47,7 @@ module ApplicationHTMLFormattersHelper
   SANITIZATION_FILTER_WHITELIST = begin
     list = HTML::Pipeline::SanitizationFilter::WHITELIST
     list[:protocols]['img']['src'] |= ['data']
-    list[:elements] |= ['span', 'font']
+    list[:elements] |= ['span', 'font', 'u']
     list[:attributes][:all] |= ['style']
     list[:attributes]['font'] = ['face']
     list[:attributes]['table'] = ['class']
@@ -96,15 +96,6 @@ module ApplicationHTMLFormattersHelper
   # Replaces the Rails sanitizer with the one configured with HTML Pipeline.
   def sanitize(text)
     format_with_pipeline(HTMLSanitizerPipeline, text)
-  end
-
-  # Replaces the Rails simple_format to escape HTML.
-  #
-  # @return [String]
-  def simple_format(text, *args)
-    text = html_escape(text) unless text.html_safe?
-    args.unshift(text)
-    super(*args)
   end
 
   # Sanitises and formats the given user-input string. The string is assumed to contain HTML markup.

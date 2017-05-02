@@ -8,7 +8,7 @@ export default class ResponsesAPI extends BaseSurveyAPI {
   *       - Survey attributes
   *   },
   *   response: {
-  *     id: number, submitted_at: datetime,
+  *     id: number, submitted_at: datetime, creator_name: string
   *       - Response Attributes
   *     sections:
   *       Array.<{
@@ -16,8 +16,10 @@ export default class ResponsesAPI extends BaseSurveyAPI {
   *           - Section attributes
   *         answers:
   *           Array.<{
+  *             present: bool,
+  *               - true if an answer object has been created for the nested question.
   *             id: number, text_response: string, options: Array, ...etc,
-  *               - Answer attributes
+  *               - Answer attributes, if the answer exists
   *             questions: Array.<{
   *               description: string, options: Array, weight: number, ...etc
   *                 - Array of questions belonging to the survey
@@ -26,7 +28,11 @@ export default class ResponsesAPI extends BaseSurveyAPI {
   *             }>,
   *           }>
   *       }>
-  *   }
+  *   },
+  *   flags: {
+  *     canModify: bool, canSubmit: bool, canUnsubmit: bool, isResponseCreator: bool,
+  *       - Flags that define actions user can perform
+  *   },
   * }
   */
 
@@ -39,7 +45,37 @@ export default class ResponsesAPI extends BaseSurveyAPI {
   * error response: {}
   */
   fetch(responseId) {
+    return this.getClient().get(`${this._getUrlPrefix()}/${responseId}/`);
+  }
+
+  /**
+  * Fetches a survey response with missing answers and options populated for student to edit.
+  *
+  * @param {number} responseId
+  * @return {Promise}
+  * success response: survey_response
+  * error response: {}
+  */
+  edit(responseId) {
     return this.getClient().get(`${this._getUrlPrefix()}/${responseId}/edit`);
+  }
+
+  /**
+  * Fetches all student responses for the current survey
+  *
+  * @return {Promise}
+  * success response: {
+  *   responses: Array.<{
+  *     started: bool, submitted_at: string, path: string,
+  *     course_user: { id: number, name: string, phantom: bool, path: string },
+  *   }>,
+  *     - Expect responses to be sorted by course_user name
+  *   survey: { id: number, title: string, ...etc }
+  * }
+  * error response: {}
+  */
+  index() {
+    return this.getClient().get(this._getUrlPrefix());
   }
 
   /**
@@ -74,6 +110,18 @@ export default class ResponsesAPI extends BaseSurveyAPI {
   */
   update(responseId, responseFields) {
     return this.getClient().patch(`${this._getUrlPrefix()}/${responseId}`, responseFields);
+  }
+
+  /**
+  * Unsubmits a survey response
+  *
+  * @param {number} responseId
+  * @return {Promise}
+  * success response: survey_response
+  * error response: {}
+  */
+  unsubmit(responseId) {
+    return this.getClient().post(`${this._getUrlPrefix()}/${responseId}/unsubmit`);
   }
 
   _getUrlPrefix(surveyId) {

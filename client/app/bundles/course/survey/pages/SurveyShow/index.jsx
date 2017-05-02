@@ -7,26 +7,29 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import Subheader from 'material-ui/Subheader';
 import { showDeleteConfirmation } from 'course/survey/actions';
 import surveyTranslations from 'course/survey/translations';
+import { formatSurveyFormData } from 'course/survey/utils';
 import * as surveyActions from 'course/survey/actions/surveys';
+import LoadingIndicator from 'course/survey/components/LoadingIndicator';
 import SurveyDetails from './SurveyDetails';
 import Section from './Section';
 
 const translations = defineMessages({
   editSurvey: {
-    id: 'course.surveys.Survey.editSurvey',
+    id: 'course.surveys.SurveyShow.editSurvey',
     defaultMessage: 'Edit Survey',
   },
   deleteSurvey: {
-    id: 'course.surveys.Survey.deleteSurvey',
+    id: 'course.surveys.SurveyShow.deleteSurvey',
     defaultMessage: 'Delete Survey',
   },
   empty: {
-    id: 'course.surveys.Survey.empty',
+    id: 'course.surveys.SurveyShow.empty',
     defaultMessage: 'This survey does not have any questions.',
   },
 });
 
 class SurveyShow extends React.Component {
+
   componentDidMount() {
     const {
       dispatch,
@@ -39,7 +42,7 @@ class SurveyShow extends React.Component {
     const { dispatch, intl, params: { surveyId } } = this.props;
     const { updateSurvey } = surveyActions;
 
-    const payload = { survey: data };
+    const payload = formatSurveyFormData(data);
     const successMessage = intl.formatMessage(surveyTranslations.updateSuccess, data);
     const failureMessage = intl.formatMessage(surveyTranslations.updateFailure);
     return dispatch(updateSurvey(surveyId, payload, successMessage, failureMessage));
@@ -48,17 +51,29 @@ class SurveyShow extends React.Component {
   showEditSurveyForm = (survey) => {
     const { dispatch, intl } = this.props;
     const { showSurveyForm } = surveyActions;
-    const { start_at, end_at, title, description, base_exp } = survey;
+    const {
+      title, description, base_exp, time_bonus_exp, start_at, end_at, hasStudentResponse,
+      allow_response_after_end, allow_modify_after_submit, anonymous,
+    } = survey;
+
+    const initialValues = {
+      title,
+      description,
+      base_exp,
+      time_bonus_exp,
+      allow_response_after_end,
+      allow_modify_after_submit,
+      anonymous,
+    };
 
     return () => dispatch(showSurveyForm({
       onSubmit: this.updateSurveyHandler,
       formTitle: intl.formatMessage(translations.editSurvey),
+      hasStudentResponse,
       initialValues: {
+        ...initialValues,
         start_at: new Date(start_at),
         end_at: new Date(end_at),
-        title,
-        description,
-        base_exp,
       },
     }));
   }
@@ -96,24 +111,27 @@ class SurveyShow extends React.Component {
     return functions;
   }
 
-  renderSections(survey) {
-    const { intl } = this.props;
+  renderBody(survey) {
+    const { intl, isLoading, disabled } = this.props;
     const { sections, canUpdate } = survey;
-
-    if (!canUpdate) {
-      return null;
-    }
-
+    if (isLoading) { return <LoadingIndicator />; }
+    if (!canUpdate) { return null; }
     if (!sections || sections.length < 1) {
       return <Subheader>{ intl.formatMessage(translations.empty) }</Subheader>;
     }
+    const lastIndex = sections.length - 1;
 
     return (
       <div>
         <Subheader>{ intl.formatMessage(surveyTranslations.questions) }</Subheader>
         {
           sections.map((section, index) =>
-            <Section key={section.id} {...{ section, index, survey }} />
+            <Section
+              key={section.id}
+              first={index === 0}
+              last={index === lastIndex}
+              {...{ section, index, survey, disabled }}
+            />
           )
         }
       </div>
@@ -121,16 +139,16 @@ class SurveyShow extends React.Component {
   }
 
   render() {
-    const { surveys, params: { courseId, surveyId } } = this.props;
+    const { surveys, disabled, params: { courseId, surveyId } } = this.props;
     const survey = surveys && surveys.length > 0 ?
                    surveys.find(s => String(s.id) === String(surveyId)) : {};
     return (
       <div>
         <SurveyDetails
-          {...{ survey, courseId, surveyId }}
+          {...{ survey, courseId, surveyId, disabled }}
           adminFunctions={this.adminFunctions(survey)}
         />
-        { this.renderSections(survey) }
+        { this.renderBody(survey) }
       </div>
     );
   }
@@ -144,10 +162,14 @@ SurveyShow.propTypes = {
   }).isRequired,
   surveys: PropTypes.arrayOf(PropTypes.object).isRequired,
   intl: intlShape.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  disabled: PropTypes.bool.isRequired,
 };
 
-export const ConnectedSurveyShow = connect(state => ({ surveys: state.surveys }))(
-  injectIntl(SurveyShow)
-);
-
+const mapStateToProps = state => ({
+  surveys: state.surveys,
+  isLoading: state.surveysFlags.isLoadingSurvey,
+  disabled: state.surveysFlags.disableSurveyShow,
+});
+export const ConnectedSurveyShow = connect(mapStateToProps)(injectIntl(SurveyShow));
 export default DragDropContext(HTML5Backend)(ConnectedSurveyShow);

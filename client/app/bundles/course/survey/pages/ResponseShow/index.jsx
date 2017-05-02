@@ -1,160 +1,150 @@
-/* eslint-disable camelcase */
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import { browserHistory } from 'react-router';
+import moment from 'moment';
 import IconButton from 'material-ui/IconButton';
 import { Card, CardText } from 'material-ui/Card';
 import TitleBar from 'lib/components/TitleBar';
 import Subheader from 'material-ui/Subheader';
 import ArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
-import { questionTypes } from 'course/survey/constants';
+import { Table, TableBody, TableRow, TableHeaderColumn, TableRowColumn } from 'material-ui/Table';
 import surveyTranslations from 'course/survey/translations';
 import { surveyShape, responseShape } from 'course/survey/propTypes';
-import { fetchResponse, updateResponse } from 'course/survey/actions/responses';
-import ResponseForm from './ResponseForm';
+import { fetchResponse } from 'course/survey/actions/responses';
+import LoadingIndicator from 'course/survey/components/LoadingIndicator';
+import ResponseForm from 'course/survey/containers/ResponseForm';
+import RespondButton from 'course/survey/containers/RespondButton';
+import UnsubmitButton from 'course/survey/containers/UnsubmitButton';
 
 const translations = defineMessages({
-  saveSuccess: {
-    id: 'course.surveys.ResponseShow.saveSuccess',
-    defaultMessage: 'Your response has been saved.',
-  },
-  saveFailure: {
-    id: 'course.surveys.ResponseShow.saveFailure',
-    defaultMessage: 'Saving Failed.',
-  },
-  submitSuccess: {
-    id: 'course.surveys.ResponseShow.submitSuccess',
-    defaultMessage: 'Your response has been submitted.',
-  },
-  submitFailure: {
-    id: 'course.surveys.ResponseShow.submitFailure',
-    defaultMessage: 'Submit Failed.',
-  },
-  loading: {
-    id: 'course.surveys.ResponseShow.loading',
-    defaultMessage: 'Loading survey questions...',
+  notSubmitted: {
+    id: 'course.surveys.ResponseShow.notSubmitted',
+    defaultMessage: 'Not submitted',
   },
 });
 
+const styles = {
+  submissionInfoTable: {
+    marginTop: 10,
+    maxWidth: 600,
+  },
+};
+
 class ResponseShow extends React.Component {
   static propTypes = {
-    survey: surveyShape,
+    surveys: PropTypes.arrayOf(surveyShape),
     response: responseShape,
-    isLoading: PropTypes.bool.isRequired,
+    flags: PropTypes.shape({
+      isLoading: PropTypes.bool.isRequired,
+      canModify: PropTypes.bool,
+      canSubmit: PropTypes.bool,
+    }),
     params: PropTypes.shape({
       courseId: PropTypes.string.isRequired,
+      surveyId: PropTypes.string.isRequired,
+      responseId: PropTypes.string.isRequired,
     }).isRequired,
     dispatch: PropTypes.func.isRequired,
   };
 
-  static buildAnswer(answer) {
-    if (answer.question.question_type === questionTypes.MULTIPLE_CHOICE) {
-      const selected_option = answer.options.find(option => option.selected);
-      if (selected_option) {
-        return { ...answer, selected_option: selected_option.question_option_id.toString() };
-      }
-    }
-    return answer;
-  }
-
-  /**
-   * Transforms the data from the server into the shaped used by the form.
-   */
-  static buildInitialValues({ sections }) {
-    if (!sections) { return {}; }
-    const buildSection = ({ answers, ...sectionFields }) => (
-      { ...sectionFields, answers: answers.map(ResponseShow.buildAnswer) }
-    );
-    return { sections: sections.map(buildSection) };
-  }
-
-  static formatAnswer(answer) {
-    const { id, text_response, options, selected_option, question } = answer;
-    const isMultipleChoice =
-      question.question_type === questionTypes.MULTIPLE_CHOICE && selected_option;
-    const reduceOption = ({ id: optionId, selected, question_option_id }) => ({
-      id: optionId,
-      selected: isMultipleChoice ? (question_option_id.toString() === selected_option) : selected,
-    });
-    return ({ id, text_response, options_attributes: options.map(reduceOption) });
-  }
-
-  /**
-   * Transforms the form data into the JSON shape that the endpoint expects to receive.
-   */
-  static formatSurveyResponseData(data) {
-    const answers_attributes = data.sections.reduce((accumulator, section) => (
-      accumulator.concat(section.answers.map(ResponseShow.formatAnswer))
-    ), []);
-    return { response: { answers_attributes, submit: data.submit } };
-  }
-
-  static renderDescription(survey) {
-    if (!survey.description) { return null; }
-    return (
-      <Card>
-        <CardText>{survey.description}</CardText>
-      </Card>
-    );
-  }
-
   componentDidMount() {
-    const { dispatch, isLoading, params: { responseId } } = this.props;
-
-    if (!isLoading) {
-      dispatch(fetchResponse(responseId));
-    }
+    const { dispatch, params: { responseId } } = this.props;
+    dispatch(fetchResponse(responseId));
   }
 
-  handleUpdateResponse = (data) => {
-    const { dispatch, params: { responseId } } = this.props;
-    const { saveSuccess, saveFailure, submitSuccess, submitFailure } = translations;
-    const payload = ResponseShow.formatSurveyResponseData(data);
-    const successMessage = <FormattedMessage {...(data.submit ? submitSuccess : saveSuccess)} />;
-    const failureMessage = <FormattedMessage {...(data.submit ? submitFailure : saveFailure)} />;
-
-    return dispatch(
-      updateResponse(responseId, payload, successMessage, failureMessage)
+  renderSubmissionInfo() {
+    const { response } = this.props;
+    return (
+      <Table style={styles.submissionInfoTable}>
+        <TableBody displayRowCheckbox={false}>
+          <TableRow selectable={false}>
+            <TableHeaderColumn>Student</TableHeaderColumn>
+            <TableRowColumn>{response.creator_name}</TableRowColumn>
+          </TableRow>
+          <TableRow selectable={false}>
+            <TableHeaderColumn>Submitted At</TableHeaderColumn>
+            <TableRowColumn>
+              {response.submitted_at ?
+                moment(response.submitted_at).format('DD MMM YYYY, h:mma') :
+                <FormattedMessage {...translations.notSubmitted} />
+              }
+            </TableRowColumn>
+          </TableRow>
+        </TableBody>
+      </Table>
     );
   }
 
-  renderForm() {
-    const { response, isLoading } = this.props;
-
-    if (isLoading) {
-      return <Subheader><FormattedMessage {...translations.loading} /></Subheader>;
-    }
+  renderBody() {
+    const { response, flags } = this.props;
+    if (flags.isLoading) { return <LoadingIndicator />; }
 
     return (
       <div>
+        { this.renderSubmissionInfo() }
         <Subheader><FormattedMessage {...surveyTranslations.questions} /></Subheader>
         <ResponseForm
-          initialValues={ResponseShow.buildInitialValues(response)}
-          onSubmit={this.handleUpdateResponse}
-          {...{ response }}
+          readOnly
+          initialValues={response}
+          {...{ response, flags }}
         />
       </div>
     );
   }
 
+  renderRespondButton(survey) {
+    const { response, params: { courseId }, flags: { canModify, canSubmit, isLoading } } = this.props;
+    if (!(canModify || canSubmit) || isLoading) { return null; }
+
+    return (
+      <RespondButton
+        courseId={courseId}
+        surveyId={survey.id}
+        responseId={response.id}
+        canModify={canModify}
+        canSubmit={canSubmit}
+        startAt={survey.start_at}
+        endAt={survey.end_at}
+        submittedAt={response.submitted_at}
+      />
+    );
+  }
+
+  renderUnsubmitButton() {
+    const { response, flags: { canUnsubmit, isLoading } } = this.props;
+    if (!canUnsubmit || isLoading) { return null; }
+    return <UnsubmitButton responseId={response.id} />;
+  }
+
   render() {
-    const { survey, params: { courseId } } = this.props;
+    const { surveys, params: { courseId, surveyId } } = this.props;
+    const survey = surveys && surveys.length > 0 ?
+                   surveys.find(s => String(s.id) === String(surveyId)) : {};
 
     return (
       <div>
         <TitleBar
           title={survey.title}
           iconElementLeft={<IconButton><ArrowBack /></IconButton>}
-          onLeftIconButtonTouchTap={() => browserHistory.push(`/courses/${courseId}/surveys`)}
+          onLeftIconButtonTouchTap={
+            () => browserHistory.push(`/courses/${courseId}/surveys/${surveyId}`)
+          }
         />
-        { ResponseShow.renderDescription(survey) }
-        { this.renderForm() }
+        { survey.description ? <Card><CardText>{survey.description}</CardText></Card> : null }
+        { this.renderBody() }
+        { this.renderRespondButton(survey) }
+        { this.renderUnsubmitButton() }
       </div>
     );
   }
 }
 
+export const UnconnectedResponseShow = ResponseShow;
+
 export default connect(
-  state => state.responseForm
+  state => ({
+    ...state.responseForm,
+    surveys: state.surveys,
+  })
 )(ResponseShow);

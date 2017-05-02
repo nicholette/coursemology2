@@ -1,86 +1,105 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { mount } from 'enzyme';
-import ReactTestUtils from 'react-addons-test-utils';
+import { mount, shallow } from 'enzyme';
+import { browserHistory } from 'react-router';
 import CourseAPI from 'api/course';
-import MockAdapter from 'axios-mock-adapter';
 import storeCreator from 'course/survey/store';
-import ResponseShow from '../index';
+import ResponseShow, { UnconnectedResponseShow } from '../index';
 
-const client = CourseAPI.survey.responses.getClient();
-const mock = new MockAdapter(client);
-
-const responseData = {
-  response: {
-    id: 5,
-    sections: [{
-      id: 2,
-      weight: 0,
-      title: 'Only section',
-      description: 'Has one question',
-      answers: [{
-        id: 3,
-        question_id: 4,
-        question: {
-          id: 4,
-          question_type: 'text',
-          description: 'Why?',
-          required: true,
-          weight: 0,
-        },
-        text_response: 'Current answer',
-        options: [],
-      }],
-    }],
-  },
-  survey: {
-    id: 6,
-    title: 'Test Response',
-    description: 'Form working?',
-  },
-};
-
-beforeEach(() => {
-  mock.reset();
+const generateContextOptions = store => ({
+  context: { intl, store, muiTheme },
+  childContextTypes: { muiTheme: React.PropTypes.object, intl: intlShape },
 });
 
 describe('<ResponseShow />', () => {
   it('allows responses to be saved', async () => {
-    const surveyId = responseData.survey.id;
-    const responseId = responseData.response.id;
+    const surveyId = '1';
+    const responseId = '1';
     const responseUrl = `/courses/${courseId}/surveys/${surveyId}/responses/${responseId}`;
-    mock.onGet(`${responseUrl}/edit`).reply(200, responseData);
     const spyFetch = jest.spyOn(CourseAPI.survey.responses, 'fetch');
-    const spyUpdate = jest.spyOn(CourseAPI.survey.responses, 'update');
 
     // Mount response show page and wait for data to load
     Object.defineProperty(window.location, 'pathname', { value: responseUrl });
-    const store = storeCreator({ surveys: {} });
-    const contextOptions = {
-      context: { intl, store, muiTheme },
-      childContextTypes: { muiTheme: React.PropTypes.object, intl: intlShape },
-    };
-    const responseShow = mount(
-      <ResponseShow params={{ courseId, responseId: responseId.toString() }} />,
-      contextOptions
+    mount(
+      <ResponseShow params={{ courseId, surveyId, responseId }} />,
+      generateContextOptions(storeCreator({}))
     );
     await sleep(1);
     expect(spyFetch).toHaveBeenCalled();
+  });
 
-    // Fill and submit response form
-    const responseForm = responseShow.find('ResponseForm').first();
-    const textResponse = responseForm.find('textarea').last();
-    const newAnswer = 'New Answer';
-    textResponse.simulate('change', { target: { value: newAnswer } });
-    const submitButton = responseForm.find('RaisedButton').last().find('button').first();
-    ReactTestUtils.Simulate.touchTap(ReactDOM.findDOMNode(submitButton.node));
-
-    const expectedPayload = {
+  it('shows form and admin buttons if user has permissions and page is loaded', () => {
+    const surveyId = 2;
+    const responseId = 2;
+    const surveys = [{
+      id: surveyId,
+      title: 'Survey',
+      description: 'Description',
+    }];
+    const responseFormData = {
       response: {
-        answers_attributes: [{ id: 3, text_response: newAnswer, options_attributes: [] }],
-        submit: true,
+        id: responseId,
+        creator_name: 'Staff',
+        submitted_at: '2099-12-31T16:00:00.000Z',
+      },
+      flags: {
+        canModify: true,
+        canSubmit: true,
+        canUnsubmit: true,
+        isResponseCreator: true,
+        isLoading: false,
       },
     };
-    expect(spyUpdate).toHaveBeenCalledWith(responseId.toString(), expectedPayload);
+    const responseShow = shallow(
+      <UnconnectedResponseShow
+        params={{ courseId, surveyId: surveyId.toString(), responseId: responseId.toString() }}
+        dispatch={() => {}}
+        surveys={surveys}
+        {...responseFormData}
+      />, generateContextOptions(storeCreator({}))
+    );
+    expect(responseShow).toMatchSnapshot();
+  });
+
+  it('shows only title and loading indicator when loading', () => {
+    const surveyId = 2;
+    const responseId = 2;
+    const responseFormData = {
+      response: {
+        id: responseId,
+        creator_name: 'Student',
+      },
+      flags: {
+        canModify: true,
+        canSubmit: true,
+        canUnsubmit: true,
+        isResponseCreator: true,
+        isLoading: true,
+      },
+    };
+    const responseShow = shallow(
+      <UnconnectedResponseShow
+        params={{ courseId, surveyId: surveyId.toString(), responseId: responseId.toString() }}
+        dispatch={() => {}}
+        {...responseFormData}
+      />, generateContextOptions(storeCreator({}))
+    );
+    expect(responseShow).toMatchSnapshot();
+  });
+
+  it('goes to SurveyShow page when title bar back button is triggered', () => {
+    const surveyId = '3';
+    const responseId = '3';
+
+    const responseShow = shallow(
+      <UnconnectedResponseShow
+        params={{ courseId, surveyId, responseId }}
+        dispatch={() => {}}
+        flags={{ isLoading: true }}
+      />, generateContextOptions(storeCreator({}))
+    );
+
+    browserHistory.push = jest.fn();
+    responseShow.find('TitleBar').first().prop('onLeftIconButtonTouchTap')();
+    expect(browserHistory.push).toHaveBeenCalledWith(`/courses/${courseId}/surveys/${surveyId}`);
   });
 });

@@ -7,10 +7,15 @@ import Question from './Question';
 import NewQuestionButton from './NewQuestionButton';
 import EditSectionButton from './EditSectionButton';
 import DeleteSectionButton from './DeleteSectionButton';
+import MoveUpButton from './MoveUpButton';
+import MoveDownButton from './MoveDownButton';
 
 const styles = {
   card: {
     marginBottom: 15,
+  },
+  subtitle: {
+    paddingRight: 64,
   },
 };
 
@@ -28,11 +33,27 @@ class SectionCard extends React.Component {
     survey: surveyShape,
     section: sectionShape,
     index: PropTypes.number.isRequired,
+    first: PropTypes.bool.isRequired,
+    last: PropTypes.bool.isRequired,
+    disabled: PropTypes.bool.isRequired,
   }
 
   constructor(props) {
     super(props);
     this.state = { expanded: true };
+  }
+
+  renderActions() {
+    const { section, first, last, disabled, index: sectionIndex } = this.props;
+    return (
+      <CardActions>
+        { section.canCreateQuestion ? <NewQuestionButton sectionId={section.id} {...{ disabled }} /> : null }
+        { section.canUpdate ? <EditSectionButton {...{ section, disabled }} /> : null }
+        { section.canDelete ? <DeleteSectionButton sectionId={section.id} {...{ disabled }} /> : null }
+        { section.canUpdate && !first ? <MoveUpButton {...{ sectionIndex, disabled }} /> : null }
+        { section.canUpdate && !last ? <MoveDownButton {...{ sectionIndex, disabled }} /> : null }
+      </CardActions>
+    );
   }
 
   render() {
@@ -46,8 +67,10 @@ class SectionCard extends React.Component {
         <CardTitle
           title={section.title}
           subtitle={section.description}
+          subtitleStyle={styles.subtitle}
           showExpandableButton={section.questions.length > 0}
         />
+        { section.questions.length > 1 ? this.renderActions() : null }
         <CardText>
           {
             section.questions.length < 1 ?
@@ -63,11 +86,7 @@ class SectionCard extends React.Component {
             )
           }
         </CardText>
-        <CardActions>
-          { section.canCreateQuestion ? <NewQuestionButton sectionId={section.id} /> : null }
-          { section.canUpdate ? <EditSectionButton {...{ section }} /> : null }
-          { section.canDelete ? <DeleteSectionButton sectionId={section.id} /> : null }
-        </CardActions>
+        { this.renderActions() }
       </Card>
     );
   }

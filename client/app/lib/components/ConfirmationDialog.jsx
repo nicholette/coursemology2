@@ -13,7 +13,7 @@ class ConfirmationDialog extends React.Component {
     open: PropTypes.bool.isRequired,
     onCancel: PropTypes.func.isRequired,
     onConfirm: PropTypes.func.isRequired,
-    message: PropTypes.string,
+    message: PropTypes.node,
     cancelButtonText: PropTypes.string,
     confirmButtonText: PropTypes.string,
     confirmDiscard: PropTypes.bool,
@@ -68,6 +68,7 @@ class ConfirmationDialog extends React.Component {
         onTouchTap={onCancel}
         style={buttonStyle}
         label={cancelButtonText || intl.formatMessage(formTranslations.cancel)}
+        ref={button => (this.cancelButton = button)}
       />,
       <FlatButton
         primary

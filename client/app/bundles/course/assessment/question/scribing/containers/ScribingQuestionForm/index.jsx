@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react';
 import { injectIntl, intlShape } from 'react-intl';
 import { reduxForm, Field, Form } from 'redux-form';
 import TextField from 'lib/components/redux-form/TextField';
+import FlatButton from 'lib/components/redux-form/FlatButton';
 import RaisedButton from 'material-ui/RaisedButton';
 
 import MaterialSummernote from 'lib/components/MaterialSummernote';
@@ -31,6 +32,11 @@ const propTypes = {
         id: PropTypes.number,
         title: PropTypes.string,
       })),
+      attachment_reference: PropTypes.shape({
+        name: PropTypes.string,
+        path: PropTypes.string,
+        updater_name: PropTypes.string,
+      }),
       error: PropTypes.shape({
         title: PropTypes.string,
         skills_id: PropTypes.string,
@@ -44,6 +50,7 @@ const propTypes = {
   scribingId: PropTypes.string,
   intl: intlShape.isRequired,
   // Redux-form proptypes
+  formValues: PropTypes.object,
   handleSubmit: PropTypes.func.isRequired,
   submitting: PropTypes.bool.isRequired,
 };
@@ -261,6 +268,31 @@ class ScribingQuestionForm extends React.Component {
                     this.props.intl.formatMessage(translations.attemptLimitPlaceholderMessage))
                 }
             </div>
+
+            <div >
+              {this.props.data.question.attachment_reference ? 
+                <label>File uploaded: {this.props.data.question.attachment_reference.name}</label> :
+                []
+              }
+              <Field
+                name={ScribingQuestionForm.getInputName('attachment')}
+                id={ScribingQuestionForm.getInputId('attachment')}
+                disabled={this.props.data.is_loading}
+                component={props => (
+                  <input
+                    name={ScribingQuestionForm.getInputName('attachment')}
+                    id={ScribingQuestionForm.getInputId('attachment')} 
+                    type="file" accept="image/*"
+                    onChange={
+                      ( e ) => {
+                        e.preventDefault();
+                        props.input.onChange(e.target.files);
+                      }
+                    }
+                  />
+                )}
+              />
+            </div>
           </div>
 
           <RaisedButton
@@ -270,6 +302,7 @@ class ScribingQuestionForm extends React.Component {
             primary
             id="scribing-question-form-submit"
             type="submit"
+            onTouchTap={()=>this.props.submit()}
             disabled={this.props.data.is_loading || submitting}
             icon={this.props.data.is_loading ? <i className="fa fa-spinner fa-lg fa-spin" /> : null}
           />

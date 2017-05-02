@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import API from 'api';
 import CourseAPI from 'api/course';
 import { getCourseId, getAssessmentId, getScribingId } from 'lib/helpers/url-helpers';
 import { submit, SubmissionError } from 'redux-form';
@@ -40,26 +41,45 @@ export function createScribingQuestion(fields) {
   const parsedFields = _.cloneDeep(fields);
   parsedFields.question_scribing.skill_ids =
     getSkillIdsFromSkills(fields.question_scribing.skill_ids);
-
   return (dispatch) => {
     dispatch({ type: actionTypes.CREATE_SCRIBING_QUESTION_REQUEST });
-    return CourseAPI.scribing.scribings.create(fields)
-      .then((response) => {
-        dispatch({
-          scribingId: getScribingId(),
-          type: actionTypes.CREATE_SCRIBING_QUESTION_SUCCESS,
-          question: response.data,
+
+    const promise = (fields.question_scribing.attachment) ?
+       API.attachment.upload(fields.question_scribing.attachment && fields.question_scribing.attachment[0]) :
+       new Promise((resolve)=>(resolve()));
+    promise
+    .then((response)=> {
+      // Replace question_scribing.attachment with attachment_reference
+      fields.question_scribing.attachment_reference_attributes = {
+        attachment_id: response.data.id,
+        name: fields.question_scribing.attachment && fields.question_scribing.attachment[0].name,
+      }
+      fields.question_scribing.attachment = undefined;
+      return CourseAPI.scribing.scribings.create(fields)
+        .then((response) => {
+          dispatch({
+            scribingId: getScribingId(),
+            type: actionTypes.CREATE_SCRIBING_QUESTION_SUCCESS,
+            question: response.data,
+          });
+
+          const courseId = getCourseId();
+          const assessmentId = getAssessmentId();
+          window.location.href = `/courses/${courseId}/assessments/${assessmentId}`;
+        })
+        .catch((error) => {
+          dispatch({ type: actionTypes.CREATE_SCRIBING_QUESTION_FAILURE });
+          if (error.response && error.response.data) {
+            throw new SubmissionError(error.response.data.errors);
+          }
         });
-        const courseId = getCourseId();
-        const assessmentId = getAssessmentId();
-        window.location.href = `/courses/${courseId}/assessments/${assessmentId}`;
-      })
-      .catch((error) => {
-        dispatch({ type: actionTypes.CREATE_SCRIBING_QUESTION_FAILURE });
+    })
+    .catch((error)=>{
+        dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE });
         if (error.response && error.response.data) {
           throw new SubmissionError(error.response.data.errors);
         }
-      });
+    })
   };
 }
 
@@ -70,7 +90,19 @@ export function updateScribingQuestion(questionId, data) {
       getSkillIdsFromSkills(data.question_scribing.skill_ids);
 
     dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_REQUEST });
-    return CourseAPI.scribing.scribings.update(questionId, parsedData)
+    const promise = (data.question_scribing.attachment) ?
+       API.attachment.upload(data.question_scribing.attachment[0]) :
+       new Promise((resolve)=>(resolve()));
+
+    promise
+    .then((response) => {
+      // Replace question_scribing.attachment with attachment_reference
+      parsedData.question_scribing.attachment_reference_attributes = {
+        attachment_id: response && response.data.id,
+        name: data.question_scribing.attachment && data.question_scribing.attachment[0].name,
+      }
+      parsedData.question_scribing.attachment = undefined;
+      return CourseAPI.scribing.scribings.update(questionId, parsedData)
       .then((response) => {
         dispatch({
           scribingId: getScribingId(),
@@ -88,6 +120,14 @@ export function updateScribingQuestion(questionId, data) {
           throw new SubmissionError(error.response.data.errors);
         }
       });
+    })
+    .catch((error) => {
+        dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE });
+        if (error.response && error.response.data) {
+          throw new SubmissionError(error.response.data.errors);
+        }
+    });
+    
   };
 }
 

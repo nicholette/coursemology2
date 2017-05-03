@@ -44,42 +44,27 @@ export function createScribingQuestion(fields) {
   return (dispatch) => {
     dispatch({ type: actionTypes.CREATE_SCRIBING_QUESTION_REQUEST });
 
-    const promise = (fields.question_scribing.attachment) ?
-       API.attachment.upload(fields.question_scribing.attachment && fields.question_scribing.attachment[0]) :
-       new Promise((resolve)=>(resolve()));
-    promise
-    .then((response)=> {
-      // Replace question_scribing.attachment with attachment_reference
-      fields.question_scribing.attachment_reference_attributes = {
-        attachment_id: response.data.id,
-        name: fields.question_scribing.attachment && fields.question_scribing.attachment[0].name,
-      }
-      fields.question_scribing.attachment = undefined;
-      return CourseAPI.scribing.scribings.create(fields)
-        .then((response) => {
-          dispatch({
-            scribingId: getScribingId(),
-            type: actionTypes.CREATE_SCRIBING_QUESTION_SUCCESS,
-            question: response.data,
-          });
-
-          const courseId = getCourseId();
-          const assessmentId = getAssessmentId();
-          window.location.href = `/courses/${courseId}/assessments/${assessmentId}`;
-        })
-        .catch((error) => {
-          dispatch({ type: actionTypes.CREATE_SCRIBING_QUESTION_FAILURE });
-          if (error.response && error.response.data) {
-            throw new SubmissionError(error.response.data.errors);
-          }
+    fields.question_scribing.file = fields.question_scribing.attachment[0];
+    fields.question_scribing.attachment = undefined;
+    
+    CourseAPI.scribing.scribings.create(fields)
+      .then((response) => {
+        dispatch({
+          scribingId: getScribingId(),
+          type: actionTypes.CREATE_SCRIBING_QUESTION_SUCCESS,
+          question: response.data,
         });
-    })
-    .catch((error)=>{
-        dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE });
+
+        const courseId = getCourseId();
+        const assessmentId = getAssessmentId();
+        window.location.href = `/courses/${courseId}/assessments/${assessmentId}`;
+      })
+      .catch((error) => {
+        dispatch({ type: actionTypes.CREATE_SCRIBING_QUESTION_FAILURE });
         if (error.response && error.response.data) {
           throw new SubmissionError(error.response.data.errors);
         }
-    })
+      });
   };
 }
 
@@ -89,20 +74,10 @@ export function updateScribingQuestion(questionId, data) {
     parsedData.question_scribing.skill_ids =
       getSkillIdsFromSkills(data.question_scribing.skill_ids);
 
-    dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_REQUEST });
-    const promise = (data.question_scribing.attachment) ?
-       API.attachment.upload(data.question_scribing.attachment[0]) :
-       new Promise((resolve)=>(resolve()));
-
-    promise
-    .then((response) => {
-      // Replace question_scribing.attachment with attachment_reference
-      parsedData.question_scribing.attachment_reference_attributes = {
-        attachment_id: response && response.data.id,
-        name: data.question_scribing.attachment && data.question_scribing.attachment[0].name,
-      }
+      parsedData.question_scribing.file = data.question_scribing.attachment[0];
       parsedData.question_scribing.attachment = undefined;
-      return CourseAPI.scribing.scribings.update(questionId, parsedData)
+      
+      CourseAPI.scribing.scribings.update(questionId, parsedData)
       .then((response) => {
         dispatch({
           scribingId: getScribingId(),
@@ -120,14 +95,6 @@ export function updateScribingQuestion(questionId, data) {
           throw new SubmissionError(error.response.data.errors);
         }
       });
-    })
-    .catch((error) => {
-        dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE });
-        if (error.response && error.response.data) {
-          throw new SubmissionError(error.response.data.errors);
-        }
-    });
-    
   };
 }
 

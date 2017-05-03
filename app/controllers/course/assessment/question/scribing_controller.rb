@@ -36,7 +36,7 @@ class Course::Assessment::Question::ScribingController < \
   
   def update
     respond_to do |format|
-      if @scribing_question.save
+      if @scribing_question.update(scribing_question_params)
         format.json { render_scribing_question_json }
       else
         format.json { render_failure_json t('.failure') }
@@ -64,8 +64,7 @@ class Course::Assessment::Question::ScribingController < \
   def scribing_question_params
     params.require(:question_scribing).permit(
       :title, :description, :staff_only_comments, :maximum_grade,
-      :attempt_limit, attachment_reference_attributes: [:attachment_id, :name],
-      skill_ids: []
+      attachment_params, skill_ids: []
     )
   end
 

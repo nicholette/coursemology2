@@ -5,6 +5,8 @@ class Course::Assessment::Question::ScribingController < \
                               class: Course::Assessment::Question::Scribing,
                               through: :assessment, parent: false
 
+  include CarrierWave::MiniMagick
+
   def new
     respond_to do |format|
       format.html { render 'new' }
@@ -18,11 +20,64 @@ class Course::Assessment::Question::ScribingController < \
   end
 
   def create
-    respond_to do |format|
-      if @scribing_question.save
-        format.json { render_scribing_question_json }
-      else
-        format.json { render_failure_json t('.failure') }
+    allowed_img_types = ['image/gif', 'image/png', 'image/jpeg', 'image/pjpeg']
+
+    #special handling for PDF files
+     if params[:question_scribing] && params[:question_scribing][:file] && params[:question_scribing][:file].content_type.downcase == 'application/pdf'
+
+      #TODO: strip off file type, and sanitize file name
+      #@basename = File.basename(sanitize_filename(uploaded_file_object.original_filename), '.pdf')
+      filename = File.basename(params[:question_scribing][:file].original_filename, '.pdf')
+      pdf_file = MiniMagick::Image.new(params[:question_scribing][:file].tempfile.path)
+      file_upload_success = false
+
+      pdf_file.pages.each_with_index { |page, index|
+        tempFileName = "#{filename}[#{index+1}].png"
+
+        page.write(tempFileName)
+        tempFile = MiniMagick::Image.new(tempFileName)
+        tempFile.background "white"
+        tempFile.flatten
+        tempFile.write(tempFileName)
+
+        new_question = Course::Assessment::Question::Scribing.new
+
+        # set params for the scribing question for this png file
+        new_question.title = @scribing_question.title
+        new_question.description = @scribing_question.description
+        new_question.maximum_grade = @scribing_question.maximum_grade
+        new_question.creator = current_user
+        new_question.assessment = @assessment
+
+        # Make sure new questions appear at the end of the list.
+        max_weight = @assessment.questions.pluck(:weight).max
+        new_question.weight ||= max_weight ? max_weight + 1 : 0
+
+        fake_upload_file = ActionDispatch::Http::UploadedFile.new(:tempfile => File.new(tempFileName),
+                                                                  :filename => tempFileName.dup,
+                                                                  :type => 'image/png')
+
+        new_question.file = fake_upload_file
+        file_upload_success = new_question.save || file_upload_success
+
+        #TODO: how to handle failure in one page?
+      }
+
+      respond_to do |format|
+        if file_upload_success
+          format.json { render_success_json t('.success') }
+        else
+          format.json { render_failure_json t('.failure') }
+        end
+      end
+
+    elsif params[:file] && (allowed_img_types.include? params[:file][:content_type].downcase) || params.key?(:file) == false
+      respond_to do |format|
+        if @scribing_question.save
+          format.json { render_scribing_question_json }
+        else
+          format.json { render_failure_json t('.failure') }
+        end
       end
     end
   end
@@ -35,11 +90,83 @@ class Course::Assessment::Question::ScribingController < \
   end
   
   def update
-    respond_to do |format|
-      if @scribing_question.update(scribing_question_params)
-        format.json { render_scribing_question_json }
-      else
-        format.json { render_failure_json t('.failure') }
+    #TODO: dont allow editing of attachment first
+    allowed_img_types = ['image/gif', 'image/png', 'image/jpeg', 'image/pjpeg']
+    #special handling for PDF files
+    if params[:question_scribing] && params[:question_scribing][:file] && params[:question_scribing][:file].content_type.downcase == 'application/pdf'
+      # byebug
+      # png_converter = Course::Assessment::Question::Scribing::PngConvertService.new(params[:question_scribing][:file])
+      # png_files = png_converter.convert_to_png
+
+      #TODO: strip off file type, and sanitize file name
+      #@basename = File.basename(sanitize_filename(uploaded_file_object.original_filename), '.pdf')
+      filename = File.basename(params[:question_scribing][:file].original_filename, '.pdf')
+      pdf_file = MiniMagick::Image.new(params[:question_scribing][:file].tempfile.path)
+      pdf_file.pages.each_with_index { |page, index|
+        tempFileName = "#{filename}#{index}.png"
+        page.write(tempFileName)
+        new_question = Course::Assessment::Question::Scribing.new
+
+        # set params for the scribing question for this png file
+        new_question.title = @scribing_question.title
+        new_question.description = @scribing_question.description
+        new_question.maximum_grade = @scribing_question.maximum_grade
+        new_question.creator = current_user
+
+        # byebug
+        fake_upload_file = ActionDispatch::Http::UploadedFile.new(:tempfile => File.new(tempFileName),
+                                                                  :filename => filename)
+        # byebug
+        new_question.file = fake_upload_file
+        new_question.save
+
+      }
+
+      # png_files = pdf_file.pages;
+
+      # # png_success = false   #track success of each png file upload
+
+      # # Create questions for them, upload the files and save them
+      # png_files.each do |png_file|
+      #   new_question = Course::Assessment::Question::Scribing.new
+
+      #   # set params for the scribing question for this png file
+      #   new_question.title = @scribing_question.title
+      #   new_question.description = @scribing_question.description
+      #   new_question.maximum_grade = @scribing_question.maximum_grade
+      #   new_question.creator = current_user
+
+      #   # create question_assessment
+      #   # qn_assessment = @assessment.question_assessments.new
+      #   # qn_assessment.question = page_question.question
+      #   # qn_assessment.position = @assessment.questions.count
+      #   byebug
+      #   # make png_file pretend to be an uploaded file
+      #   fake_upload_file = ActionDispatch::Http::UploadedFile.new(:tempfile => File.new(png_file),
+      #                                                             :filename => filename)
+      #   new_question.file = fake_upload_file
+
+      #   # file_upload = FileUpload.create({creator: current_user,
+      #   #                               owner: page_question,
+      #   #                               file: fake_upload_file
+      #   #                               })
+      #   # png_success = file_upload.save
+
+      #   # save question and question_assessment to db
+      #   new_question.save
+      #   # qn_assessment.save
+      # end
+
+      # png_converter.clean_up
+
+    elsif params[:question_scribing] && params[:question_scribing][:file] && (allowed_img_types.include? params[:question_scribing][:file].content_type.downcase) || params.key?(:file) == false
+      byebug
+      respond_to do |format|
+        if @scribing_question.update(scribing_question_params)
+          format.json { render_scribing_question_json }
+        else
+          format.json { render_failure_json t('.failure') }
+        end
       end
     end
   end
@@ -66,6 +193,11 @@ class Course::Assessment::Question::ScribingController < \
       :title, :description, :staff_only_comments, :maximum_grade,
       attachment_params, skill_ids: []
     )
+  end
+
+  def render_success_json(message)
+    render json: { message: message },
+           status: :ok
   end
 
   def render_failure_json(message)

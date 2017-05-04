@@ -282,7 +282,7 @@ class ScribingQuestionForm extends React.Component {
                   <input
                     name={ScribingQuestionForm.getInputName('attachment')}
                     id={ScribingQuestionForm.getInputId('attachment')} 
-                    type="file" accept="image/*"
+                    type="file" accept="image/gif, image/png, image/jpeg, image/pjpeg, application/pdf"
                     onChange={
                       ( e ) => {
                         e.preventDefault();

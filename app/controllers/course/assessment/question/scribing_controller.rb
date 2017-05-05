@@ -94,10 +94,6 @@ class Course::Assessment::Question::ScribingController < \
     allowed_img_types = ['image/gif', 'image/png', 'image/jpeg', 'image/pjpeg']
     #special handling for PDF files
     if params[:question_scribing] && params[:question_scribing][:file] && params[:question_scribing][:file].content_type.downcase == 'application/pdf'
-      # byebug
-      # png_converter = Course::Assessment::Question::Scribing::PngConvertService.new(params[:question_scribing][:file])
-      # png_files = png_converter.convert_to_png
-
       #TODO: strip off file type, and sanitize file name
       #@basename = File.basename(sanitize_filename(uploaded_file_object.original_filename), '.pdf')
       filename = File.basename(params[:question_scribing][:file].original_filename, '.pdf')
@@ -113,51 +109,12 @@ class Course::Assessment::Question::ScribingController < \
         new_question.maximum_grade = @scribing_question.maximum_grade
         new_question.creator = current_user
 
-        # byebug
         fake_upload_file = ActionDispatch::Http::UploadedFile.new(:tempfile => File.new(tempFileName),
                                                                   :filename => filename)
-        # byebug
         new_question.file = fake_upload_file
         new_question.save
 
       }
-
-      # png_files = pdf_file.pages;
-
-      # # png_success = false   #track success of each png file upload
-
-      # # Create questions for them, upload the files and save them
-      # png_files.each do |png_file|
-      #   new_question = Course::Assessment::Question::Scribing.new
-
-      #   # set params for the scribing question for this png file
-      #   new_question.title = @scribing_question.title
-      #   new_question.description = @scribing_question.description
-      #   new_question.maximum_grade = @scribing_question.maximum_grade
-      #   new_question.creator = current_user
-
-      #   # create question_assessment
-      #   # qn_assessment = @assessment.question_assessments.new
-      #   # qn_assessment.question = page_question.question
-      #   # qn_assessment.position = @assessment.questions.count
-      #   byebug
-      #   # make png_file pretend to be an uploaded file
-      #   fake_upload_file = ActionDispatch::Http::UploadedFile.new(:tempfile => File.new(png_file),
-      #                                                             :filename => filename)
-      #   new_question.file = fake_upload_file
-
-      #   # file_upload = FileUpload.create({creator: current_user,
-      #   #                               owner: page_question,
-      #   #                               file: fake_upload_file
-      #   #                               })
-      #   # png_success = file_upload.save
-
-      #   # save question and question_assessment to db
-      #   new_question.save
-      #   # qn_assessment.save
-      # end
-
-      # png_converter.clean_up
 
     elsif params[:question_scribing] && params[:question_scribing][:file] && (allowed_img_types.include? params[:question_scribing][:file].content_type.downcase) || params.key?(:file) == false
       byebug

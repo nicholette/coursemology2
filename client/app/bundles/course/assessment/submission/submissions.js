@@ -3,6 +3,7 @@ import initializeDownloadLink from 'lib/helpers/initializeDownloadLink';
 
 require('./submit-answer');
 require('./calculate-grade-exp');
+require('./answer/scribing');
 
 const MULTI_QUESTION_ASSESSMENT_SELECTOR = '.multi-question';
 

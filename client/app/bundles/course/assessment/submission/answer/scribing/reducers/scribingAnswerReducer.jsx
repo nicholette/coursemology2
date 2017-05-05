@@ -25,10 +25,7 @@ export const initialState = {
 function apiReducer(state, action) {
   const { type } = action;
   switch (type) {
-    case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST:
-    case actionTypes.CREATE_RESPONSE_REQUEST:
-    case actionTypes.UPDATE_SCRIBING_QUESTION_REQUEST:
-    case actionTypes.SUBMIT_FORM_LOADING: {
+    case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST: {
       const { isLoading } = action;
       return {
         ...state,
@@ -36,10 +33,7 @@ function apiReducer(state, action) {
         save_errors: undefined,
       };
     }
-    case actionTypes.FETCH_SCRIBING_QUESTION_SUCCESS:
-    case actionTypes.CREATE_SURVEY_QUESTION_SUCCESS:
-    case actionTypes.UPDATE_SCRIBING_QUESTION_SUCCESS:
-    case actionTypes.SUBMIT_FORM_SUCCESS: {
+    case actionTypes.FETCH_SCRIBING_QUESTION_SUCCESS: {
       const { question } = action.data;
       question.maximum_grade = parseInt(question.maximum_grade, 10);
       return {
@@ -48,10 +42,7 @@ function apiReducer(state, action) {
         is_loading: false,
       };
     }
-    case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE:
-    case actionTypes.CREATE_SURVEY_QUESTION_FAILURE:
-    case actionTypes.UPDATE_SURVEY_QUESTION_FAILURE:
-    case actionTypes.SUBMIT_FORM_FAILURE: {
+    case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE: {
       return {
         ...state,
         is_loading: false,
@@ -63,7 +54,7 @@ function apiReducer(state, action) {
   }
 }
 
-export default function scribingQuestionReducer(state = initialState, action) {
+export default function scribingAnswerReducer(state = initialState, action) {
   const { type } = action;
 
   switch (type) {

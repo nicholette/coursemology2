@@ -44,6 +44,11 @@ const propTypes = {
       }),
       published_assessment: PropTypes.bool,
       attempt_limit: PropTypes.number,
+      attachment_reference: PropTypes.shape({
+        name: PropTypes.string,
+        path: PropTypes.string,
+        updater_name: PropTypes.string,
+      })
     }),
     is_loading: PropTypes.bool,
   }).isRequired,

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170426024809) do
+ActiveRecord::Schema.define(version: 20170506010828) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -284,6 +284,11 @@ ActiveRecord::Schema.define(version: 20170426024809) do
   end
 
   create_table "course_assessment_answer_scribings", force: :cascade do |t|
+  end
+
+  create_table "course_assessment_answer_scribing_scribbles", force: :cascade do |t|
+    t.text    "content"
+    t.integer "scribing_answer_id", :index=>{:name=>"fk__course_assessment_answer_scribing_scribbles_scribing_answer"}, :foreign_key=>{:references=>"course_assessment_answer_scribings", :name=>"fk_course_assessment_answer_18d2431b18796704f96f8d5cccbc232d", :on_update=>:no_action, :on_delete=>:no_action}
   end
 
   create_table "course_assessment_answer_text_responses", force: :cascade do |t|

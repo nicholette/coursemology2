@@ -1,4 +1,5 @@
 import React, { PropTypes } from 'react';
+import { Canvas } from 'react-fabricjs';
 import { injectIntl, intlShape } from 'react-intl';
 
 import styles from './ScribingAnswerForm.scss';
@@ -49,6 +50,15 @@ const propTypes = {
 
 class ScribingAnswerForm extends React.Component {
 
+  constructor() {
+    super();
+    this.state = {
+      canvas: {},
+    }
+    this.onClickDrawingMode = this.onClickDrawingMode.bind(this);
+    this.onClickSelectionMode = this.onClickSelectionMode.bind(this);
+  }
+
   componentDidMount() {
     const { dispatch } = this.props;
 
@@ -57,6 +67,19 @@ class ScribingAnswerForm extends React.Component {
     if (scribingQuestionId) {
       dispatch(fetchScribingQuestion(scribingQuestionId));
     }
+
+    // Initialize Fabric.js canvas
+    // Takes in canvas's id for initialization
+    const canvas = new fabric.Canvas('canvas', {
+      width: this.refs.canvas.clientWidth,
+      height: this.refs.canvas.clientHeight
+    });
+
+    this.setState({ canvas });
+  }
+
+  componentDidUpdate() {
+    this.updateCanvas();
   }
 
   handleImageLoaded() {
@@ -67,24 +90,40 @@ class ScribingAnswerForm extends React.Component {
 
   }
 
-  renderScribingImage() {
+  onClickDrawingMode() {
+    this.state.canvas.isDrawingMode = true;
+    console.log('drawing mode');
+  }
+
+  onClickSelectionMode() {
+    this.state.canvas.isDrawingMode = false;
+    console.log('selection mode');
+  }
+
+  renderButtons() {
+    // TODO: show state of the button
+    return (
+      <div>
+        <button type="button" onClick={this.onClickDrawingMode}>Drawing Mode</button>
+        <button type="button" onClick={this.onClickSelectionMode}>Selection Mode</button>
+      </div>
+    )
+  }
+
+  updateCanvas() {
     const imagePath = this.props.scribingAnswer.question.attachment_reference.path;
-    return imagePath ? 
-      (
-        <img
-          src={window.location.origin + '\\' + imagePath}
-          onLoad={this.handleImageLoaded()}
-          onError={this.handleImageErrored()}
-        />
-      ) : [];
+    if (imagePath) {
+      const canvas = this.state.canvas;
+      canvas.setBackgroundImage(window.location.origin + '\\' + imagePath, canvas.renderAll.bind(canvas));
+    }
   }
 
   render() {
-
+    // TODO: Make the height/width automatic
     return (
       <div>
-        This is a placeholder message
-        { this.renderScribingImage() }
+        { this.renderButtons() }
+        <canvas id="canvas" ref="canvas" height={800} width={600}/>
       </div>
     );
   }

@@ -198,6 +198,7 @@ Rails.application.routes.draw do
                       resources :annotations, only: [:create]
                     end
                   end
+                  resources :scribing, only: [:show, :update]
                 end
               end
             end

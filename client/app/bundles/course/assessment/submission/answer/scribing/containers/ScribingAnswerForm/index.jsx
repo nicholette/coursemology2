@@ -5,7 +5,7 @@ import { injectIntl, intlShape } from 'react-intl';
 import styles from './ScribingAnswerForm.scss';
 import translations from './ScribingAnswerForm.intl';
 
-import { fetchScribingQuestion } from '../../actions/scribingAnswerActionCreators';
+import { fetchScribingQuestion, fetchScribingAnswer, updateScribingAnswer } from '../../actions/scribingAnswerActionCreators';
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
@@ -43,6 +43,11 @@ const propTypes = {
         updater_name: PropTypes.string,
       })
     }),
+    answer: PropTypes.shape({
+      scribbles: PropTypes.arrayOf(PropTypes.shape({
+        content: PropTypes.string,
+      }))
+    }),
     isLoading: PropTypes.bool,
   }),
   save_errors: PropTypes.string,
@@ -57,6 +62,7 @@ class ScribingAnswerForm extends React.Component {
     }
     this.onClickDrawingMode = this.onClickDrawingMode.bind(this);
     this.onClickSelectionMode = this.onClickSelectionMode.bind(this);
+    this.onClickSave = this.onClickSave.bind(this);
   }
 
   componentDidMount() {
@@ -64,10 +70,14 @@ class ScribingAnswerForm extends React.Component {
 
     var answer = document.getElementById('scribing-answer');
     var scribingQuestionId = answer.dataset.scribingQuestionId;
+    var scribingAnswerId = answer.dataset.scribingAnswerId;
+
     if (scribingQuestionId) {
       dispatch(fetchScribingQuestion(scribingQuestionId));
     }
-
+    if (scribingAnswerId) {
+      dispatch(fetchScribingAnswer(scribingAnswerId));
+    }
     // Initialize Fabric.js canvas
     // Takes in canvas's id for initialization
     const canvas = new fabric.Canvas('canvas', {
@@ -96,36 +106,70 @@ class ScribingAnswerForm extends React.Component {
   }
 
   onClickSelectionMode() {
+    console.log('selection mode');
     this.state.canvas.isDrawingMode = false;
-    const objects = this.state.canvas._objects;
-    console.log(objects);
+  }
 
-    for (var i=0; i<objects.length; i++) {
-      console.log(i, objects[i].toSVG());
-    }
+  //TOOD: need to account for varying height and width of canvas
+  addSvgStartText() {
+    return `<svg xmlns="http://www.w3.org/2000/svg" 
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            version="1.1" width="600" height="800" xml:space="preserve">
+            <desc>Created with Fabric.js 1.6.0-rc.1</desc>
+            <defs></defs>`;
+  }
+
+  addSvgEndText() {
+    return '</svg>';
   }
 
   onClickSave() {
+    console.log('save');
+    const { dispatch } = this.props;
 
+    console.log('the real canvas', this.state.canvas.toSVG());
+
+    const objects = this.state.canvas._objects;
+    const scribbles = [];
+    for (var i=0; i<objects.length; i++) {
+      scribbles.push(this.addSvgStartText() + objects[i].toSVG() + this.addSvgEndText());
+    }
+    const answerId = document.getElementById('scribing-answer').dataset.scribingAnswerId;
+
+    dispatch(updateScribingAnswer(answerId, scribbles));
   }
 
   renderButtons() {
     // TODO: show state of the button
     return (
       <div>
-        <button onClick={this.onClickDrawingMode}>Drawing Mode</button>
-        <button onClick={this.onClickSelectionMode}>Selection Mode</button>
-        <button onClick={this.onClickSave}>Save</button>
+        <button type="button" onClick={this.onClickDrawingMode}>Drawing Mode</button>
+        <button type="button" onClick={this.onClickSelectionMode}>Selection Mode</button>
+        <button type="button" onClick={this.onClickSave}>Save</button>
       </div>
     )
   }
 
   updateCanvas() {
     const imagePath = this.props.scribingAnswer.question.attachment_reference.path;
+    var canvas = this.state.canvas;
     if (imagePath) {
-      const canvas = this.state.canvas;
       canvas.setBackgroundImage(window.location.origin + '\\' + imagePath, canvas.renderAll.bind(canvas));
     }
+
+    const scribbles = this.props.scribingAnswer.answer.scribbles
+    // TODO: handle behavior, where after saving, more scribbles will be added
+    if (scribbles) {
+      var i=0;
+      scribbles.forEach((scribble) => {
+        fabric.loadSVGFromString(scribble.content, function(objects, options) {
+          var obj = fabric.util.groupSVGElements(objects, options);
+          canvas.add(obj).renderAll();
+        });
+      })
+    }
+
+    const objects = canvas._objects;
   }
 
   render() {

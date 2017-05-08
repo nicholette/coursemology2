@@ -51,6 +51,11 @@ const propTypes = {
         updater_name: PropTypes.string,
       })
     }),
+    answer: PropTypes.shape({
+      scribbles: PropTypes.arrayOf(PropTypes.shape({
+        content: PropTypes.string,
+      }))
+    }),
     isLoading: PropTypes.bool,
   })
 };

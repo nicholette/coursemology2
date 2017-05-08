@@ -14,10 +14,10 @@ export function submitForm() {
 export function fetchScribingQuestion(scribingId) {
   return (dispatch) => {
     dispatch({ type: actionTypes.FETCH_SCRIBING_QUESTION_REQUEST });
-    return CourseAPI.scribing.scribings.fetch(scribingId)
+    return CourseAPI.question.scribing.scribings.fetch(scribingId)
       .then((response) => {
         dispatch({
-          scribingId: CourseAPI.scribing.scribings.getScribingId(),
+          scribingId: CourseAPI.question.scribing.scribings.getScribingId(),
           type: actionTypes.FETCH_SCRIBING_QUESTION_SUCCESS,
           data: response.data,
         });
@@ -47,7 +47,7 @@ export function createScribingQuestion(fields) {
     fields.question_scribing.file = fields.question_scribing.attachment[0];
     fields.question_scribing.attachment = undefined;
     
-    CourseAPI.scribing.scribings.create(fields)
+    CourseAPI.question.scribing.scribings.create(fields)
       .then((response) => {
         dispatch({
           scribingId: getScribingId(),
@@ -77,7 +77,7 @@ export function updateScribingQuestion(questionId, data) {
       parsedData.question_scribing.file = data.question_scribing.attachment[0];
       parsedData.question_scribing.attachment = undefined;
       
-      CourseAPI.scribing.scribings.update(questionId, parsedData)
+      CourseAPI.question.scribing.scribings.update(questionId, parsedData)
       .then((response) => {
         dispatch({
           scribingId: getScribingId(),
@@ -101,10 +101,10 @@ export function updateScribingQuestion(questionId, data) {
 export function deleteScribingQuestion(question) {
   return (dispatch) => {
     dispatch({ type: actionTypes.DELETE_SCRIBING_QUESTION_REQUEST });
-    return CourseAPI.scribing.scribings.delete(question.id)
+    return CourseAPI.question.scribing.scribings.delete(question.id)
       .then(() => {
         dispatch({
-          scribingId: CourseAPI.scribing.scribings.getScribingId(),
+          scribingId: CourseAPI.question.scribing.scribings.getScribingId(),
           questionId: question.id,
           type: actionTypes.DELETE_SCRIBING_QUESTION_SUCCESS,
         });

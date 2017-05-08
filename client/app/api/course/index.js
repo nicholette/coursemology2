@@ -3,7 +3,8 @@ import VirtualClassroomsAPI from './VirtualClassrooms';
 import MaterialsAPI from './Materials';
 import MaterialFoldersAPI from './MaterialFolders';
 import SurveyAPI from './Survey';
-import ScribingAPI from './assessment/question/scribing';
+import ScribingQuestionAPI from './assessment/question/scribing';
+import ScribingAnswerAPI from './assessment/submission/answer/scribing';
 
 const CourseAPI = {
   assessments: new AssessmentsAPI(),
@@ -11,7 +12,12 @@ const CourseAPI = {
   materials: new MaterialsAPI(),
   materialFolders: new MaterialFoldersAPI(),
   survey: SurveyAPI,
-  scribing: ScribingAPI,
+  question: {
+    scribing: ScribingQuestionAPI,
+  },
+  answer: {
+    scribing: ScribingAnswerAPI,
+  }
 };
 
 Object.freeze(CourseAPI);

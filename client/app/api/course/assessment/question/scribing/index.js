@@ -1,9 +1,9 @@
 import ScribingsAPI from './Scribing';
 
-const ScribingAPI = {
+const ScribingQuestionAPI = {
   scribings: new ScribingsAPI(),
 };
 
-Object.freeze(ScribingAPI);
+Object.freeze(ScribingQuestionAPI);
 
-export default ScribingAPI;
+export default ScribingQuestionAPI;

@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class Course::Assessment::Submission::Answer::Scribing::Controller < \
+class Course::Assessment::Submission::Answer::ScribingController < \
   Course::Assessment::Submission::Answer::Controller
 
   before_action :set_scribing_answer

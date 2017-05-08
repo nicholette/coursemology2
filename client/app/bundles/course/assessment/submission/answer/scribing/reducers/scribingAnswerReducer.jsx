@@ -18,6 +18,9 @@ export const initialState = {
       updater_name: '',
     }
   },
+  answer: {
+    scribbles: [],
+  },
   isLoading: false,
   save_errors: undefined,
 };
@@ -25,7 +28,9 @@ export const initialState = {
 function apiReducer(state, action) {
   const { type } = action;
   switch (type) {
-    case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST: {
+    case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST:
+    case actionTypes.FETCH_SCRIBING_ANSWER_REQUEST:
+    case actionTypes.UPDATE_SCRIBING_ANSWER_REQUEST: {
       const { isLoading } = action;
       return {
         ...state,
@@ -42,7 +47,24 @@ function apiReducer(state, action) {
         is_loading: false,
       };
     }
-    case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE: {
+    case actionTypes.FETCH_SCRIBING_ANSWER_SUCCESS: {
+      const answer = action.data && action.data.scribing_answer;
+      console.log('answer', answer);
+      return {
+        ...state,
+        answer,
+        is_loading: false,
+      };
+    }
+    case actionTypes.UPDATE_SCRIBING_ANSWER_SUCCESS: {
+      return {
+        ...state,
+        is_loading: false,
+      };
+    }
+    case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE:
+    case actionTypes.FETCH_SCRIBING_ANSWER_FAILURE:
+    case actionTypes.UPDATE_SCRIBING_ANSWER_FAILURE: {
       return {
         ...state,
         is_loading: false,
@@ -61,6 +83,12 @@ export default function scribingAnswerReducer(state = initialState, action) {
     case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST:
     case actionTypes.FETCH_SCRIBING_QUESTION_SUCCESS:
     case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE:
+    case actionTypes.FETCH_SCRIBING_ANSWER_REQUEST:
+    case actionTypes.FETCH_SCRIBING_ANSWER_SUCCESS:
+    case actionTypes.FETCH_SCRIBING_ANSWER_FAILURE:
+    case actionTypes.UPDATE_SCRIBING_ANSWER_REQUEST:
+    case actionTypes.UPDATE_SCRIBING_ANSWER_SUCCESS:
+    case actionTypes.UPDATE_SCRIBING_ANSWER_FAILURE:
     case actionTypes.SUBMIT_FORM_LOADING:
     case actionTypes.SUBMIT_FORM_SUCCESS:
     case actionTypes.SUBMIT_FORM_FAILURE: {

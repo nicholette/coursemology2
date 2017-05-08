@@ -26,25 +26,15 @@ export default defineMessages({
     defaultMessage: 'Skills',
     description: 'Label for the skills input field.',
   },
-  attemptLimitFieldLabel: {
-    id: 'course.assessment.question.scribing.scribingQuestionForm.attemptLimitFieldLabel',
-    defaultMessage: 'Attempt Limit',
-    description: 'Label for the attempt limit input field.',
-  },
-  attemptLimitPlaceholderMessage: {
-    id: 'course.assessment.question.scribing.scribingQuestionForm.attemptLimitPlaceholderMessage',
-    defaultMessage: 'The maximum times that the students can test their answers (does not apply to staff)',
-    description: 'Placeholder message for attempt limit input field.',
-  },
-  newPackageButton: {
-    id: 'course.assessment.question.scribing.scribingQuestionForm.newPackageButton',
-    defaultMessage: 'Choose new package',
-    description: 'Button for uploading new zip package.',
-  },
   noFileChosenMessage: {
     id: 'course.assessment.question.scribing.scribingQuestionForm.noFileChosenMessage',
     defaultMessage: 'No file chosen',
     description: 'Message to be displayed when no file is chosen for a file input.',
+  },
+  chooseFileButton: {
+    id: 'course.assessment.question.scribing.scribingQuestionForm.chooseFileButton',
+    defaultMessage: 'Choose File',
+    description: 'Button for adding an image attachment.',
   },
   submitButton: {
     id: 'course.assessment.question.scribing.scribingQuestionForm.submitButton',

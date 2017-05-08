@@ -44,11 +44,6 @@ const propTypes = {
       }),
       published_assessment: PropTypes.bool,
       attempt_limit: PropTypes.number,
-      attachment_reference: PropTypes.shape({
-        name: PropTypes.string,
-        path: PropTypes.string,
-        updater_name: PropTypes.string,
-      })
     }),
     is_loading: PropTypes.bool,
   }).isRequired,
@@ -86,7 +81,18 @@ class ScribingQuestionForm extends React.Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    return this.props.data.is_loading !== nextProps.data.is_loading;
+    const fileName = this.props.formValues 
+              && this.props.formValues.question_scribing.attachment 
+              && this.props.formValues.question_scribing.attachment[0].name;
+
+    const nextFileName = nextProps.formValues 
+              && nextProps.formValues.question_scribing.attachment 
+              && nextProps.formValues.question_scribing.attachment[0].name;
+
+    console.log(fileName !== nextFileName);
+
+    return (this.props.data.is_loading !== nextProps.data.is_loading)
+          || (fileName !== nextFileName);
   }
 
   handleCreateQuestion = (data) => {
@@ -208,6 +214,10 @@ class ScribingQuestionForm extends React.Component {
     const skillsOptions = question.skills;
     const skillsValues = question.skill_ids;
 
+    const fileName = this.props.formValues 
+                    && this.props.formValues.question_scribing.attachment
+                    && this.props.formValues.question_scribing.attachment[0].name;
+
     // Field level validations
     const required = value => (
       value ? undefined : intl.formatMessage(translations.cannotBeBlankValidationError)
@@ -264,39 +274,44 @@ class ScribingQuestionForm extends React.Component {
                   ScribingQuestionForm.convertNull(question.maximum_grade))
               }
             </div>
-            <div className={styles.attemptLimitInput}>
-              {
-                  this.renderInputField(
-                    this.props.intl.formatMessage(translations.attemptLimitFieldLabel),
-                    'attempt_limit', false, [nonNegative], 'number',
-                    ScribingQuestionForm.convertNull(question.attempt_limit),
-                    this.props.intl.formatMessage(translations.attemptLimitPlaceholderMessage))
-                }
-            </div>
-
-            <div >
-              {this.props.data.question.attachment_reference ? 
-                <label>File uploaded: {this.props.data.question.attachment_reference.name}</label> :
-                []
+            <div className={styles.fileInputDiv}>
+              {this.props.data.question.attachment_reference.name ? 
+                <div className={styles.row}>
+                  <label>File uploaded: {this.props.data.question.attachment_reference.name}</label>
+                </div> : []
               }
-              <Field
-                name={ScribingQuestionForm.getInputName('attachment')}
-                id={ScribingQuestionForm.getInputId('attachment')}
-                disabled={this.props.data.is_loading}
-                component={props => (
-                  <input
-                    name={ScribingQuestionForm.getInputName('attachment')}
-                    id={ScribingQuestionForm.getInputId('attachment')} 
-                    type="file" accept="image/gif, image/png, image/jpeg, image/pjpeg, application/pdf"
-                    onChange={
-                      ( e ) => {
-                        e.preventDefault();
-                        props.input.onChange(e.target.files);
-                      }
-                    }
-                  />
-                )}
-              />
+              <div className={styles.row} >
+                <Field
+                  name={ScribingQuestionForm.getInputName('attachment')}
+                  id={ScribingQuestionForm.getInputId('attachment')}
+                  disabled={this.props.data.is_loading}
+                  component={props => (
+                    <RaisedButton
+                      className={styles.fileInputButton}
+                      label={this.props.intl.formatMessage(translations.chooseFileButton)}
+                      labelPosition="before"
+                      containerElement="label"
+                      primary
+                      disabled={this.props.isLoading}
+                    >
+                      <input
+                        id={ScribingQuestionForm.getInputId('attachment')}
+                        type="file"
+                        accept="image/gif, image/png, image/jpeg, image/pjpeg, application/pdf"
+                        style={{display:`none`}}
+                        disabled={this.props.isLoading}
+                        onChange={
+                          ( e ) => {
+                            e.preventDefault();
+                            props.input.onChange(e.target.files);
+                          }
+                        }
+                      />
+                    </RaisedButton>
+                  )}
+                />
+                <div className={styles.fileLabel}>{fileName}</div>
+              </div>
             </div>
           </div>
 

@@ -2,7 +2,6 @@ import React, { PropTypes } from 'react';
 import { Canvas } from 'react-fabricjs';
 import { injectIntl, intlShape } from 'react-intl';
 
-import styles from './ScribingAnswerForm.scss';
 import translations from './ScribingAnswerForm.intl';
 
 import { fetchScribingQuestion, fetchScribingAnswer, updateScribingAnswer } from '../../actions/scribingAnswerActionCreators';
@@ -51,6 +50,18 @@ const propTypes = {
     isLoading: PropTypes.bool,
   }),
   save_errors: PropTypes.string,
+}
+
+const styles = {
+  canvas_div: {
+    height: `800px`,
+    width: `600px`,
+    alignItems: `center`,
+    margin: `auto`,
+  },
+  canvas: {
+    border: `1px solid black`,
+  }
 }
 
 class ScribingAnswerForm extends React.Component {
@@ -102,19 +113,17 @@ class ScribingAnswerForm extends React.Component {
 
   onClickDrawingMode() {
     this.state.canvas.isDrawingMode = true;
-    console.log('drawing mode');
   }
 
   onClickSelectionMode() {
-    console.log('selection mode');
     this.state.canvas.isDrawingMode = false;
   }
 
-  //TOOD: need to account for varying height and width of canvas
   addSvgStartText() {
     return `<svg xmlns="http://www.w3.org/2000/svg" 
             xmlns:xlink="http://www.w3.org/1999/xlink"
-            version="1.1" width="600" height="800" xml:space="preserve">
+            version="1.1" width="${this.refs.canvas.clientWidth}" 
+            height="${this.refs.canvas.clientHeight}" xml:space="preserve">
             <desc>Created with Fabric.js 1.6.0-rc.1</desc>
             <defs></defs>`;
   }
@@ -124,11 +133,7 @@ class ScribingAnswerForm extends React.Component {
   }
 
   onClickSave() {
-    console.log('save');
     const { dispatch } = this.props;
-
-    console.log('the real canvas', this.state.canvas.toSVG());
-
     const objects = this.state.canvas._objects;
     const scribbles = [];
     for (var i=0; i<objects.length; i++) {
@@ -137,6 +142,9 @@ class ScribingAnswerForm extends React.Component {
     const answerId = document.getElementById('scribing-answer').dataset.scribingAnswerId;
 
     dispatch(updateScribingAnswer(answerId, scribbles));
+
+    // TODO: remove after demo
+    window.location.reload(true);
   }
 
   renderButtons() {
@@ -173,11 +181,12 @@ class ScribingAnswerForm extends React.Component {
   }
 
   render() {
+
     // TODO: Make the height/width automatic
     return (
-      <div>
+      <div style={styles.canvas_div}>
         { this.renderButtons() }
-        <canvas id="canvas" ref="canvas" height={800} width={600}/>
+        <canvas style={styles.canvas} id="canvas" ref="canvas" height={800} width={600}/>
       </div>
     );
   }

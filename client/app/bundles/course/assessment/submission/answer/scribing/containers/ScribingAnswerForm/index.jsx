@@ -97,15 +97,25 @@ class ScribingAnswerForm extends React.Component {
 
   onClickSelectionMode() {
     this.state.canvas.isDrawingMode = false;
-    console.log('selection mode');
+    const objects = this.state.canvas._objects;
+    console.log(objects);
+
+    for (var i=0; i<objects.length; i++) {
+      console.log(i, objects[i].toSVG());
+    }
+  }
+
+  onClickSave() {
+
   }
 
   renderButtons() {
     // TODO: show state of the button
     return (
       <div>
-        <button type="button" onClick={this.onClickDrawingMode}>Drawing Mode</button>
-        <button type="button" onClick={this.onClickSelectionMode}>Selection Mode</button>
+        <button onClick={this.onClickDrawingMode}>Drawing Mode</button>
+        <button onClick={this.onClickSelectionMode}>Selection Mode</button>
+        <button onClick={this.onClickSave}>Save</button>
       </div>
     )
   }

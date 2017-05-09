@@ -11,6 +11,8 @@ import translations from './ScribingAnswerForm.intl';
 
 import { fetchScribingQuestion, fetchScribingAnswer, updateScribingAnswer } from '../../actions/scribingAnswerActionCreators';
 
+import { tools } from '../../constants';
+
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
   scribingAnswer: PropTypes.shape({
@@ -59,7 +61,7 @@ const propTypes = {
 
 const styles = {
   canvas_div: {
-    width: `650px`,
+    width: `625px`,
     alignItems: `center`,
     margin: `auto`,
   },
@@ -77,10 +79,12 @@ class ScribingAnswerForm extends React.Component {
     super();
     this.state = {
       canvas: {},
+      selectedTool: tools.SELECT,
     }
     this.onClickDrawingMode = this.onClickDrawingMode.bind(this);
     this.onClickSelectionMode = this.onClickSelectionMode.bind(this);
     this.onClickSave = this.onClickSave.bind(this);
+    this.onClickDelete = this.onClickDelete.bind(this);
   }
 
   componentDidMount() {
@@ -120,10 +124,29 @@ class ScribingAnswerForm extends React.Component {
 
   onClickDrawingMode() {
     this.state.canvas.isDrawingMode = true;
+    this.setState({selectedTool: tools.DRAW})
   }
 
   onClickSelectionMode() {
     this.state.canvas.isDrawingMode = false;
+    this.setState({selectedTool: tools.SELECT})
+  }
+
+  onClickDelete() {
+    const canvas = this.state.canvas;
+    const activeGroup = canvas.getActiveGroup();
+    const activeObject = canvas.getActiveObject();
+
+    if (activeObject) {
+      canvas.remove(activeObject);
+    }
+    else if (activeGroup) {
+      const objectsInGroup = activeGroup.getObjects();
+      canvas.discardActiveGroup();
+      objectsInGroup.forEach(function(object) {
+        canvas.remove(object);
+      });
+    }
   }
 
   addSvgStartText() {
@@ -156,11 +179,17 @@ class ScribingAnswerForm extends React.Component {
 
   renderToolBar() {
     // TODO: show state of the button
+    console.log(this.state.selectedTool, tools.DRAW, this.state.selectedTool === tools.DRAW);
+
     return (
       <Toolbar style={styles.toolbar}>
         <ToolbarGroup>
-          <FontIcon className="fa fa-pencil" onClick={this.onClickDrawingMode}/>
-          <FontIcon className="fa fa-hand-pointer-o" onClick={this.onClickSelectionMode}/>
+          <FontIcon className="fa fa-pencil" style={this.state.selectedTool === tools.DRAW ? {color: `black`} : {}}
+            onClick={this.onClickDrawingMode} />
+          <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ? {color: `black`} : {}}
+            onClick={this.onClickSelectionMode}/>
+          <FontIcon className="fa fa-trash-o" style={this.state.selectedTool === tools.DELETE ? {color: `black`} : {}}
+            onClick={this.onClickDelete}/>
         </ToolbarGroup>
         <ToolbarGroup>
           <RaisedButton label="Save" primary={true} onClick={this.onClickSave} />
@@ -191,13 +220,19 @@ class ScribingAnswerForm extends React.Component {
     const objects = canvas._objects;
   }
 
+  renderCanvas() {
+    return (
+      <canvas style={styles.canvas} id="canvas" ref="canvas" height={800} width={625}/>
+    );
+  }
+
   render() {
 
     // TODO: Make the height/width automatic
     return (
       <div style={styles.canvas_div}>
         { this.renderToolBar() }
-        <canvas style={styles.canvas} id="canvas" ref="canvas" height={800} width={650}/>
+        { this.renderCanvas() }
       </div>
     );
   }

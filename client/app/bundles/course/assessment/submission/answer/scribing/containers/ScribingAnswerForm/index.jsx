@@ -1,5 +1,10 @@
 import React, { PropTypes } from 'react';
 import { Canvas } from 'react-fabricjs';
+
+import FontIcon from 'material-ui/FontIcon';
+import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
+import RaisedButton from 'material-ui/RaisedButton';
+
 import { injectIntl, intlShape } from 'react-intl';
 
 import translations from './ScribingAnswerForm.intl';
@@ -54,13 +59,15 @@ const propTypes = {
 
 const styles = {
   canvas_div: {
-    height: `800px`,
-    width: `600px`,
+    width: `650px`,
     alignItems: `center`,
     margin: `auto`,
   },
   canvas: {
     border: `1px solid black`,
+  },
+  toolbar: {
+    marginBottom: `1em`,
   }
 }
 
@@ -147,14 +154,18 @@ class ScribingAnswerForm extends React.Component {
     window.location.reload(true);
   }
 
-  renderButtons() {
+  renderToolBar() {
     // TODO: show state of the button
     return (
-      <div>
-        <button type="button" onClick={this.onClickDrawingMode}>Drawing Mode</button>
-        <button type="button" onClick={this.onClickSelectionMode}>Selection Mode</button>
-        <button type="button" onClick={this.onClickSave}>Save</button>
-      </div>
+      <Toolbar style={styles.toolbar}>
+        <ToolbarGroup>
+          <FontIcon className="fa fa-pencil" onClick={this.onClickDrawingMode}/>
+          <FontIcon className="fa fa-hand-pointer-o" onClick={this.onClickSelectionMode}/>
+        </ToolbarGroup>
+        <ToolbarGroup>
+          <RaisedButton label="Save" primary={true} onClick={this.onClickSave} />
+        </ToolbarGroup>
+      </Toolbar>
     )
   }
 
@@ -185,8 +196,8 @@ class ScribingAnswerForm extends React.Component {
     // TODO: Make the height/width automatic
     return (
       <div style={styles.canvas_div}>
-        { this.renderButtons() }
-        <canvas style={styles.canvas} id="canvas" ref="canvas" height={800} width={600}/>
+        { this.renderToolBar() }
+        <canvas style={styles.canvas} id="canvas" ref="canvas" height={800} width={650}/>
       </div>
     );
   }

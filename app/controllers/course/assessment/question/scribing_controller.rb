@@ -32,13 +32,30 @@ class Course::Assessment::Question::ScribingController < \
       file_upload_success = false
 
       pdf_file.pages.each_with_index { |page, index|
+        # Converts multipage pdf to single page pdf, then convert them with density
         tempFileName = "#{filename}[#{index+1}].png"
 
-        page.write(tempFileName)
-        tempFile = MiniMagick::Image.new(tempFileName)
-        tempFile.background "white"
-        tempFile.flatten
-        tempFile.write(tempFileName)
+        # Assume that all pdf's are A4 portrait 
+        image = MiniMagick::Image.new(params[:question_scribing][:file].tempfile.path + "[#{index}]")
+        MiniMagick::Tool::Convert.new do |convert|
+          convert.render
+          convert.density(300)
+          # need to check whether to resize image first or later
+          convert.resize('890x1256')
+          convert.background('white')
+          convert << image.path
+          convert << tempFileName
+        end
+        
+        # tempFileName = "#{filename}[#{index+1}].png"
+
+        # page.write(tempFileName)
+        # tempFile = MiniMagick::Image.new(tempFileName)
+
+        # # Set white for transparent background
+        # tempFile.background "white"
+        # tempFile.flatten
+        # tempFile.write(tempFileName)
 
         new_question = Course::Assessment::Question::Scribing.new
 

@@ -61,7 +61,7 @@ const propTypes = {
 
 const styles = {
   canvas_div: {
-    width: `625px`,
+    width: `890px`,
     alignItems: `center`,
     margin: `auto`,
   },
@@ -222,7 +222,7 @@ class ScribingAnswerForm extends React.Component {
 
   renderCanvas() {
     return (
-      <canvas style={styles.canvas} id="canvas" ref="canvas" height={800} width={625}/>
+      <canvas style={styles.canvas} id="canvas" ref="canvas" height={1256} width={890}/>
     );
   }
 

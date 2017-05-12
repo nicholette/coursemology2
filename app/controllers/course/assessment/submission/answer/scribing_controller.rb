@@ -13,22 +13,22 @@ class Course::Assessment::Submission::Answer::ScribingController < \
     end
   end
 
-  # interim solution, to be removed before integration
-  def update
-    # delete exisiting scribbles
-    Course::Assessment::Answer::ScribingScribble.delete_all "scribing_answer_id = #{@scribing_answer.id}"
+  # # interim solution, to be removed before integration
+  # def update
+  #   # delete exisiting scribbles
+  #   Course::Assessment::Answer::ScribingScribble.delete_all "scribing_answer_id = #{@scribing_answer.id}"
 
-    params[:scribing_answer][:scribbles].each { |scribble|
-      newScribble = Course::Assessment::Answer::ScribingScribble.new
-      newScribble.content = scribble
-      newScribble.scribing_answer_id = @scribing_answer.id
-      newScribble.save
-    }
+  #   params[:scribing_answer][:scribbles].each { |scribble|
+  #     newScribble = Course::Assessment::Answer::ScribingScribble.new
+  #     newScribble.content = scribble
+  #     newScribble.scribing_answer_id = @scribing_answer.id
+  #     newScribble.save
+  #   }
 
-    respond_to do |format|
-      format.json { render_scribing_answer_json }
-    end
-  end
+  #   respond_to do |format|
+  #     format.json { render_scribing_answer_json }
+  #   end
+  # end
 
   private
 

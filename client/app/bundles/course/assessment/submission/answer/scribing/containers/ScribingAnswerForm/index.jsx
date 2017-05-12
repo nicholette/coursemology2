@@ -149,32 +149,34 @@ class ScribingAnswerForm extends React.Component {
     }
   }
 
-  addSvgStartText() {
-    return `<svg xmlns="http://www.w3.org/2000/svg" 
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            version="1.1" width="${this.refs.canvas.clientWidth}" 
-            height="${this.refs.canvas.clientHeight}" xml:space="preserve">
-            <desc>Created with Fabric.js 1.6.0-rc.1</desc>
-            <defs></defs>`;
-  }
+  // addSvgStartText() {
+  //   return `<svg xmlns="http://www.w3.org/2000/svg" 
+  //           xmlns:xlink="http://www.w3.org/1999/xlink"
+  //           version="1.1" width="${this.refs.canvas.clientWidth}" 
+  //           height="${this.refs.canvas.clientHeight}" xml:space="preserve">
+  //           <desc>Created with Fabric.js 1.6.0-rc.1</desc>
+  //           <defs></defs>`;
+  // }
 
-  addSvgEndText() {
-    return '</svg>';
-  }
+  // addSvgEndText() {
+  //   return '</svg>';
+  // }
 
   onClickSave() {
     const { dispatch } = this.props;
     const objects = this.state.canvas._objects;
     const scribbles = [];
     for (var i=0; i<objects.length; i++) {
-      scribbles.push(this.addSvgStartText() + objects[i].toSVG() + this.addSvgEndText());
+      // scribbles.push( objects[i].toSVG() + this.addSvgEndText());
+      console.log('scribble' + i, JSON.stringify(objects[i]));
     }
+    console.log('canvas', JSON.stringify(this.state.canvas));
     const answerId = document.getElementById('scribing-answer').dataset.scribingAnswerId;
 
-    dispatch(updateScribingAnswer(answerId, scribbles));
+    // dispatch(updateScribingAnswer(answerId, scribbles));
 
     // TODO: remove after demo
-    window.location.reload(true);
+    // window.location.reload(true);
   }
 
   renderToolBar() {

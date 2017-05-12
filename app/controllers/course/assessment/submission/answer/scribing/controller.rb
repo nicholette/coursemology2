@@ -14,21 +14,21 @@ class Course::Assessment::Submission::Answer::Scribing::Controller < \
   end
 
   # interim solution, to be removed before integration
-  def update
-    # delete exisiting scribbles
-    Course::Assessment::Answer::ScribingScribble.delete_all "scribing_answer_id = #{@scribing_answer.id}"
+  # def update
+  #   # delete exisiting scribbles
+  #   # Course::Assessment::Answer::ScribingScribble.delete_all "scribing_answer_id = #{@scribing_answer.id}"
 
-    params[:scribing_answer][:scribbles].each { |scribble|
-      newScribble = Course::Assessment::Answer::ScribingScribble.new
-      newScribble.content = scribble
-      newScribble.scribing_answer_id = @scribing_answer.id
-      newScribble.save
-    }
+  #   # params[:scribing_answer][:scribbles].each { |scribble|
+  #     newScribble = Course::Assessment::Answer::ScribingScribble.new
+  #     newScribble.content = params[:scribing_answer][:content]
+  #     newScribble.user = current_user
+  #     newScribble.scribing_answer_id = @scribing_answer.id
+  #     newScribble.save
 
-    respond_to do |format|
-      format.json { render_scribing_answer_json }
-    end
-  end
+  #   respond_to do |format|
+  #     format.json { render_scribing_answer_json }
+  #   end
+  # end
 
   private
 
@@ -44,7 +44,7 @@ class Course::Assessment::Submission::Answer::Scribing::Controller < \
 
   def scribing_answer_params
     params.require(:scribing_answer).permit(
-      scribbles: []
+      content: []
     )
   end
 

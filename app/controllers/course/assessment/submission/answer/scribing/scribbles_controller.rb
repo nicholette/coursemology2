@@ -3,13 +3,13 @@ class Course::Assessment::Submission::Answer::Scribing::ScribblesController < \
   Course::Assessment::Submission::Answer::Scribing::Controller
 
   def create
-    if scribble_params['id'] != ""
-      @scribble = Scribble.find(scribble_params['id'])
+    if scribble_params[':user_id'] != ""
+      @scribble = Scribble.find(scribble_params['user_id'])
     else
       # clarify: take the prev answer?
       @scribble = Scribble.where({
-        std_course_id: scribble_params[:std_course_id],
-        scribing_answer_id: scribble_params[:scribing_answer_id]
+        user_id: scribble_params[:user_id],
+        answer_id: scribble_params[:answer_id]
       }).first
     end
     if @scribble
@@ -27,7 +27,7 @@ class Course::Assessment::Submission::Answer::Scribing::ScribblesController < \
   private
 
   def scribble_params
-    params.require(:scribble).permit(:id, :scribing_answer_id, :content)
+    params.require(:scribble).permit(:user_id, :answer_id, :content)
   end
 
 end

@@ -6,9 +6,16 @@ class Course::Assessment::Question::Scribing < ActiveRecord::Base
   def to_partial_path
     'course/assessment/question/scribing/scribing'
   end
-
-  def attempt(submission, _last_attempt = nil)
+  
+  def attempt(submission, last_attempt = nil)
     answer = submission.scribing_answers.build(submission: submission, question: question)
+    if last_attempt
+      answer.content = last_attempt.content
+      if last_attempt.attachment_reference
+        answer.attachment_reference = last_attempt.attachment_reference.dup
+      end
+    end
     answer.acting_as
   end
+
 end

@@ -1,19 +1,13 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
-import { browserHistory } from 'react-router';
+import { formatLongDateTime } from 'lib/moment';
 import { Table, TableBody, TableRow, TableRowColumn } from 'material-ui/Table';
 import { Card, CardText } from 'material-ui/Card';
-import IconButton from 'material-ui/IconButton';
-import IconMenu from 'material-ui/IconMenu';
-import MenuItem from 'material-ui/MenuItem';
 import Toggle from 'material-ui/Toggle';
 import RaisedButton from 'material-ui/RaisedButton';
-import ArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
-import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
-import { formatDateTime } from 'lib/date-time-defaults';
-import TitleBar from 'lib/components/TitleBar';
 import libTranslations from 'lib/translations';
+import history from 'lib/history';
 import surveyTranslations from 'course/survey/translations';
 import { surveyShape } from 'course/survey/propTypes';
 import { updateSurvey } from 'course/survey/actions/surveys';
@@ -33,10 +27,6 @@ class SurveyDetails extends React.Component {
   static propTypes = {
     survey: surveyShape,
     courseId: PropTypes.string.isRequired,
-    adminFunctions: PropTypes.arrayOf(PropTypes.shape({
-      label: PropTypes.string,
-      handler: PropTypes.func,
-    })),
     disabled: PropTypes.bool.isRequired,
 
     dispatch: PropTypes.func.isRequired,
@@ -52,24 +42,6 @@ class SurveyDetails extends React.Component {
     ));
   }
 
-  renderAdminMenu() {
-    const { adminFunctions } = this.props;
-
-    if (!adminFunctions || adminFunctions.length < 1) {
-      return null;
-    }
-
-    return (
-      <IconMenu iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}>
-        {
-        adminFunctions.map(({ label, handler }) =>
-          <MenuItem key={label} primaryText={label} onTouchTap={handler} />
-        )
-      }
-      </IconMenu>
-    );
-  }
-
   renderDescription() {
     const { survey } = this.props;
 
@@ -82,7 +54,7 @@ class SurveyDetails extends React.Component {
         <h4>
           <FormattedMessage {...surveyTranslations.description} />
         </h4>
-        <p>{survey.description}</p>
+        <p dangerouslySetInnerHTML={{ __html: survey.description }} />
       </CardText>
     );
   }
@@ -105,7 +77,7 @@ class SurveyDetails extends React.Component {
     );
   }
 
-  renderBody() {
+  render() {
     const { survey, courseId, disabled } = this.props;
     if (!survey) { return null; }
     return (
@@ -118,7 +90,7 @@ class SurveyDetails extends React.Component {
                   <FormattedMessage {...surveyTranslations.opensAt} />
                 </TableRowColumn>
                 <TableRowColumn>
-                  {formatDateTime(survey.start_at)}
+                  { formatLongDateTime(survey.start_at) }
                 </TableRowColumn>
               </TableRow>
               <TableRow>
@@ -126,7 +98,7 @@ class SurveyDetails extends React.Component {
                   <FormattedMessage {...surveyTranslations.expiresAt} />
                 </TableRowColumn>
                 <TableRowColumn>
-                  {formatDateTime(survey.end_at)}
+                  { formatLongDateTime(survey.end_at) }
                 </TableRowColumn>
               </TableRow>
               <TableRow>
@@ -185,7 +157,7 @@ class SurveyDetails extends React.Component {
               <RaisedButton
                 style={styles.button}
                 label={<FormattedMessage {...surveyTranslations.results} />}
-                onTouchTap={() => browserHistory.push(
+                onTouchTap={() => history.push(
                 `/courses/${courseId}/surveys/${survey.id}/results`
               )}
               /> : null
@@ -195,7 +167,7 @@ class SurveyDetails extends React.Component {
               <RaisedButton
                 style={styles.button}
                 label={<FormattedMessage {...surveyTranslations.responses} />}
-                onTouchTap={() => browserHistory.push(
+                onTouchTap={() => history.push(
                 `/courses/${courseId}/surveys/${survey.id}/responses`
               )}
               /> : null
@@ -213,21 +185,6 @@ class SurveyDetails extends React.Component {
           />
         </CardText>
       </Card>
-    );
-  }
-
-  render() {
-    const { survey, courseId } = this.props;
-    return (
-      <div>
-        <TitleBar
-          title={survey.title}
-          iconElementRight={this.renderAdminMenu()}
-          iconElementLeft={<IconButton><ArrowBack /></IconButton>}
-          onLeftIconButtonTouchTap={() => browserHistory.push(`/courses/${courseId}/surveys`)}
-        />
-        { this.renderBody() }
-      </div>
     );
   }
 }

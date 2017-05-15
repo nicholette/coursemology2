@@ -287,8 +287,11 @@ ActiveRecord::Schema.define(version: 20170506010828) do
   end
 
   create_table "course_assessment_answer_scribing_scribbles", force: :cascade do |t|
-    t.text    "content"
-    t.integer "scribing_answer_id", :index=>{:name=>"fk__course_assessment_answer_scribing_scribbles_scribing_answer"}, :foreign_key=>{:references=>"course_assessment_answer_scribings", :name=>"fk_course_assessment_answer_18d2431b18796704f96f8d5cccbc232d", :on_update=>:no_action, :on_delete=>:no_action}
+    t.text     "content"
+    t.integer  "answer_id",  :index=>{:name=>"fk__course_assessment_answer_scribing_scribbles_scribing_answer"}, :foreign_key=>{:references=>"course_assessment_answer_scribings", :name=>"fk_course_assessment_answer_scribing_scribbles_answer_id", :on_update=>:no_action, :on_delete=>:no_action}
+    t.integer  "creator_id", :null=>false, :index=>{:name=>"fk__course_assessment_answer_scribing_scribbles_creator_id"}, :foreign_key=>{:references=>"users", :name=>"fk_course_assessment_answer_scribing_scribbles_creator_id", :on_update=>:no_action, :on_delete=>:no_action}
+    t.datetime "created_at", :null=>false
+    t.datetime "updated_at", :null=>false
   end
 
   create_table "course_assessment_answer_text_responses", force: :cascade do |t|
@@ -320,9 +323,6 @@ ActiveRecord::Schema.define(version: 20170506010828) do
   add_index "course_assessment_question_programming_template_files", ["question_id", "filename"], :name=>"index_course_assessment_question_programming_template_filenames", :unique=>true, :case_sensitive=>false
 
   create_table "course_assessment_question_scribings", force: :cascade do |t|
-    t.datetime "created_at",    :null=>false
-    t.datetime "updated_at",    :null=>false
-    t.integer  "attempt_limit"
   end
 
   create_table "course_assessment_question_text_responses", force: :cascade do |t|

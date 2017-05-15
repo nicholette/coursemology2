@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class Course::Survey::ResponsesController < Course::Survey::SurveysController
+class Course::Survey::ResponsesController < Course::Survey::Controller
   load_and_authorize_resource :response, through: :survey, class: Course::Survey::Response.name
 
   def index
@@ -77,7 +77,7 @@ class Course::Survey::ResponsesController < Course::Survey::SurveysController
     @response = @survey.responses.accessible_by(current_ability).
                 find_by(course_user_id: current_course_user.id)
     if @response
-      render json: { responseId: @response.id }, status: :bad_request
+      render partial: 'see_other', status: :see_other
     else
       render json: { error: error.message }, status: :bad_request
     end

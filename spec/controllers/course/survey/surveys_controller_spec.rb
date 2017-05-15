@@ -38,6 +38,17 @@ RSpec.describe Course::Survey::SurveysController do
         subject { get :index, course_id: course.id }
 
         it { is_expected.to render_template('index') }
+
+        context 'when survey component is disabled' do
+          before do
+            allow(controller).
+              to receive_message_chain('current_component_host.[]').and_return(nil)
+          end
+
+          it 'raises an component not found error' do
+            expect { subject }.to raise_error(ComponentNotFoundError)
+          end
+        end
       end
 
       context 'when json data is requested' do
@@ -244,7 +255,8 @@ RSpec.describe Course::Survey::SurveysController do
           )
 
           expect(multiple_choice_question['answers'][0].keys).to contain_exactly(
-            'id', 'course_user_name', 'phantom', 'selected_options'
+            'id', 'course_user_name', 'course_user_id', 'phantom', 'selected_options',
+            'response_path'
           )
 
           expect(multiple_choice_question['options'][0].keys).to contain_exactly(

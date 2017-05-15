@@ -9,18 +9,18 @@ const styles = {
   },
 };
 
-const ResultsSection = ({ section, includePhantoms }) => (
+const ResultsSection = ({ section, includePhantoms, anonymous }) => (
   <Card style={styles.card}>
     <CardTitle
       title={section.title}
-      subtitle={section.description}
+      subtitle={<div dangerouslySetInnerHTML={{ __html: section.description }} />}
     />
     <CardText>
       {
           section.questions.map((question, index) =>
             <ResultsQuestion
               key={question.id}
-              {...{ question, index, includePhantoms }}
+              {...{ question, index, includePhantoms, anonymous }}
             />
           )
         }
@@ -31,6 +31,7 @@ const ResultsSection = ({ section, includePhantoms }) => (
 ResultsSection.propTypes = {
   section: sectionShape.isRequired,
   includePhantoms: PropTypes.bool.isRequired,
+  anonymous: PropTypes.bool.isRequired,
 };
 
 export default ResultsSection;

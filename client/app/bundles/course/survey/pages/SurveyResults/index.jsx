@@ -1,13 +1,9 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
-import { browserHistory } from 'react-router';
-import TitleBar from 'lib/components/TitleBar';
-import IconButton from 'material-ui/IconButton';
 import Subheader from 'material-ui/Subheader';
 import Toggle from 'material-ui/Toggle';
 import { Card, CardText } from 'material-ui/Card';
-import ArrowBack from 'material-ui/svg-icons/navigation/arrow-back';
 import surveyTranslations from 'course/survey/translations';
 import { fetchResults } from 'course/survey/actions/surveys';
 import LoadingIndicator from 'course/survey/components/LoadingIndicator';
@@ -27,30 +23,28 @@ const translations = defineMessages({
     id: 'course.surveys.SurveyResults.noSections',
     defaultMessage: 'This survey does not have any questions yet.',
   },
+  noPhantoms: {
+    id: 'course.surveys.SurveyResults.noPhantoms',
+    defaultMessage: 'No phantom student responses.',
+  },
 });
 
 class SurveyResults extends React.Component {
   static propTypes = {
+    survey: surveyShape,
+    surveyId: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired,
     isLoading: PropTypes.bool.isRequired,
-    params: PropTypes.shape({
-      courseId: PropTypes.string.isRequired,
-      surveyId: PropTypes.string.isRequired,
-    }).isRequired,
-    surveys: PropTypes.arrayOf(surveyShape),
     sections: PropTypes.arrayOf(sectionShape),
   }
 
   constructor(props) {
     super(props);
-    this.state = { includePhantoms: false };
+    this.state = { includePhantoms: true };
   }
 
   componentDidMount() {
-    const {
-      dispatch,
-      params: { surveyId },
-    } = this.props;
+    const { dispatch, surveyId } = this.props;
     dispatch(fetchResults(surveyId));
   }
 
@@ -70,22 +64,8 @@ class SurveyResults extends React.Component {
     return { totalStudents, realStudents };
   }
 
-  renderIncludePhantomToggle() {
-    return (
-      <Card>
-        <CardText>
-          <Toggle
-            label={<FormattedMessage {...translations.includePhantoms} />}
-            labelPosition="right"
-            onToggle={(_, value) => this.setState({ includePhantoms: value })}
-          />
-        </CardText>
-      </Card>
-    );
-  }
-
-  renderBody() {
-    const { sections, isLoading } = this.props;
+  render() {
+    const { sections, isLoading, survey: { anonymous } } = this.props;
     const noSections = sections && sections.length < 1;
     if (isLoading) { return <LoadingIndicator />; }
     if (noSections) {
@@ -105,12 +85,14 @@ class SurveyResults extends React.Component {
               />
             </h4>
             {
-              totalStudents === realStudents ? null :
-              <Toggle
-                label={<FormattedMessage {...translations.includePhantoms} />}
-                labelPosition="right"
-                onToggle={(_, value) => this.setState({ includePhantoms: value })}
-              />
+              totalStudents === realStudents ?
+                <p><FormattedMessage {...translations.noPhantoms} /></p> :
+                <Toggle
+                  label={<FormattedMessage {...translations.includePhantoms} />}
+                  labelPosition="right"
+                  toggled={this.state.includePhantoms}
+                  onToggle={(_, value) => this.setState({ includePhantoms: value })}
+                />
             }
           </CardText>
         </Card>
@@ -120,32 +102,14 @@ class SurveyResults extends React.Component {
             <ResultsSection
               key={section.id}
               includePhantoms={this.state.includePhantoms}
-              {...{ section, index }}
+              {...{ section, index, anonymous }}
             />
           )
         }
       </div>
     );
   }
-
-  render() {
-    const { surveys, params: { courseId, surveyId } } = this.props;
-    const survey = surveys && surveys.length > 0 ?
-                   surveys.find(s => String(s.id) === String(surveyId)) : {};
-    return (
-      <div>
-        <TitleBar
-          title={survey.title}
-          iconElementLeft={<IconButton><ArrowBack /></IconButton>}
-          onLeftIconButtonTouchTap={() => browserHistory.push(`/courses/${courseId}/surveys`)}
-        />
-        { this.renderBody() }
-      </div>
-    );
-  }
 }
-const mapStateToProps = state => ({
-  ...state.results,
-  surveys: state.surveys,
-});
+
+const mapStateToProps = state => state.results;
 export default connect(mapStateToProps)(SurveyResults);

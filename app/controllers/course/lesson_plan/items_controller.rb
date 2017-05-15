@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class Course::LessonPlan::ItemsController < Course::ComponentController
+class Course::LessonPlan::ItemsController < Course::LessonPlan::Controller
   # This can only be done with Bullet once Rails supports polymorphic +inverse_of+.
   prepend_around_action :without_bullet, only: [:index]
 
@@ -8,8 +8,6 @@ class Course::LessonPlan::ItemsController < Course::ComponentController
                               through_association: :lesson_plan_items,
                               class: Course::LessonPlan::Item.name,
                               parent: false
-
-  add_breadcrumb :index, :course_lesson_plan_path
 
   def index
     respond_to do |format|
@@ -51,7 +49,7 @@ class Course::LessonPlan::ItemsController < Course::ComponentController
   # @return [Hash{Integer => Array<String>]
   def assessment_tabs_titles_hash
     @assessment_tabs_titles_hash ||=
-      current_course.assessment_categories.includes { tabs }.map(&:tabs).flatten.
+      current_course.assessment_categories.includes(:tabs).map(&:tabs).flatten.
       map do |tab|
         [tab.id, tab_title_array(tab)]
       end.to_h

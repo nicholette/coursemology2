@@ -20,7 +20,8 @@ class Course::Assessment::Submission < ActiveRecord::Base
       event :publish, transitions_to: :published
     end
     state :graded do
-      event :unsubmit, transitions_to: :attempting
+      # Revert to submitted state but keep the grading info.
+      event :unmark, transitions_to: :submitted
       event :publish, transitions_to: :published
     end
     state :published do
@@ -74,9 +75,9 @@ class Course::Assessment::Submission < ActiveRecord::Base
   #   Gets the time the submission was graded.
   #   @return [Time]
   calculated :graded_at, (lambda do
-    Course::Assessment::Answer.unscope(:order).where do
-      course_assessment_answers.submission_id == course_assessment_submissions.id
-    end.select { max(course_assessment_answers.graded_at) }
+    Course::Assessment::Answer.unscope(:order).
+      where('course_assessment_answers.submission_id = course_assessment_submissions.id').
+      select('max(course_assessment_answers.graded_at)')
   end)
 
   # @!method self.by_user(user)
@@ -86,21 +87,22 @@ class Course::Assessment::Submission < ActiveRecord::Base
 
   # @!method self.by_users(user)
   #   @param [Fixnum|Array<Fixnum>] user_ids The user ids to filter submissions by
-  scope :by_users, ->(user_ids) { where { creator_id >> user_ids } }
+  scope :by_users, ->(user_ids) { where(creator_id: user_ids) }
 
   # @!method self.from_category(category)
   #   Finds all the submissions in the given category.
   #   @param [Course::Assessment::Category] category The category to filter submissions by
   scope :from_category, (lambda do |category|
-    where { assessment_id >> category.assessments.select(:id) }
+    where(assessment_id: category.assessments.select(:id))
   end)
 
   scope :from_course, (lambda do |course|
-    joins { assessment.tab.category }.where { assessment.tab.category.course == course }
+    joins(assessment: { tab: :category }).
+      where('course_assessment_categories.course_id = ?', course.id)
   end)
 
   scope :from_group, (lambda do |group_id|
-    joins(experience_points_record: [course_user: :groups]).
+    joins(experience_points_record: { course_user: :groups }).
       where('course_groups.id IN (?)', group_id)
   end)
 
@@ -119,8 +121,8 @@ class Course::Assessment::Submission < ActiveRecord::Base
 
   scope :pending_for_grading, (lambda do
     where(workflow_state: [:submitted, :graded]).
-      joins { assessment }.
-      where { assessment.autograded == false }
+      joins(:assessment).
+      where('course_assessments.autograded = ?', false)
   end)
 
   # Filter submissions by category_id, assessment_id, group_id and/or user_id (creator)
@@ -139,6 +141,7 @@ class Course::Assessment::Submission < ActiveRecord::Base
 
   alias_method :finalise=, :finalise!
   alias_method :mark=, :mark!
+  alias_method :unmark=, :unmark!
   alias_method :publish=, :publish!
   alias_method :unsubmit=, :unsubmit!
 
@@ -172,7 +175,7 @@ class Course::Assessment::Submission < ActiveRecord::Base
   # Return the points awarded for the submission.
   # If submission is 'graded', return the draft value, otherwise, the return the points awarded.
   def current_points_awarded
-    graded? ? draft_points_awarded : points_awarded
+    published? ? points_awarded : draft_points_awarded
   end
 
   private

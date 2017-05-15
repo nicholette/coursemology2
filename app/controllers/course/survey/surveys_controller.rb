@@ -1,8 +1,6 @@
 # frozen_string_literal: true
-class Course::Survey::SurveysController < Course::ComponentController
+class Course::Survey::SurveysController < Course::Survey::Controller
   include Course::Survey::ReorderingConcern
-  load_and_authorize_resource :survey, through: :course, class: Course::Survey.name
-  add_breadcrumb :index, :course_surveys_path
 
   def index
     respond_to do |format|
@@ -84,8 +82,7 @@ class Course::Survey::SurveysController < Course::ComponentController
       :title, :description, :base_exp, :time_bonus_exp, :start_at, :bonus_end_at, :end_at,
       :published, :allow_response_after_end, :allow_modify_after_submit
     ]
-    fields << :anonymous if action_name == 'create' || !@survey.anonymous ||
-                            !@survey.has_student_response?
+    fields << :anonymous if action_name == 'create' || @survey.can_toggle_anonymity?
     params.require(:survey).permit(*fields)
   end
 end

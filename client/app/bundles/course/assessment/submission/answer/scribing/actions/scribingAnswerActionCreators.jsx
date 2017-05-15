@@ -5,12 +5,10 @@ import { getCourseId, getAssessmentId, getScribingId } from 'lib/helpers/url-hel
 import { actionTypes } from '../constants';
 
 export function fetchScribingQuestion(scribingId) {
-  console.log('here again');
   return (dispatch) => {
     dispatch({ type: actionTypes.FETCH_SCRIBING_QUESTION_REQUEST });
     return CourseAPI.question.scribing.scribings.fetch(scribingId)
       .then((response) => {
-        console.log('success', response.data)
         dispatch({
           scribingId,
           type: actionTypes.FETCH_SCRIBING_QUESTION_SUCCESS,
@@ -18,7 +16,6 @@ export function fetchScribingQuestion(scribingId) {
         });
       })
       .catch((error) => {
-        console.log('error', error)
         dispatch({ type: actionTypes.FETCH_SCRIBING_QUESTION_FAILURE });
         if (error.response && error.response.data) {
           throw new SubmissionError(error.response.data.errors);
@@ -32,7 +29,6 @@ export function fetchScribingAnswer(answerId) {
     dispatch({ type: actionTypes.FETCH_SCRIBING_ANSWER_REQUEST });
     return CourseAPI.answer.scribing.scribings.fetch(answerId)
       .then((response) => {
-        console.log('success', response.data)
         dispatch({
           answerId,
           type: actionTypes.FETCH_SCRIBING_ANSWER_SUCCESS,
@@ -40,7 +36,6 @@ export function fetchScribingAnswer(answerId) {
         });
       })
       .catch((error) => {
-        console.log('error', error)
         dispatch({ type: actionTypes.FETCH_SCRIBING_ANSWER_FAILURE });
         if (error.response && error.response.data) {
           throw new SubmissionError(error.response.data.errors);

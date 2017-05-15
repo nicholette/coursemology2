@@ -14,39 +14,11 @@ import translations from './ScribingQuestionForm.intl';
 import { fetchScribingQuestion, createScribingQuestion, updateScribingQuestion } from '../../actions/scribingQuestionActionCreators';
 import { formNames } from '../../constants';
 
+import { dataShape } from '../../propTypes';
+
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
-  data: PropTypes.shape({
-    question: PropTypes.shape({
-      id: PropTypes.number,
-      title: PropTypes.string,
-      description: PropTypes.string,
-      staff_only_comments: PropTypes.string,
-      maximum_grade: PropTypes.number,
-      weight: PropTypes.number,
-      skill_ids: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.number,
-        title: PropTypes.string,
-      })),
-      skills: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.number,
-        title: PropTypes.string,
-      })),
-      attachment_reference: PropTypes.shape({
-        name: PropTypes.string,
-        path: PropTypes.string,
-        updater_name: PropTypes.string,
-      }),
-      error: PropTypes.shape({
-        title: PropTypes.string,
-        skills_id: PropTypes.string,
-        maximum_grade: PropTypes.number,
-      }),
-      published_assessment: PropTypes.bool,
-      attempt_limit: PropTypes.number,
-    }),
-    is_loading: PropTypes.bool,
-  }).isRequired,
+  data: dataShape.isRequired,
   scribingId: PropTypes.string,
   intl: intlShape.isRequired,
   // Redux-form proptypes
@@ -88,8 +60,6 @@ class ScribingQuestionForm extends React.Component {
     const nextFileName = nextProps.formValues 
               && nextProps.formValues.question_scribing.attachment 
               && nextProps.formValues.question_scribing.attachment[0].name;
-
-    console.log(fileName !== nextFileName);
 
     return (this.props.data.is_loading !== nextProps.data.is_loading)
           || (fileName !== nextFileName);

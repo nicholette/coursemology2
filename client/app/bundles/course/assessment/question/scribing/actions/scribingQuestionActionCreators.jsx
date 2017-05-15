@@ -34,30 +34,41 @@ export function fetchScribingQuestion(scribingId) {
 // Helper function to convert array of skills to array of skill_ids
 function getSkillIdsFromSkills(skills) {
   const ids = _.map(skills, skill => skill.id);
+  // Need to return array of empty string
+  // If not, backend will barf
   return (ids.length > 0) ? ids : [''];
 }
 
-export function createScribingQuestion(fields) {
+// Helper function to process form fields before create/update
+function processFields(fields) {
   const parsedFields = _.cloneDeep(fields);
-  parsedFields.question_scribing.skill_ids =
-    getSkillIdsFromSkills(fields.question_scribing.skill_ids);
+  parsedFields.question_scribing.skill_ids = 
+        getSkillIdsFromSkills(fields.question_scribing.skill_ids);
+  parsedFields.question_scribing.file = fields.question_scribing.attachment[0];
+  delete parsedFields.question_scribing.attachment;
+
+  return parsedFields;
+}
+
+// Helper function to redirect to assessment main page
+function redirectToAssessment() {
+  const courseId = getCourseId();
+  const assessmentId = getAssessmentId();
+  window.location.href = `/courses/${courseId}/assessments/${assessmentId}`;
+}
+
+export function createScribingQuestion(fields) {
   return (dispatch) => {
     dispatch({ type: actionTypes.CREATE_SCRIBING_QUESTION_REQUEST });
-
-    fields.question_scribing.file = fields.question_scribing.attachment[0];
-    fields.question_scribing.attachment = undefined;
-    
-    CourseAPI.question.scribing.scribings.create(fields)
+    const parsedFields = processFields(fields);
+    CourseAPI.question.scribing.scribings.create(parsedFields)
       .then((response) => {
         dispatch({
           scribingId: getScribingId(),
           type: actionTypes.CREATE_SCRIBING_QUESTION_SUCCESS,
           question: response.data,
         });
-
-        const courseId = getCourseId();
-        const assessmentId = getAssessmentId();
-        window.location.href = `/courses/${courseId}/assessments/${assessmentId}`;
+        redirectToAssessment();
       })
       .catch((error) => {
         dispatch({ type: actionTypes.CREATE_SCRIBING_QUESTION_FAILURE });
@@ -68,33 +79,24 @@ export function createScribingQuestion(fields) {
   };
 }
 
-export function updateScribingQuestion(questionId, data) {
+export function updateScribingQuestion(questionId, fields) {
   return (dispatch) => {
-    const parsedData = _.cloneDeep(data);
-    parsedData.question_scribing.skill_ids =
-      getSkillIdsFromSkills(data.question_scribing.skill_ids);
-
-      parsedData.question_scribing.file = data.question_scribing.attachment[0];
-      parsedData.question_scribing.attachment = undefined;
-      
-      CourseAPI.question.scribing.scribings.update(questionId, parsedData)
-      .then((response) => {
-        dispatch({
-          scribingId: getScribingId(),
-          type: actionTypes.UPDATE_SCRIBING_QUESTION_SUCCESS,
-          question: response.data,
-        });
-
-        const courseId = getCourseId();
-        const assessmentId = getAssessmentId();
-        window.location.href = `/courses/${courseId}/assessments/${assessmentId}`;
-      })
-      .catch((error) => {
-        dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE });
-        if (error.response && error.response.data) {
-          throw new SubmissionError(error.response.data.errors);
-        }
+    const parsedFields = processFields(fields);
+    CourseAPI.question.scribing.scribings.update(questionId, parsedFields)
+    .then((response) => {
+      dispatch({
+        scribingId: getScribingId(),
+        type: actionTypes.UPDATE_SCRIBING_QUESTION_SUCCESS,
+        question: response.data,
       });
+      redirectToAssessment();
+    })
+    .catch((error) => {
+      dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE });
+      if (error.response && error.response.data) {
+        throw new SubmissionError(error.response.data.errors);
+      }
+    });
   };
 }
 

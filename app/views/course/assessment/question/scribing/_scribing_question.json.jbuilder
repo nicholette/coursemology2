@@ -19,5 +19,4 @@ json.question do
   end
 
   json.published_assessment @assessment.published?
-  json.attempt_limit @scribing_question.attempt_limit
 end

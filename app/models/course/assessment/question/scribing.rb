@@ -7,9 +7,9 @@ class Course::Assessment::Question::Scribing < ActiveRecord::Base
     'course/assessment/question/scribing/scribing'
   end
 
-  def attempt(submission, last_attempt = nil)
+  # Scribing is not autogradable, don't need last attempt
+  def attempt(submission, _last_attempt = nil)
     answer = submission.scribing_answers.build(submission: submission, question: question)
-    answer.scribbles = last_attempt.scribbles.dup if last_attempt&.scribbles
     answer.acting_as
   end
 end

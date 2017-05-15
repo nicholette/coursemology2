@@ -22,20 +22,6 @@ RSpec.describe Course::Assessment::Question::Scribing, type: :model do
         answer = subject.attempt(submission)
         expect(submission.scribing_answers).to include(answer.actable)
       end
-
-      context 'when last_attempt is given' do
-        let(:last_attempt) do
-          create(:course_assessment_answer_scribing)
-        end
-
-        it 'builds a new answer with old scribbles' do
-          answer = subject.attempt(submission, last_attempt).actable
-          answer.save!
-
-          expect(last_attempt.scribbles.map(&:content)).
-            to contain_exactly(*answer.scribbles.map(&:content))
-        end
-      end
     end
   end
 end

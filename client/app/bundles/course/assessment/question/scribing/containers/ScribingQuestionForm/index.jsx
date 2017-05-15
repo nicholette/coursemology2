@@ -1,10 +1,10 @@
 import React, { PropTypes } from 'react';
 import { injectIntl, intlShape } from 'react-intl';
 import { reduxForm, Field, Form } from 'redux-form';
+
+import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'lib/components/redux-form/TextField';
 import FlatButton from 'lib/components/redux-form/FlatButton';
-import RaisedButton from 'material-ui/RaisedButton';
-
 import MaterialSummernote from 'lib/components/MaterialSummernote';
 import ChipInput from 'lib/components/ChipInput';
 
@@ -12,12 +12,16 @@ import styles from './ScribingQuestionForm.scss';
 import translations from './ScribingQuestionForm.intl';
 
 import { fetchScribingQuestion, createScribingQuestion, updateScribingQuestion } from '../../actions/scribingQuestionActionCreators';
-import { formNames } from '../../constants';
 
+import { formNames } from '../../constants';
 import { dataShape } from '../../propTypes';
 
 const propTypes = {
-  dispatch: PropTypes.func.isRequired,
+  actions: React.PropTypes.shape({
+    submitForm: PropTypes.func.isRequired,
+    createScribingQuestion: PropTypes.func.isRequired,
+    updateScribingQuestion: PropTypes.func.isRequired,
+  }),
   data: dataShape.isRequired,
   scribingId: PropTypes.string,
   intl: intlShape.isRequired,
@@ -41,9 +45,11 @@ class ScribingQuestionForm extends React.Component {
   }
 
   componentDidMount() {
-    const { dispatch, scribingId } = this.props;
+    const { scribingId } = this.props;
+    const { fetchScribingQuestion } = this.props.actions;
+
     if (scribingId) {
-      dispatch(fetchScribingQuestion(scribingId));
+      fetchScribingQuestion(scribingId);
     }
     this.summernoteEditors = $('#scribing-question-form .note-editor .note-editable');
   }
@@ -66,29 +72,28 @@ class ScribingQuestionForm extends React.Component {
   }
 
   handleCreateQuestion = (data) => {
-    const { dispatch } = this.props;
-    return dispatch(
-      createScribingQuestion(data)
-    );
+    const { createScribingQuestion } = this.props.actions;
+    return createScribingQuestion(data);
   }
 
   handleUpdateQuestion = (data) => {
-    const { dispatch, scribingId } = this.props;
-    return dispatch(
-      updateScribingQuestion(scribingId, data)
-    );
+    const { scribingId } = this.props;
+    const { updateScribingQuestion } = this.props.actions;
+
+    return updateScribingQuestion(scribingId, data);
   }
 
   submitButtonText() {
-    if (this.props.data.is_loading) {
-      return this.props.intl.formatMessage(translations.loadingMessage);
-    }
+    const { is_loading } = this.props.data;
+    const { formatMessage } = this.props.intl;
 
-    return this.props.intl.formatMessage(translations.submitButton);
+    return (is_loading) ? 
+           formatMessage(translations.loadingMessage) :
+           formatMessage(translations.submitButton);
   }
 
   renderInputField(label, field, required, validate,
-    type, value, placeholder = null) {
+                   type, value, placeholder = null) {
     return (
       <div title={placeholder}>
         <Field
@@ -139,12 +144,9 @@ class ScribingQuestionForm extends React.Component {
               value={props.input.value || []}
               dataSource={options}
               dataSourceConfig={{ value: 'id', text: 'title' }}
-              onRequestAdd={(addedChip) => {
-                let values = props.input.value || [];
-                values = values.slice();
-                values.push(addedChip);
-                props.input.onChange(values);
-              }}
+              onRequestAdd={(addedChip) => (
+                props.input.onChange([...props.input.value, addedChip])
+              )}
               onRequestDelete={(deletedChip) => {
                 let values = props.input.value || [];
                 values = values.filter(v => v.id !== deletedChip);
@@ -287,10 +289,9 @@ class ScribingQuestionForm extends React.Component {
 
           <RaisedButton
             className={styles.submitButton}
-            label={'Submit'}
+            label={this.submitButtonText()}
             labelPosition="before"
             primary
-            id="scribing-question-form-submit"
             type="submit"
             onTouchTap={()=>this.props.submit()}
             disabled={this.props.data.is_loading || submitting}

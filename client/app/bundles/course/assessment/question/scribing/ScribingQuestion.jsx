@@ -7,6 +7,7 @@ import { getScribingId } from 'lib/helpers/url-helpers';
 import ScribingQuestionForm from './containers/ScribingQuestionForm';
 import * as scribingQuestionActionCreators from './actions/scribingQuestionActionCreators';
 import { formNames } from './constants';
+import { questionShape } from './propTypes';
 
 
 function buildInitialValues(scribingQuestion) {
@@ -37,50 +38,11 @@ function mapStateToProps({ scribingQuestion, ...state }) {
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
   scribingQuestion: PropTypes.shape({
-    question: PropTypes.shape({
-      id: PropTypes.number,
-      title: PropTypes.string,
-      description: PropTypes.string,
-      staff_only_comments: PropTypes.string,
-      maximum_grade: PropTypes.number,
-      weight: PropTypes.number,
-      skill_ids: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.number,
-        title: PropTypes.string,
-      })),
-      skills: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.number,
-        title: PropTypes.string,
-      })),
-      error: PropTypes.shape({
-        title: PropTypes.string,
-        skills_id: PropTypes.string,
-        maximum_grade: PropTypes.number,
-      }),
-      published_assessment: PropTypes.bool,
-      attempt_limit: PropTypes.number,
-    }),
+    question: questionShape,
     is_loading: PropTypes.bool,
   }).isRequired,
   initialValues: PropTypes.shape({
-    scribing_question: PropTypes.shape({
-      id: PropTypes.number,
-      title: PropTypes.string,
-      description: PropTypes.string,
-      staff_only_comments: PropTypes.string,
-      maximum_grade: PropTypes.number,
-      weight: PropTypes.number,
-      skill_ids: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.number,
-        title: PropTypes.string,
-      })),
-      attachment_reference: PropTypes.shape({
-        name: PropTypes.string,
-        path: PropTypes.string,
-        updater_name: PropTypes.string,
-      }),
-      attempt_limit: PropTypes.number,
-    }),
+    scribing_question: questionShape
   }).isRequired,
   formValues: PropTypes.object,
   scribingId: PropTypes.string,
@@ -93,13 +55,11 @@ const ScribingQuestion = (props) => {
 
   return (
     <ScribingQuestionForm
-      {...{
-        actions,
-        data: scribingQuestion,
-        formValues,
-        initialValues,
-        scribingId,
-      }}
+        actions={actions}
+        data={scribingQuestion}
+        formValues={formValues}
+        initialValues={initialValues}
+        scribingId={scribingId}
     />
   );
 };

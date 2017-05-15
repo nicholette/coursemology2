@@ -34,7 +34,6 @@ export const questionShape = PropTypes.shape({
   attachment_reference: attachmentReferenceShape,
   error: errorShape,
   published_assessment: PropTypes.bool,
-  attempt_limit: PropTypes.number,
 });
 
 export const dataShape = PropTypes.shape({

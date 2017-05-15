@@ -11,7 +11,7 @@ $(document).ready(() => {
     const store = storeCreator({ scribingQuestion: {} });
 
     render(
-      <ProviderWrapper {...{ store }}>
+      <ProviderWrapper store={store}>
         <ScribingQuestion />
       </ProviderWrapper>,
       mountNode

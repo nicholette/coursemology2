@@ -33,10 +33,9 @@ export function fetchScribingQuestion(scribingId) {
 
 // Helper function to convert array of skills to array of skill_ids
 function getSkillIdsFromSkills(skills) {
-  const ids = _.map(skills, skill => skill.id);
-  // Need to return array of empty string
+  // Need to return array of empty string if nothing
   // If not, backend will barf
-  return (ids.length > 0) ? ids : [''];
+  return (skills.length > 0) ? _.map(skills, 'id') : [''];
 }
 
 // Helper function to process form fields before create/update
@@ -50,13 +49,6 @@ function processFields(fields) {
   return parsedFields;
 }
 
-// Helper function to redirect to assessment main page
-function redirectToAssessment() {
-  const courseId = getCourseId();
-  const assessmentId = getAssessmentId();
-  window.location.href = `/courses/${courseId}/assessments/${assessmentId}`;
-}
-
 export function createScribingQuestion(fields) {
   return (dispatch) => {
     dispatch({ type: actionTypes.CREATE_SCRIBING_QUESTION_REQUEST });
@@ -67,8 +59,9 @@ export function createScribingQuestion(fields) {
           scribingId: getScribingId(),
           type: actionTypes.CREATE_SCRIBING_QUESTION_SUCCESS,
           question: response.data,
+          courseId: getCourseId(),
+          assessmentId: getAssessmentId(),
         });
-        redirectToAssessment();
       })
       .catch((error) => {
         dispatch({ type: actionTypes.CREATE_SCRIBING_QUESTION_FAILURE });
@@ -88,8 +81,9 @@ export function updateScribingQuestion(questionId, fields) {
         scribingId: getScribingId(),
         type: actionTypes.UPDATE_SCRIBING_QUESTION_SUCCESS,
         question: response.data,
+        courseId: getCourseId(),
+        assessmentId: getAssessmentId(),
       });
-      redirectToAssessment();
     })
     .catch((error) => {
       dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE });

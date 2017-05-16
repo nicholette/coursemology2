@@ -4,6 +4,9 @@ export const formNames = mirrorCreator([
   'SCRIBING_QUESTION',
 ]);
 
+export const questionNamePrefix = 'question_scribing.';
+export const questionIdPrefix = 'question_scribing_';
+
 const actionTypes = mirrorCreator([
   'SCRIBING_QUESTION_UPDATE',
   'SKILLS_UPDATE',

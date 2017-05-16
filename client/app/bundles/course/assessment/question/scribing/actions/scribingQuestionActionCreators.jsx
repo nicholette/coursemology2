@@ -42,8 +42,14 @@ function getSkillIdsFromSkills(skills) {
 function processFields(fields) {
   const parsedFields = _.cloneDeep(fields);
   parsedFields.question_scribing.skill_ids = 
-        getSkillIdsFromSkills(fields.question_scribing.skill_ids);
-  parsedFields.question_scribing.file = fields.question_scribing.attachment[0];
+    getSkillIdsFromSkills(fields.question_scribing.skill_ids);
+
+  if (fields.question_scribing.attachment) {
+    parsedFields.question_scribing.file = fields.question_scribing.attachment[0];
+  } else {
+    delete parsedFields.question_scribing.file;
+  }
+  
   delete parsedFields.question_scribing.attachment;
 
   return parsedFields;

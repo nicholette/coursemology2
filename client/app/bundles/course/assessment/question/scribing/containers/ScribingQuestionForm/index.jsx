@@ -3,10 +3,11 @@ import { injectIntl, intlShape } from 'react-intl';
 import { reduxForm, Field, Form } from 'redux-form';
 
 import RaisedButton from 'material-ui/RaisedButton';
-import TextField from 'lib/components/redux-form/TextField';
 import FlatButton from 'lib/components/redux-form/FlatButton';
-import MaterialSummernote from 'lib/components/MaterialSummernote';
 import ChipInput from 'lib/components/ChipInput';
+
+import InputField from '../../components/InputField';
+import SummernoteField from '../../components/SummernoteField';
 
 import styles from './ScribingQuestionForm.scss';
 import translations from './ScribingQuestionForm.intl';
@@ -14,7 +15,7 @@ import translations from './ScribingQuestionForm.intl';
 import { fetchScribingQuestion, createScribingQuestion, updateScribingQuestion } from '../../actions/scribingQuestionActionCreators';
 
 import { formNames } from '../../constants';
-import { dataShape } from '../../propTypes';
+import { dataShape, questionShape } from '../../propTypes';
 
 const propTypes = {
   actions: React.PropTypes.shape({
@@ -26,7 +27,12 @@ const propTypes = {
   scribingId: PropTypes.string,
   intl: intlShape.isRequired,
   // Redux-form proptypes
-  formValues: PropTypes.object,
+  formValues: PropTypes.shape({
+    scribing_question: PropTypes.shape(questionShape),
+  }),
+  initialValues: PropTypes.shape({
+    scribing_question: PropTypes.shape(questionShape),
+  }),
   handleSubmit: PropTypes.func.isRequired,
   submitting: PropTypes.bool.isRequired,
 };
@@ -90,46 +96,6 @@ class ScribingQuestionForm extends React.Component {
     return (is_loading) ? 
            formatMessage(translations.loadingMessage) :
            formatMessage(translations.submitButton);
-  }
-
-  renderInputField(label, field, required, validate,
-                   type, value, placeholder = null) {
-    return (
-      <div title={placeholder}>
-        <Field
-          name={ScribingQuestionForm.getInputName(field)}
-          id={ScribingQuestionForm.getInputId(field)}
-          validate={validate}
-          floatingLabelText={(required ? '* ' : '') + label}
-          floatingLabelFixed
-          fullWidth
-          type={type}
-          component={TextField}
-          disabled={this.props.data.is_loading}
-        />
-      </div>
-    );
-  }
-
-  renderSummernoteField(label, field, validate, value) {
-    return (
-      <Field
-        name={ScribingQuestionForm.getInputName(field)}
-        id={ScribingQuestionForm.getInputId(field)}
-        validate={validate}
-        component={props => (
-          <MaterialSummernote
-            field={field}
-            label={label}
-            value={value}
-            disabled={this.props.data.is_loading}
-            name={ScribingQuestionForm.getInputName(field)}
-            inputId={ScribingQuestionForm.getInputId(field)}
-            onChange={props.input.onChange}
-          />
-          )}
-      />
-    );
   }
 
   renderMultiSelectSkillsField(label, field, value, options, error) {
@@ -210,26 +176,32 @@ class ScribingQuestionForm extends React.Component {
         <Form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
           <div className={styles.inputContainer}>
             <div className={styles.titleInput}>
-              {
-                this.renderInputField(
-                  this.props.intl.formatMessage(translations.titleFieldLabel),
-                  'title', false, [], 'text', question.title || '',
-                  this.props.data.question.error && this.props.data.question.error.title)
-              }
+              <InputField
+                label={this.props.intl.formatMessage(translations.titleFieldLabel)}
+                field={'title'}
+                required={false}
+                type={'text'}
+                // value={question.title || ''}
+                placeholder={this.props.data.question.error && this.props.data.question.error.title}
+                is_loading={this.props.data.is_loading}
+                value={this.props.formValues && this.props.formValues.question_scribing && this.props.formValues.question_scribing.title}
+              />
             </div>
             <div className={styles.descriptionInput}>
-              {
-                this.renderSummernoteField(
-                  this.props.intl.formatMessage(translations.descriptionFieldLabel),
-                  'description', [], question.description || '')
-              }
+              <SummernoteField
+                label={this.props.intl.formatMessage(translations.descriptionFieldLabel)}
+                field={'description'}
+                is_loading={this.props.data.is_loading}
+              />
             </div>
             <div className={styles.staffCommentsInput}>
-              {
-                this.renderSummernoteField(
-                  this.props.intl.formatMessage(translations.staffOnlyCommentsFieldLabel),
-                  'staff_only_comments', [], question.staff_only_comments || '')
-             }
+              <SummernoteField
+                label={this.props.intl.formatMessage(translations.staffOnlyCommentsFieldLabel)}
+                field={'staff_only_comments'}
+                // value={question.staff_only_comments || ''}
+                value={this.props.formValues && this.props.formValues.question_scribing && this.props.formValues.question_scribing.staff_only_comments}
+                is_loading={this.props.data.is_loading}
+              />
             </div>
             <div className={styles.skillsInput}>
               {
@@ -239,12 +211,16 @@ class ScribingQuestionForm extends React.Component {
               }
             </div>
             <div className={styles.maximumGradeInput}>
-              {
-                this.renderInputField(
-                  this.props.intl.formatMessage(translations.maximumGradeFieldLabel),
-                  'maximum_grade', true, [required, lessThan1000, nonNegative], 'number',
-                  ScribingQuestionForm.convertNull(question.maximum_grade))
-              }
+              <InputField
+                label={this.props.intl.formatMessage(translations.maximumGradeFieldLabel)}
+                field={'maximum_grade'}
+                required={true}
+                validate={[required, lessThan1000, nonNegative]}
+                type={'number'}
+                // value={ScribingQuestionForm.convertNull(question.maximum_grade)}
+                is_loading={this.props.data.is_loading}
+                value={ScribingQuestionForm.convertNull(this.props.formValues && this.props.formValues.question_scribing && this.props.formValues.question_scribing.maximum_grade)}
+              />
             </div>
             <div className={styles.fileInputDiv}>
               {this.props.data.question.attachment_reference.name ? 

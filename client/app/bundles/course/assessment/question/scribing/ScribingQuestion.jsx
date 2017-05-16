@@ -41,10 +41,12 @@ const propTypes = {
     question: questionShape,
     is_loading: PropTypes.bool,
   }).isRequired,
+  formValues: PropTypes.shape({
+    scribing_question: PropTypes.shape(questionShape),
+  }),
   initialValues: PropTypes.shape({
-    scribing_question: questionShape
-  }).isRequired,
-  formValues: PropTypes.object,
+    scribing_question: PropTypes.shape(questionShape),
+  }),
   scribingId: PropTypes.string,
 };
 

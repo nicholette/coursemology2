@@ -4,10 +4,11 @@ import { reduxForm, Field, Form } from 'redux-form';
 
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'lib/components/redux-form/FlatButton';
-import ChipInput from 'lib/components/ChipInput';
 
 import InputField from '../../components/InputField';
 import SummernoteField from '../../components/SummernoteField';
+import MultiSelectSkillsField from '../../components/MultiSelectSkillsField';
+import FileUploadField from '../../components/FileUploadField';
 
 import styles from './ScribingQuestionForm.scss';
 import translations from './ScribingQuestionForm.intl';
@@ -38,13 +39,6 @@ const propTypes = {
 };
 
 class ScribingQuestionForm extends React.Component {
-  static getInputName(field) {
-    return `question_scribing.${field}`;
-  }
-
-  static getInputId(field) {
-    return `question_scribing_${field}`;
-  }
 
   static convertNull(value) {
     return value === null ? '' : value;
@@ -62,19 +56,6 @@ class ScribingQuestionForm extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     this.summernoteEditors.attr('contenteditable', !nextProps.data.is_loading);
-  }
-
-  shouldComponentUpdate(nextProps) {
-    const fileName = this.props.formValues 
-              && this.props.formValues.question_scribing.attachment 
-              && this.props.formValues.question_scribing.attachment[0].name;
-
-    const nextFileName = nextProps.formValues 
-              && nextProps.formValues.question_scribing.attachment 
-              && nextProps.formValues.question_scribing.attachment[0].name;
-
-    return (this.props.data.is_loading !== nextProps.data.is_loading)
-          || (fileName !== nextFileName);
   }
 
   handleCreateQuestion = (data) => {
@@ -98,48 +79,12 @@ class ScribingQuestionForm extends React.Component {
            formatMessage(translations.submitButton);
   }
 
-  renderMultiSelectSkillsField(label, field, value, options, error) {
+  renderExistingAttachmentLabel() {
     return (
-      <div key={field}>
-        <Field
-          name={ScribingQuestionForm.getInputName(field)}
-          id={ScribingQuestionForm.getInputId(field)}
-          component={props => (
-            <ChipInput
-              id={ScribingQuestionForm.getInputId(field)}
-              value={props.input.value || []}
-              dataSource={options}
-              dataSourceConfig={{ value: 'id', text: 'title' }}
-              onRequestAdd={(addedChip) => (
-                props.input.onChange([...props.input.value, addedChip])
-              )}
-              onRequestDelete={(deletedChip) => {
-                let values = props.input.value || [];
-                values = values.filter(v => v.id !== deletedChip);
-                props.input.onChange(values);
-              }}
-              floatingLabelText={label}
-              floatingLabelFixed
-              openOnFocus
-              fullWidth
-              disabled={this.props.data.is_loading}
-              errorText={error}
-              menuStyle={{ maxHeight: '80vh', overflowY: 'scroll' }}
-            />
-            )}
-        />
-
-        <select
-          name={`${ScribingQuestionForm.getInputName(field)}[]`}
-          multiple
-          value={value.map(opt => opt.id)}
-          style={{ display: 'none' }}
-          disabled={this.props.data.is_loading}
-          onChange={(e) => { this.onSelectSkills(parseInt(e.target.value, 10) || e.target.value); }}
-        >
-          { options.map(opt => <option value={opt.id} key={opt.id}>{opt.title}</option>) }
-        </select>
-      </div>
+      this.props.data.question.attachment_reference.name ? 
+      <div className={styles.row}>
+        <label>File uploaded: {this.props.data.question.attachment_reference.name}</label>
+      </div> : []
     );
   }
 
@@ -181,7 +126,6 @@ class ScribingQuestionForm extends React.Component {
                 field={'title'}
                 required={false}
                 type={'text'}
-                // value={question.title || ''}
                 placeholder={this.props.data.question.error && this.props.data.question.error.title}
                 is_loading={this.props.data.is_loading}
                 value={this.props.formValues && this.props.formValues.question_scribing && this.props.formValues.question_scribing.title}
@@ -198,17 +142,18 @@ class ScribingQuestionForm extends React.Component {
               <SummernoteField
                 label={this.props.intl.formatMessage(translations.staffOnlyCommentsFieldLabel)}
                 field={'staff_only_comments'}
-                // value={question.staff_only_comments || ''}
                 value={this.props.formValues && this.props.formValues.question_scribing && this.props.formValues.question_scribing.staff_only_comments}
                 is_loading={this.props.data.is_loading}
               />
             </div>
             <div className={styles.skillsInput}>
-              {
-                this.renderMultiSelectSkillsField(
-                  this.props.intl.formatMessage(translations.skillsFieldLabel),
-                  'skill_ids', skillsValues, skillsOptions)
-              }
+              <MultiSelectSkillsField
+                label={this.props.intl.formatMessage(translations.skillsFieldLabel)}
+                field={'skill_ids'}
+                value={skillsValues}
+                options={skillsOptions}
+                is_loading={this.props.data.is_loading}
+              />
             </div>
             <div className={styles.maximumGradeInput}>
               <InputField
@@ -217,46 +162,17 @@ class ScribingQuestionForm extends React.Component {
                 required={true}
                 validate={[required, lessThan1000, nonNegative]}
                 type={'number'}
-                // value={ScribingQuestionForm.convertNull(question.maximum_grade)}
                 is_loading={this.props.data.is_loading}
                 value={ScribingQuestionForm.convertNull(this.props.formValues && this.props.formValues.question_scribing && this.props.formValues.question_scribing.maximum_grade)}
               />
             </div>
             <div className={styles.fileInputDiv}>
-              {this.props.data.question.attachment_reference.name ? 
-                <div className={styles.row}>
-                  <label>File uploaded: {this.props.data.question.attachment_reference.name}</label>
-                </div> : []
-              }
+              { this.renderExistingAttachmentLabel() }
               <div className={styles.row} >
-                <Field
-                  name={ScribingQuestionForm.getInputName('attachment')}
-                  id={ScribingQuestionForm.getInputId('attachment')}
-                  disabled={this.props.data.is_loading}
-                  component={props => (
-                    <RaisedButton
-                      className={styles.fileInputButton}
-                      label={this.props.intl.formatMessage(translations.chooseFileButton)}
-                      labelPosition="before"
-                      containerElement="label"
-                      primary
-                      disabled={this.props.isLoading}
-                    >
-                      <input
-                        id={ScribingQuestionForm.getInputId('attachment')}
-                        type="file"
-                        accept="image/gif, image/png, image/jpeg, image/pjpeg, application/pdf"
-                        style={{display:`none`}}
-                        disabled={this.props.isLoading}
-                        onChange={
-                          ( e ) => {
-                            e.preventDefault();
-                            props.input.onChange(e.target.files);
-                          }
-                        }
-                      />
-                    </RaisedButton>
-                  )}
+                <FileUploadField
+                  field={'attachment'}
+                  label={this.props.intl.formatMessage(translations.chooseFileButton)}
+                  is_loading={this.props.data.is_loading}
                 />
                 <div className={styles.fileLabel}>{fileName}</div>
               </div>

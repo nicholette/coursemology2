@@ -73,7 +73,6 @@ class ScribingQuestionForm extends React.Component {
   submitButtonText() {
     const { is_submitting } = this.props.data;
     const { formatMessage } = this.props.intl;
-    console.log('submitting?', is_submitting);
     return (is_submitting) ? 
            formatMessage(translations.submittingMessage) :
            formatMessage(translations.submitButton);
@@ -178,15 +177,19 @@ class ScribingQuestionForm extends React.Component {
               />
             </div>
             <div className={styles.fileInputDiv}>
-              { this.renderExistingAttachmentLabel() }
-              <div className={styles.row} >
-                <FileUploadField
-                  field={'attachment'}
-                  label={this.props.intl.formatMessage(translations.chooseFileButton)}
-                  is_loading={this.props.data.is_loading}
-                />
-                <div className={styles.fileLabel}>{fileName}</div>
-              </div>
+              { 
+                this.props.data.question.attachment_reference.name ?
+                this.renderExistingAttachmentLabel() :
+                <div className={styles.row} >
+                  <FileUploadField
+                    field={'attachment'}
+                    label={this.props.intl.formatMessage(translations.chooseFileButton)}
+                    is_loading={this.props.data.is_loading}
+                    validate={[required]}
+                    fileName={fileName}
+                  />
+                </div>
+              }
             </div>
           </div>
 

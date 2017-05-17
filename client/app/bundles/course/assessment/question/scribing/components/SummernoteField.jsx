@@ -17,6 +17,7 @@ export default class SummernoteField extends Component {
        <Field
         name={ questionNamePrefix + field }
         id={ questionIdPrefix + field}
+        label={ label }
         validate={validate}
         component={MaterialSummernote}
       />

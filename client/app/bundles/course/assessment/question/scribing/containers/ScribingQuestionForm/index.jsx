@@ -5,6 +5,7 @@ import { reduxForm, Field, Form } from 'redux-form';
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'lib/components/redux-form/FlatButton';
 
+import LoadingIndicator from '../../components/LoadingIndicator';
 import InputField from '../../components/InputField';
 import SummernoteField from '../../components/SummernoteField';
 import MultiSelectSkillsField from '../../components/MultiSelectSkillsField';
@@ -39,7 +40,6 @@ const propTypes = {
 };
 
 class ScribingQuestionForm extends React.Component {
-
   static convertNull(value) {
     return value === null ? '' : value;
   }
@@ -71,12 +71,21 @@ class ScribingQuestionForm extends React.Component {
   }
 
   submitButtonText() {
-    const { is_loading } = this.props.data;
+    const { is_submitting } = this.props.data;
     const { formatMessage } = this.props.intl;
-
-    return (is_loading) ? 
-           formatMessage(translations.loadingMessage) :
+    console.log('submitting?', is_submitting);
+    return (is_submitting) ? 
+           formatMessage(translations.submittingMessage) :
            formatMessage(translations.submitButton);
+  }
+
+  renderErrorMessage() {
+    const errors = this.props.data.save_errors;
+    return errors ?
+      <div className="alert alert-danger">
+        { errors.map((errorMessage, index) => <div key={index}>{errorMessage}</div>)}
+      </div> : null
+    ;
   }
 
   renderExistingAttachmentLabel() {
@@ -115,9 +124,11 @@ class ScribingQuestionForm extends React.Component {
     );
 
     // TODO: Display submit fail response
-    // TODO: Display submitting message
     return (
+      (this.props.data.is_loading) ? <LoadingIndicator /> :
+
       <div>
+        { this.renderErrorMessage() }
         <Form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
           <div className={styles.inputContainer}>
             <div className={styles.titleInput}>
@@ -187,7 +198,7 @@ class ScribingQuestionForm extends React.Component {
             type="submit"
             onTouchTap={()=>this.props.submit()}
             disabled={this.props.data.is_loading || submitting}
-            icon={this.props.data.is_loading ? <i className="fa fa-spinner fa-lg fa-spin" /> : null}
+            icon={this.props.data.is_submitting ? <i className="fa fa-spinner fa-lg fa-spin" /> : null}
           />
         </Form>
       </div>

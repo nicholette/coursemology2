@@ -70,16 +70,17 @@ export function createScribingQuestion(fields) {
         });
       })
       .catch((error) => {
-        dispatch({ type: actionTypes.CREATE_SCRIBING_QUESTION_FAILURE });
-        if (error.response && error.response.data) {
-          throw new SubmissionError(error.response.data.errors);
-        }
+        dispatch({
+          type: actionTypes.CREATE_SCRIBING_QUESTION_FAILURE,
+          save_errors: error.response && error.response.data && error.response.data.errors
+        });
       });
   };
 }
 
 export function updateScribingQuestion(questionId, fields) {
   return (dispatch) => {
+    dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_REQUEST });
     const parsedFields = processFields(fields);
     CourseAPI.question.scribing.scribings.update(questionId, parsedFields)
     .then((response) => {
@@ -92,10 +93,10 @@ export function updateScribingQuestion(questionId, fields) {
       });
     })
     .catch((error) => {
-      dispatch({ type: actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE });
-      if (error.response && error.response.data) {
-        throw new SubmissionError(error.response.data.errors);
-      }
+      dispatch({
+        type: actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE,
+        save_errors: error.response && error.response.data && error.response.data.errors
+      });
     });
   };
 }

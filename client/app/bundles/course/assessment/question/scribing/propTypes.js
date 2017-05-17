@@ -39,4 +39,6 @@ export const questionShape = PropTypes.shape({
 export const dataShape = PropTypes.shape({
   question: questionShape,
   is_loading: PropTypes.bool,
+  is_submitting: PropTypes.bool,
+  save_errors: PropTypes.arrayOf(PropTypes.string),
 });

@@ -45,9 +45,9 @@ export default defineMessages({
     id: 'course.assessment.question.scribing.scribingQuestionForm.submitFailureMessage',
     defaultMessage: 'An error occurred, please try again.',
   },
-  loadingMessage: {
-    id: 'course.assessment.question.scribing.scribingQuestionForm.loadingMessage',
-    defaultMessage: 'Loading',
+  submittingMessage: {
+    id: 'course.assessment.question.scribing.scribingQuestionForm.submittingMessage',
+    defaultMessage: 'Submitting...',
     description: 'Text to be displayed when waiting for server response after form submission.',
   },
   resolveErrorsMessage: {

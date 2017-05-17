@@ -18,7 +18,8 @@ export const initialState = {
       updater_name: '',
     }
   },
-  isLoading: false,
+  is_loading: false,
+  is_submitting: false,
   save_errors: undefined,
 };
 
@@ -32,12 +33,18 @@ export default function scribingQuestionReducer(state = initialState, action) {
 
   switch (type) {
     case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST:
-    case actionTypes.CREATE_RESPONSE_REQUEST:
-    case actionTypes.UPDATE_SCRIBING_QUESTION_REQUEST: {
-      const { isLoading } = action;
       return {
         ...state,
-        is_loading: isLoading,
+        is_loading: true,
+        is_submitting: false,
+        save_errors: undefined,
+      };
+    case actionTypes.CREATE_SCRIBING_QUESTION_REQUEST: 
+    case actionTypes.UPDATE_SCRIBING_QUESTION_REQUEST: {
+      return {
+        ...state,
+        is_loading: false,
+        is_submitting: true,
         save_errors: undefined,
       };
     }
@@ -49,23 +56,29 @@ export default function scribingQuestionReducer(state = initialState, action) {
         ...state,
         question,
         is_loading: false,
+        is_submitting: false,
+        save_errors: undefined,
       };
     }
-    case actionTypes.CREATE_SURVEY_QUESTION_SUCCESS:
+    case actionTypes.CREATE_SCRIBING_QUESTION_SUCCESS:
     case actionTypes.UPDATE_SCRIBING_QUESTION_SUCCESS: {
-      const { courseId, assessmentId } = action.data;
+      const { courseId, assessmentId } = action;
       redirectToAssessment(courseId, assessmentId);
       return {
         ...state,
         is_loading: false,
+        is_submitting: true, // to provide transition to assessment page
+        save_errors: undefined,
       };
     }
     case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE:
-    case actionTypes.CREATE_SURVEY_QUESTION_FAILURE:
-    case actionTypes.UPDATE_SURVEY_QUESTION_FAILURE: {
+    case actionTypes.CREATE_SCRIBING_QUESTION_FAILURE:
+    case actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE: {
       return {
         ...state,
         is_loading: false,
+        is_submitting: false,
+        save_errors: action.save_errors,
       };
     }
     default: {

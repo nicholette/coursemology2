@@ -53,24 +53,22 @@ RSpec.describe Course::Assessment::Question::ScribingController do
         end
       end
 
-      #TODO: add test case for uploading normal images
+      context 'when attaching an image attachment' do
+        let(:question_scribing_attributes) do
+          attributes_for(:course_assessment_question_scribings).
+            slice(:title, :description, :maximum_grade, :file).tap do |result|
+            result[:file] = fixture_file_upload('files/picture.jpg', 'image/jpeg')
+          end
+        end
 
-      # context 'when attaching an image attachment' do
-      #   let(:question_scribing_attributes) do
-      #     attributes_for(:course_assessment_question_scribings).
-      #       slice(:title, :description, :maximum_grade, :file).tap do |result|
-      #       result[:file] = fixture_file_upload('files/picture.jpg', 'image/jpeg')
-      #     end
-      #   end
-
-      #   it 'returns the correct attachment url' do
-      #     subject
-      #     body = JSON.parse(response.body)
-      #     expect(body['attachment_reference']['path']).to eq(
-      #       controller.instance_variable_get(:@scribing_question).attachment_reference.path
-      #     )
-      #   end
-      # end
+        it 'returns the correct attachment' do
+          subject
+          body = JSON.parse(response.body)
+          expect(body["question"]['attachment_reference']['name']).to eq(
+            controller.instance_variable_get(:@scribing_question).attachment_reference.name
+          )
+        end
+      end
 
       context 'when attaching a pdf attachment' do
         let(:question_scribing_attributes) do

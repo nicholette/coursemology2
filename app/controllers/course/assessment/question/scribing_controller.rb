@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# rubocop:disable Metrics/ClassLength
 class Course::Assessment::Question::ScribingController < \
   Course::Assessment::QuestionsController
   load_and_authorize_resource :scribing_question,
@@ -19,14 +20,12 @@ class Course::Assessment::Question::ScribingController < \
     end
   end
 
-  def create
-    allowed_img_types = ['image/gif', 'image/png', 'image/jpeg', 'image/pjpeg']
-
-    #special handling for PDF files
-    if params[:question_scribing] && params[:question_scribing][:file]&.content_type&.downcase == 'application/pdf'
+  def create # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    # special handling for PDF files
+    if params&.[](:question_scribing)&.[](:file)&.content_type&.downcase == 'application/pdf'
       file = params[:question_scribing][:file]
       respond_to do |format|
-        if (generatePdfQuestions file)
+        if generate_pdf_questions(file)
           format.json { render_success_json t('.success') }
         else
           format.json { render_failure_json t('.failure') }
@@ -92,7 +91,7 @@ class Course::Assessment::Question::ScribingController < \
       :title, :description, :staff_only_comments, :maximum_grade,
       skill_ids: []
     )
-  end 
+  end
 
   def render_success_json(message)
     render json: { message: message },
@@ -104,16 +103,15 @@ class Course::Assessment::Question::ScribingController < \
            status: :bad_request
   end
 
-  def generatePdfQuestions(file)
-    result = @scribing_question.class.transaction do
+  def generate_pdf_questions(file) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    @scribing_question.class.transaction do # rubocop:disable Metrics/BlockLength
       filename = remove_whitespace(File.basename(file.original_filename, '.pdf'))
       pdf_file = MiniMagick::Image.new(file.tempfile.path)
 
-      pdf_file.pages.each_with_index { |page, index|
+      pdf_file.pages.each_with_index do |_page, index|
         # Converts multipage pdf to single page pdf, then convert them with density
-        tempFileName = "#{filename}[#{index+1}].png"
+        temp_filename = "#{filename}[#{index + 1}].png"
 
-        # Assume that all pdf's are A4 portrait 
         image = MiniMagick::Image.new(file.tempfile.path + "[#{index}]")
         MiniMagick::Tool::Convert.new do |convert|
           convert.render
@@ -122,15 +120,15 @@ class Course::Assessment::Question::ScribingController < \
           convert.background('white')
           convert.flatten
           convert << image.path
-          convert << tempFileName
+          convert << temp_filename
         end
 
         new_question = Course::Assessment::Question::Scribing.new
 
         # Leave filename sanitization to attachment reference
-        fake_upload_file = ActionDispatch::Http::UploadedFile.new(:tempfile => File.new(tempFileName),
-                                                                  :filename => tempFileName.dup,
-                                                                  :type => 'image/png')
+        fake_upload_file = ActionDispatch::Http::UploadedFile.new(tempfile: File.new(temp_filename),
+                                                                  filename: temp_filename.dup,
+                                                                  type: 'image/png')
         new_question.file = fake_upload_file
         new_question.title = @scribing_question.title
         new_question.description = @scribing_question.description
@@ -143,7 +141,7 @@ class Course::Assessment::Question::ScribingController < \
         new_question.weight ||= max_weight ? max_weight + 1 : 0
 
         raise ActiveRecord::Rollback unless new_question.save
-      }
+      end
       true
     end
   end
@@ -151,7 +149,7 @@ class Course::Assessment::Question::ScribingController < \
   # Convert spaces to underscore
   def remove_whitespace(filename)
     filename.tap do |name|
-      name.gsub! ' ', '_'
+      name.tr! ' ', '_'
     end
   end
 end

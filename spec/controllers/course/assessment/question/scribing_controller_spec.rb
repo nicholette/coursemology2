@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 require 'rails_helper'
 
+# rubocop:disable Metrics/BlockLength
 RSpec.describe Course::Assessment::Question::ScribingController do
   render_views
   let(:instance) { Instance.default }
-  with_tenant(:instance) do
+  with_tenant(:instance) do # rubocop:disable Metrics/BlockLength
     let(:scribing_question) { nil }
     let(:user) { create(:user) }
     let(:course) { create(:course, creator: user) }
@@ -29,7 +30,7 @@ RSpec.describe Course::Assessment::Question::ScribingController do
       controller.instance_variable_set(:@scribing_question, scribing_question)
     end
 
-    describe '#create' do
+    describe '#create' do # rubocop:disable Metrics/BlockLength
       subject do
         request.accept = 'application/json'
         post :create, course_id: course, assessment_id: assessment,
@@ -48,8 +49,8 @@ RSpec.describe Course::Assessment::Question::ScribingController do
           subject
           body = JSON.parse(response.body)
           expect(body['message']).to eq(
-                                        I18n.t('course.assessment.question.scribing.create.failure')
-                                     )
+            I18n.t('course.assessment.question.scribing.create.failure')
+          )
         end
       end
 
@@ -64,7 +65,7 @@ RSpec.describe Course::Assessment::Question::ScribingController do
         it 'returns the correct attachment' do
           subject
           body = JSON.parse(response.body)
-          expect(body["question"]['attachment_reference']['name']).to eq(
+          expect(body['question']['attachment_reference']['name']).to eq(
             controller.instance_variable_get(:@scribing_question).attachment_reference.name
           )
         end
@@ -81,7 +82,7 @@ RSpec.describe Course::Assessment::Question::ScribingController do
         it 'creates paged PNG image' do
           subject
           body = JSON.parse(response.body)
-          expect(AttachmentReference.exists?(:creator => user, :name => 'document[1].png')).to eq(true)
+          expect(AttachmentReference.exists?(creator: user, name: 'document[1].png')).to eq(true)
           expect(body['message']).to eq(
             I18n.t('course.assessment.question.scribing.create.success')
           )
@@ -108,8 +109,8 @@ RSpec.describe Course::Assessment::Question::ScribingController do
           subject
           body = JSON.parse(response.body)
           expect(body['message']).to eq(
-                                        I18n.t('course.assessment.question.scribing.update.failure')
-                                     )
+            I18n.t('course.assessment.question.scribing.update.failure')
+          )
         end
       end
     end

@@ -11,8 +11,11 @@ RSpec.describe Course::Assessment::Question::ScribingController do
     let(:assessment) { create(:assessment, course: course) }
     let(:question_scribing_attributes) do
       attributes_for(:course_assessment_question_scribings).
-        slice(:title, :description, :staff_only_comments, :maximum_grade,
-              :attempt_limit)
+        slice(:title, :description, :staff_only_comments, :maximum_grade, :file)
+    end
+    let(:question_scribing_update_attributes) do
+      attributes_for(:course_assessment_question_scribings).
+        slice(:title, :description, :staff_only_comments, :maximum_grade)
     end
     let(:immutable_scribing_question) do
       create(:course_assessment_question_scribings, assessment: assessment).tap do |question|
@@ -23,7 +26,6 @@ RSpec.describe Course::Assessment::Question::ScribingController do
 
     before do
       sign_in(user)
-      return unless scribing_question
       controller.instance_variable_set(:@scribing_question, scribing_question)
     end
 
@@ -50,13 +52,50 @@ RSpec.describe Course::Assessment::Question::ScribingController do
                                      )
         end
       end
+
+      #TODO: add test case for uploading normal images
+
+      # context 'when attaching an image attachment' do
+      #   let(:question_scribing_attributes) do
+      #     attributes_for(:course_assessment_question_scribings).
+      #       slice(:title, :description, :maximum_grade, :file).tap do |result|
+      #       result[:file] = fixture_file_upload('files/picture.jpg', 'image/jpeg')
+      #     end
+      #   end
+
+      #   it 'returns the correct attachment url' do
+      #     subject
+      #     body = JSON.parse(response.body)
+      #     expect(body['attachment_reference']['path']).to eq(
+      #       controller.instance_variable_get(:@scribing_question).attachment_reference.path
+      #     )
+      #   end
+      # end
+
+      context 'when attaching a pdf attachment' do
+        let(:question_scribing_attributes) do
+          attributes_for(:course_assessment_question_scribings).
+            slice(:title, :description, :maximum_grade, :file).tap do |result|
+            result[:file] = fixture_file_upload('files/document.pdf', 'application/pdf')
+          end
+        end
+
+        it 'creates paged PNG image' do
+          subject
+          body = JSON.parse(response.body)
+          expect(AttachmentReference.exists?(:creator => user, :name => 'document[1].png')).to eq(true)
+          expect(body['message']).to eq(
+            I18n.t('course.assessment.question.scribing.create.success')
+          )
+        end
+      end
     end
 
     describe '#update' do
       subject do
         request.accept = 'application/json'
         patch :update, course_id: course, assessment_id: assessment, id: scribing_question,
-                       question_scribing: question_scribing_attributes
+                       question_scribing: question_scribing_update_attributes
       end
 
       context 'when the question cannot be saved' do

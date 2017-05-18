@@ -23,7 +23,7 @@ class Course::Assessment::Question::ScribingController < \
     allowed_img_types = ['image/gif', 'image/png', 'image/jpeg', 'image/pjpeg']
 
     #special handling for PDF files
-    if params[:question_scribing] && params[:question_scribing][:file]&.content_type.downcase == 'application/pdf'
+    if params[:question_scribing] && params[:question_scribing][:file]&.content_type&.downcase == 'application/pdf'
       file = params[:question_scribing][:file]
       respond_to do |format|
         if (generatePdfQuestions file)
@@ -119,8 +119,8 @@ class Course::Assessment::Question::ScribingController < \
           convert.render
           convert.density(300)
           # need to check whether to resize image first or later
-          convert.resize('890x1256')
           convert.background('white')
+          convert.flatten
           convert << image.path
           convert << tempFileName
         end

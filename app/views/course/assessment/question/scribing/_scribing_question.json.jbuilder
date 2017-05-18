@@ -6,7 +6,6 @@ json.question do
     json.attachment_reference do
       json.name @scribing_question.attachment_references[0].name
       json.path attachment_reference_path(@scribing_question.attachment_references[0])
-      # json.path attachment_reference_path(@scribing_question.attachment)
       json.updater_name @scribing_question.attachment_references[0].updater.name
     end
   else

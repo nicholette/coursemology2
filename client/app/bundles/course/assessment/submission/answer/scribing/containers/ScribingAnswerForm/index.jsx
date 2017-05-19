@@ -15,8 +15,6 @@ import { tools } from '../../constants';
 
 const propTypes = {
   actions: React.PropTypes.shape({
-    setPathLoaded: PropTypes.func.isRequired,
-    setImageLoaded: PropTypes.func.isRequired,
     setCanvasLoaded: PropTypes.func.isRequired,
     fetchScribingQuestion: PropTypes.func.isRequired,
     fetchScribingAnswer: PropTypes.func.isRequired,

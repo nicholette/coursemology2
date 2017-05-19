@@ -21,20 +21,28 @@ export const initialState = {
   answer: {
     scribbles: [],
   },
-  isLoading: false,
+  is_canvas_loaded: false,
+  is_loading: false,
   save_errors: undefined,
 };
 
-function apiReducer(state, action) {
+export default function scribingAnswerReducer(state = initialState, action) {
   const { type } = action;
+
   switch (type) {
+    case actionTypes.SET_CANVAS_LOADED: {
+      return {
+        ...state,
+        is_canvas_loaded: action.loaded,
+      };
+    }
     case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST:
     case actionTypes.FETCH_SCRIBING_ANSWER_REQUEST:
     case actionTypes.UPDATE_SCRIBING_ANSWER_REQUEST: {
       const { isLoading } = action;
       return {
         ...state,
-        is_loading: isLoading,
+        is_loading: true,
         save_errors: undefined,
       };
     }
@@ -49,7 +57,6 @@ function apiReducer(state, action) {
     }
     case actionTypes.FETCH_SCRIBING_ANSWER_SUCCESS: {
       const answer = action.data && action.data.scribing_answer;
-      console.log('answer', answer);
       return {
         ...state,
         answer,
@@ -69,30 +76,6 @@ function apiReducer(state, action) {
         ...state,
         is_loading: false,
       };
-    }
-    default: {
-      return state;
-    }
-  }
-}
-
-export default function scribingAnswerReducer(state = initialState, action) {
-  const { type } = action;
-
-  switch (type) {
-    case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST:
-    case actionTypes.FETCH_SCRIBING_QUESTION_SUCCESS:
-    case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE:
-    case actionTypes.FETCH_SCRIBING_ANSWER_REQUEST:
-    case actionTypes.FETCH_SCRIBING_ANSWER_SUCCESS:
-    case actionTypes.FETCH_SCRIBING_ANSWER_FAILURE:
-    case actionTypes.UPDATE_SCRIBING_ANSWER_REQUEST:
-    case actionTypes.UPDATE_SCRIBING_ANSWER_SUCCESS:
-    case actionTypes.UPDATE_SCRIBING_ANSWER_FAILURE:
-    case actionTypes.SUBMIT_FORM_LOADING:
-    case actionTypes.SUBMIT_FORM_SUCCESS:
-    case actionTypes.SUBMIT_FORM_FAILURE: {
-      return apiReducer(state, action);
     }
     default: {
       return state;

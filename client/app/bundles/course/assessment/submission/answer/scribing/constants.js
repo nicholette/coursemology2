@@ -1,6 +1,7 @@
 import mirrorCreator from 'mirror-creator';
 
 export const actionTypes = mirrorCreator([
+  'SET_CANVAS_LOADED',
   'FETCH_SCRIBING_QUESTION_REQUEST',
   'FETCH_SCRIBING_QUESTION_SUCCESS',
   'FETCH_SCRIBING_QUESTION_FAILURE',

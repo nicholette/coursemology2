@@ -6,6 +6,9 @@ import { getFormValues } from 'redux-form';
 import { getScribingId } from 'lib/helpers/url-helpers';
 import ScribingAnswerForm from './containers/ScribingAnswerForm';
 import * as scribingAnswerActionCreators from './actions/scribingAnswerActionCreators';
+
+import { questionShape } from '../../../question/scribing/propTypes';
+import { answerShape } from './propTypes';
 import { formNames } from './constants';
 
 function mapStateToProps({ scribingAnswer, ...state }) {
@@ -18,45 +21,10 @@ function mapStateToProps({ scribingAnswer, ...state }) {
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
   scribingAnswer: PropTypes.shape({
-    question: PropTypes.shape({
-      id: PropTypes.number,
-      title: PropTypes.string,
-      description: PropTypes.string,
-      staff_only_comments: PropTypes.string,
-      maximum_grade: PropTypes.number,
-      weight: PropTypes.number,
-      skill_ids: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.number,
-        title: PropTypes.string,
-      })),
-      skills: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.number,
-        title: PropTypes.string,
-      })),
-      attachment_reference: PropTypes.shape({
-        name: PropTypes.string,
-        path: PropTypes.string,
-        updater_name: PropTypes.string,
-      }),
-      error: PropTypes.shape({
-        title: PropTypes.string,
-        skills_id: PropTypes.string,
-        maximum_grade: PropTypes.number,
-      }),
-      published_assessment: PropTypes.bool,
-      attempt_limit: PropTypes.number,
-      attachment_reference: PropTypes.shape({
-        name: PropTypes.string,
-        path: PropTypes.string,
-        updater_name: PropTypes.string,
-      })
-    }),
-    answer: PropTypes.shape({
-      scribbles: PropTypes.arrayOf(PropTypes.shape({
-        content: PropTypes.string,
-      }))
-    }),
-    isLoading: PropTypes.bool,
+    question: questionShape,
+    // answer: answerShape,
+    is_loading: PropTypes.bool,
+    save_errors: PropTypes.array(PropTypes.string),
   })
 };
 
@@ -66,11 +34,8 @@ const ScribingAnswer = (props) => {
   // TODO: get scribing answer id
   return (
     <ScribingAnswerForm
-      {...{
-        dispatch,
-        actions,
-        scribingAnswer
-      }}
+      actions={actions}
+      scribingAnswer={scribingAnswer}
     />
   );
 };

@@ -4,6 +4,12 @@ import CourseAPI from 'api/course';
 import { getCourseId, getAssessmentId, getScribingId } from 'lib/helpers/url-helpers';
 import { actionTypes } from '../constants';
 
+export function setCanvasLoaded(loaded) {
+  return (dispatch) => {
+    dispatch({ type: actionTypes.SET_CANVAS_LOADED, loaded });
+  }
+}
+
 export function fetchScribingQuestion(scribingId) {
   return (dispatch) => {
     dispatch({ type: actionTypes.FETCH_SCRIBING_QUESTION_REQUEST });

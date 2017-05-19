@@ -9,54 +9,26 @@ import { injectIntl, intlShape } from 'react-intl';
 
 import translations from './ScribingAnswerForm.intl';
 
-import { fetchScribingQuestion, fetchScribingAnswer, updateScribingAnswer } from '../../actions/scribingAnswerActionCreators';
-
+import { questionShape } from '../../../../../question/scribing/propTypes';
+import { answerShape } from '../../propTypes';
 import { tools } from '../../constants';
 
 const propTypes = {
-  dispatch: PropTypes.func.isRequired,
-  scribingAnswer: PropTypes.shape({
-    question: PropTypes.shape({
-      id: PropTypes.number,
-      title: PropTypes.string,
-      description: PropTypes.string,
-      staff_only_comments: PropTypes.string,
-      maximum_grade: PropTypes.number,
-      weight: PropTypes.number,
-      skill_ids: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.number,
-        title: PropTypes.string,
-      })),
-      skills: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.number,
-        title: PropTypes.string,
-      })),
-      attachment_reference: PropTypes.shape({
-        name: PropTypes.string,
-        path: PropTypes.string,
-        updater_name: PropTypes.string,
-      }),
-      error: PropTypes.shape({
-        title: PropTypes.string,
-        skills_id: PropTypes.string,
-        maximum_grade: PropTypes.number,
-      }),
-      published_assessment: PropTypes.bool,
-      attempt_limit: PropTypes.number,
-      attachment_reference: PropTypes.shape({
-        name: PropTypes.string,
-        path: PropTypes.string,
-        updater_name: PropTypes.string,
-      })
-    }),
-    answer: PropTypes.shape({
-      scribbles: PropTypes.arrayOf(PropTypes.shape({
-        content: PropTypes.string,
-      }))
-    }),
-    isLoading: PropTypes.bool,
+  actions: React.PropTypes.shape({
+    setPathLoaded: PropTypes.func.isRequired,
+    setImageLoaded: PropTypes.func.isRequired,
+    setCanvasLoaded: PropTypes.func.isRequired,
+    fetchScribingQuestion: PropTypes.func.isRequired,
+    fetchScribingAnswer: PropTypes.func.isRequired,
+    updateScribingAnswer: PropTypes.func.isRequired,
   }),
-  save_errors: PropTypes.string,
+  scribingAnswer: PropTypes.shape({
+    question: questionShape,
+    // answer: answerShape,
+    is_loading: PropTypes.bool,
+    is_canvas_loaded: PropTypes.bool,
+    save_errors: PropTypes.array(PropTypes.string),
+  }),
 }
 
 const styles = {
@@ -74,12 +46,12 @@ const styles = {
 }
 
 class ScribingAnswerForm extends React.Component {
-
   constructor() {
     super();
     this.state = {
-      canvas: {},
       selectedTool: tools.SELECT,
+      imageWidth: 0,
+      imageHeight: 0,
     }
     this.onClickDrawingMode = this.onClickDrawingMode.bind(this);
     this.onClickSelectionMode = this.onClickSelectionMode.bind(this);
@@ -87,53 +59,77 @@ class ScribingAnswerForm extends React.Component {
     this.onClickDelete = this.onClickDelete.bind(this);
   }
 
-  componentDidMount() {
-    const { dispatch } = this.props;
-
+  initializeAnswer() {
     var answer = document.getElementById('scribing-answer');
     var scribingQuestionId = answer.dataset.scribingQuestionId;
     var scribingAnswerId = answer.dataset.scribingAnswerId;
 
     if (scribingQuestionId) {
-      dispatch(fetchScribingQuestion(scribingQuestionId));
+      this.props.actions.fetchScribingQuestion(scribingQuestionId);
     }
     if (scribingAnswerId) {
-      dispatch(fetchScribingAnswer(scribingAnswerId));
+      this.props.actions.fetchScribingAnswer(scribingAnswerId);
     }
-    // Initialize Fabric.js canvas
-    // Takes in canvas's id for initialization
-    const canvas = new fabric.Canvas('canvas', {
-      width: this.refs.canvas.clientWidth,
-      height: this.refs.canvas.clientHeight
-    });
+  }
 
-    this.setState({ canvas });
+  initializeCanvas(imagePath) {
+    const _self = this;
+    const imageUrl = window.location.origin + '\\' + imagePath;
+    const image = new Image();
+    image.src = imageUrl;
+    image.onload = () => {
+      const CANVAS_MAX_WIDTH = 890;
+      const width = Math.min(image.width, CANVAS_MAX_WIDTH);
+      const scale = Math.min(width / image.width, 1);
+      const height = scale * image.height;
+
+      _self.refs.canvas.width = width;
+      _self.refs.canvas.height = height;
+
+      // Takes in canvas's id for initialization
+      const canvas = new fabric.Canvas('canvas', { width, height });
+
+      const fabricImage = new fabric.Image(
+        image,
+        {opacity: 1, scaleX: scale, scaleY: scale}
+      );
+      canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
+
+      _self.canvas = canvas;
+      _self.props.actions.setCanvasLoaded(true);
+    }
+  }
+
+  componentDidMount() {
+    this.initializeAnswer();
   }
 
   componentDidUpdate() {
     this.updateCanvas();
   }
 
-  handleImageLoaded() {
-
-  }
-
-  handleImageErrored() {
-
+  shouldComponentUpdate(nextProps) {
+    if (!this.props.scribingAnswer.is_canvas_loaded && 
+        this.props.scribingAnswer.question.attachment_reference.path !==
+        nextProps.scribingAnswer.question.attachment_reference.path) {
+        this.initializeCanvas(nextProps.scribingAnswer.question.attachment_reference.path);
+      return false;
+    }
+    return nextProps.scribingAnswer.is_canvas_loaded;
   }
 
   onClickDrawingMode() {
-    this.state.canvas.isDrawingMode = true;
+    this.canvas.isDrawingMode = true;
     this.setState({selectedTool: tools.DRAW})
   }
 
   onClickSelectionMode() {
-    this.state.canvas.isDrawingMode = false;
+    this.canvas.isDrawingMode = false;
     this.setState({selectedTool: tools.SELECT})
   }
 
   onClickDelete() {
-    const canvas = this.state.canvas;
+    const canvas = this.canvas;
     const activeGroup = canvas.getActiveGroup();
     const activeObject = canvas.getActiveObject();
 
@@ -163,14 +159,13 @@ class ScribingAnswerForm extends React.Component {
   // }
 
   onClickSave() {
-    const { dispatch } = this.props;
-    const objects = this.state.canvas._objects;
+    const objects = this.canvas._objects;
     const scribbles = [];
     for (var i=0; i<objects.length; i++) {
       // scribbles.push( objects[i].toSVG() + this.addSvgEndText());
       console.log('scribble' + i, JSON.stringify(objects[i]));
     }
-    console.log('canvas', JSON.stringify(this.state.canvas));
+    console.log('canvas', JSON.stringify(this.canvas));
     const answerId = document.getElementById('scribing-answer').dataset.scribingAnswerId;
 
     // dispatch(updateScribingAnswer(answerId, scribbles));
@@ -180,9 +175,6 @@ class ScribingAnswerForm extends React.Component {
   }
 
   renderToolBar() {
-    // TODO: show state of the button
-    console.log(this.state.selectedTool, tools.DRAW, this.state.selectedTool === tools.DRAW);
-
     return (
       <Toolbar style={styles.toolbar}>
         <ToolbarGroup>
@@ -201,12 +193,6 @@ class ScribingAnswerForm extends React.Component {
   }
 
   updateCanvas() {
-    const imagePath = this.props.scribingAnswer.question.attachment_reference.path;
-    var canvas = this.state.canvas;
-    if (imagePath) {
-      canvas.setBackgroundImage(window.location.origin + '\\' + imagePath, canvas.renderAll.bind(canvas));
-    }
-
     const scribbles = this.props.scribingAnswer.answer.scribbles
     // TODO: handle behavior, where after saving, more scribbles will be added
     if (scribbles) {
@@ -222,19 +208,13 @@ class ScribingAnswerForm extends React.Component {
     const objects = canvas._objects;
   }
 
-  renderCanvas() {
-    return (
-      <canvas style={styles.canvas} id="canvas" ref="canvas" height={1256} width={890}/>
-    );
-  }
-
   render() {
 
     // TODO: Make the height/width automatic
     return (
       <div style={styles.canvas_div}>
         { this.renderToolBar() }
-        { this.renderCanvas() }
+        <canvas style={styles.canvas} id="canvas" ref="canvas" />
       </div>
     );
   }

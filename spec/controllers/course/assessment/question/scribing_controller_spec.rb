@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 require 'rails_helper'
 
-# rubocop:disable Metrics/BlockLength
 RSpec.describe Course::Assessment::Question::ScribingController do
   render_views
   let(:instance) { Instance.default }
-  with_tenant(:instance) do # rubocop:disable Metrics/BlockLength
+  with_tenant(:instance) do
     let(:scribing_question) { nil }
     let(:user) { create(:user) }
     let(:course) { create(:course, creator: user) }
@@ -30,7 +29,7 @@ RSpec.describe Course::Assessment::Question::ScribingController do
       controller.instance_variable_set(:@scribing_question, scribing_question)
     end
 
-    describe '#create' do # rubocop:disable Metrics/BlockLength
+    describe '#create' do
       subject do
         request.accept = 'application/json'
         post :create, course_id: course, assessment_id: assessment,

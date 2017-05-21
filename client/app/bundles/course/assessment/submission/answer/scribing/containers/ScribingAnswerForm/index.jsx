@@ -152,7 +152,6 @@ class ScribingAnswerForm extends React.Component {
           this.layers = [...this.layers, newScribble];
         } else {
           fabricObjs.map((obj) => {
-            obj.selectable = true;
             this.canvas.add(obj)
           });
         }

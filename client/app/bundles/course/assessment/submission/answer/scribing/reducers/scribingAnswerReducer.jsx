@@ -1,25 +1,9 @@
 import { actionTypes } from '../constants';
 
 export const initialState = {
-  question: {
-    id: null,
-    title: '',
-    description: '',
-    staff_only_comments: '',
-    maximum_grade: 0,
-    weight: 0,
-    skill_ids: [],
-    skills: [],
-    published_assessment: false,
-    attempt_limit: null,
-    attachment_reference: {
-      name: '',
-      path: '',
-      updater_name: '',
-    }
-  },
   answer: {
     scribbles: [],
+    image_path: ''
   },
   is_canvas_loaded: false,
   is_loading: false,

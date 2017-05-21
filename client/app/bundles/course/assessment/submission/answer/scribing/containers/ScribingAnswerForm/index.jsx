@@ -4,24 +4,25 @@ import { Canvas } from 'react-fabricjs';
 import FontIcon from 'material-ui/FontIcon';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
 import RaisedButton from 'material-ui/RaisedButton';
+import Popover from 'material-ui/Popover';
+import Menu from 'material-ui/Menu';
+import MenuItem from 'material-ui/MenuItem';
 
 import { injectIntl, intlShape } from 'react-intl';
 
 import translations from './ScribingAnswerForm.intl';
 
-import { questionShape } from '../../../../../question/scribing/propTypes';
 import { answerShape } from '../../propTypes';
 import { tools } from '../../constants';
 
 const propTypes = {
   actions: React.PropTypes.shape({
     setCanvasLoaded: PropTypes.func.isRequired,
-    fetchScribingQuestion: PropTypes.func.isRequired,
     fetchScribingAnswer: PropTypes.func.isRequired,
     updateScribingAnswer: PropTypes.func.isRequired,
   }),
   scribingAnswer: PropTypes.shape({
-    question: questionShape,
+    // question: questionShape,
     // answer: answerShape,
     is_loading: PropTypes.bool,
     is_canvas_loaded: PropTypes.bool,
@@ -40,7 +41,7 @@ const styles = {
   },
   toolbar: {
     marginBottom: `1em`,
-  }
+  },
 }
 
 class ScribingAnswerForm extends React.Component {
@@ -50,6 +51,8 @@ class ScribingAnswerForm extends React.Component {
       selectedTool: tools.SELECT,
       imageWidth: 0,
       imageHeight: 0,
+      isPopoverOpen: false,
+      layers: [],
     }
     this.onClickDrawingMode = this.onClickDrawingMode.bind(this);
     this.onClickSelectionMode = this.onClickSelectionMode.bind(this);
@@ -57,14 +60,26 @@ class ScribingAnswerForm extends React.Component {
     this.onClickDelete = this.onClickDelete.bind(this);
   }
 
+  handlePopoverTouchTap = (event) => {
+    // This prevents ghost click.
+    // event.preventDefault();
+
+    this.setState({
+      isPopoverOpen: true,
+      anchorEl: event.currentTarget,
+    });
+  };
+
+  handlePopoverRequestClose = () => {
+    this.setState({
+      isPopoverOpen: false,
+    });
+  };
+
   initializeAnswer() {
     var answer = document.getElementById('scribing-answer');
-    var scribingQuestionId = answer.dataset.scribingQuestionId;
     var scribingAnswerId = answer.dataset.scribingAnswerId;
 
-    if (scribingQuestionId) {
-      this.props.actions.fetchScribingQuestion(scribingQuestionId);
-    }
     if (scribingAnswerId) {
       this.props.actions.fetchScribingAnswer(scribingAnswerId);
     }
@@ -76,6 +91,7 @@ class ScribingAnswerForm extends React.Component {
     const image = new Image();
     image.src = imageUrl;
     image.onload = () => {
+      // A4 size width
       const CANVAS_MAX_WIDTH = 890;
       const width = Math.min(image.width, CANVAS_MAX_WIDTH);
       const scale = Math.min(width / image.width, 1);
@@ -94,25 +110,81 @@ class ScribingAnswerForm extends React.Component {
       canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
 
       _self.canvas = canvas;
+
+      _self.initializeScribbles();
+
       _self.props.actions.setCanvasLoaded(true);
     }
   }
 
+  initializeScribbles() {
+    const { scribbles, user_id } = this.props.scribingAnswer.answer;
+    this.layers = [];
+    if (scribbles) {
+      scribbles.forEach((scribble) => {
+        const objects = JSON.parse(scribble.content).objects;
+        const fabricObjs = [];
+
+        for (var i = 0; i < objects.length; i++) {
+          var klass = fabric.util.getKlass(objects[i].type);
+          klass.fromObject(objects[i], (obj)=>(fabricObjs.push(obj)));
+        }
+
+        if (scribble.creator_id !== user_id) {
+          const scribbleGroup = new fabric.Group(fabricObjs);
+          scribbleGroup.selectable = false;
+
+          const showLayer = (isShown) => {
+            const thisGroup = scribbleGroup;
+            if (isShown && !this.canvas.contains(thisGroup)) {
+              this.canvas.add(thisGroup);
+            } else if (!isShown && this.canvas.contains(thisGroup)) {
+              this.canvas.remove(thisGroup);
+            }
+            this.canvas.renderAll();
+          }
+          // Populate layers list
+          const newScribble = {
+            ...scribble,
+            isDisplayed: true,
+            showLayer,
+          }
+          this.layers = [...this.layers, newScribble];
+        } else {
+          fabricObjs.map((obj) => {
+            obj.selectable = true;
+            this.canvas.add(obj)
+          });
+        }
+      })
+    }
+  }
+
+  updateScribbles() {
+    const { user_id } = this.props.scribingAnswer.answer;
+    const { layers } = this;
+
+    if (layers) {
+      layers.forEach((layer) => {
+        layer.showLayer(layer.isDisplayed);
+      })
+    }
+  }
+
   componentDidMount() {
+    // Retrieve answer in async call
     this.initializeAnswer();
   }
 
-  componentDidUpdate() {
-    this.updateCanvas();
-  }
-
   shouldComponentUpdate(nextProps) {
+    // Don't update until canvas is ready
     if (!this.props.scribingAnswer.is_canvas_loaded && 
-        this.props.scribingAnswer.question.attachment_reference.path !==
-        nextProps.scribingAnswer.question.attachment_reference.path) {
-        this.initializeCanvas(nextProps.scribingAnswer.question.attachment_reference.path);
+        this.props.scribingAnswer.answer.image_path !==
+        nextProps.scribingAnswer.answer.image_path) {
+        this.initializeCanvas(nextProps.scribingAnswer.answer.image_path);
       return false;
     }
+    this.updateScribbles();
     return nextProps.scribingAnswer.is_canvas_loaded;
   }
 
@@ -143,33 +215,61 @@ class ScribingAnswerForm extends React.Component {
     }
   }
 
-  // addSvgStartText() {
-  //   return `<svg xmlns="http://www.w3.org/2000/svg" 
-  //           xmlns:xlink="http://www.w3.org/1999/xlink"
-  //           version="1.1" width="${this.refs.canvas.clientWidth}" 
-  //           height="${this.refs.canvas.clientHeight}" xml:space="preserve">
-  //           <desc>Created with Fabric.js 1.6.0-rc.1</desc>
-  //           <defs></defs>`;
-  // }
+  getScribbleJSON() {
+    // Remove non-user scribings in canvas
+    this.layers.forEach((layer) => {
+      if (layer.creator_id !== this.props.scribingAnswer.answer.user_id) {
+        layer.showLayer(false)
+      }
+    })
+    
+    // Only save user scribings
+    const json = JSON.stringify(this.canvas._objects);
 
-  // addSvgEndText() {
-  //   return '</svg>';
-  // }
+    // Add back non-user scribings according canvas state
+    this.layers.forEach((layer) => (layer.showLayer(layer.showLayer)));
+
+    return '{"objects":'+ json +'}';
+  }
 
   onClickSave() {
     const objects = this.canvas._objects;
-    const scribbles = [];
-    for (var i=0; i<objects.length; i++) {
-      // scribbles.push( objects[i].toSVG() + this.addSvgEndText());
-      console.log('scribble' + i, JSON.stringify(objects[i]));
-    }
-    console.log('canvas', JSON.stringify(this.canvas));
     const answerId = document.getElementById('scribing-answer').dataset.scribingAnswerId;
+    const json = this.getScribbleJSON();
+    this.props.actions.updateScribingAnswer(answerId, json);
+  }
 
-    // dispatch(updateScribingAnswer(answerId, scribbles));
+  renderPopover() {
 
-    // TODO: remove after demo
-    // window.location.reload(true);
+    return this.layers ? (
+      <Popover
+        open={this.state.isPopoverOpen}
+        anchorEl={this.state.anchorEl}
+        anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+        targetOrigin={{horizontal: 'left', vertical: 'top'}}
+        onRequestClose={this.handlePopoverRequestClose}
+      >
+        <Menu>
+          { this.layers.map((layer) => (
+              <MenuItem 
+                key={layer.creator_id}
+                primaryText={layer.creator_name}
+                checked={layer.isDisplayed}
+                onTouchTap={(event) => {
+                  // Shift to props for updating
+                    const layersClone = _.cloneDeep(this.layers);
+                    const temp = _.find(layersClone, {creator_id: layer.creator_id});
+                    temp.isDisplayed = !temp.isDisplayed;
+                    this.layers = layersClone;
+                    this.updateScribbles();
+                    this.forceUpdate();
+                }}
+              />
+            ))
+          }
+        </Menu>
+      </Popover>
+    ) : null;
   }
 
   renderToolBar() {
@@ -182,6 +282,11 @@ class ScribingAnswerForm extends React.Component {
             onClick={this.onClickSelectionMode}/>
           <FontIcon className="fa fa-trash-o" style={this.state.selectedTool === tools.DELETE ? {color: `black`} : {}}
             onClick={this.onClickDelete}/>
+          <RaisedButton
+            onTouchTap={this.handlePopoverTouchTap}
+            label="Layers"
+          />
+          { this.renderPopover() }
         </ToolbarGroup>
         <ToolbarGroup>
           <RaisedButton label="Save" primary={true} onClick={this.onClickSave} />
@@ -190,24 +295,7 @@ class ScribingAnswerForm extends React.Component {
     )
   }
 
-  updateCanvas() {
-    const scribbles = this.props.scribingAnswer.answer.scribbles
-    // TODO: handle behavior, where after saving, more scribbles will be added
-    if (scribbles) {
-      var i=0;
-      scribbles.forEach((scribble) => {
-        fabric.loadSVGFromString(scribble.content, function(objects, options) {
-          var obj = fabric.util.groupSVGElements(objects, options);
-          canvas.add(obj).renderAll();
-        });
-      })
-    }
-
-    const objects = canvas._objects;
-  }
-
   render() {
-
     // TODO: Make the height/width automatic
     return (
       <div style={styles.canvas_div}>

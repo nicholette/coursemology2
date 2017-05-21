@@ -7,7 +7,6 @@ import { getScribingId } from 'lib/helpers/url-helpers';
 import ScribingAnswerForm from './containers/ScribingAnswerForm';
 import * as scribingAnswerActionCreators from './actions/scribingAnswerActionCreators';
 
-import { questionShape } from '../../../question/scribing/propTypes';
 import { answerShape } from './propTypes';
 import { formNames } from './constants';
 
@@ -21,7 +20,6 @@ function mapStateToProps({ scribingAnswer, ...state }) {
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
   scribingAnswer: PropTypes.shape({
-    question: questionShape,
     // answer: answerShape,
     is_loading: PropTypes.bool,
     save_errors: PropTypes.array(PropTypes.string),

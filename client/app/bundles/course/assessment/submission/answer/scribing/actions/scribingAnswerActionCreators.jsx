@@ -10,26 +10,6 @@ export function setCanvasLoaded(loaded) {
   }
 }
 
-export function fetchScribingQuestion(scribingId) {
-  return (dispatch) => {
-    dispatch({ type: actionTypes.FETCH_SCRIBING_QUESTION_REQUEST });
-    return CourseAPI.question.scribing.scribings.fetch(scribingId)
-      .then((response) => {
-        dispatch({
-          scribingId,
-          type: actionTypes.FETCH_SCRIBING_QUESTION_SUCCESS,
-          data: response.data,
-        });
-      })
-      .catch((error) => {
-        dispatch({ type: actionTypes.FETCH_SCRIBING_QUESTION_FAILURE });
-        if (error.response && error.response.data) {
-          throw new SubmissionError(error.response.data.errors);
-        }
-      });
-  };
-}
-
 export function fetchScribingAnswer(answerId) {
   return (dispatch) => {
     dispatch({ type: actionTypes.FETCH_SCRIBING_ANSWER_REQUEST });
@@ -50,12 +30,10 @@ export function fetchScribingAnswer(answerId) {
   };
 }
 
-// scribblesinSVG: array of scribbles in SVG
-export function updateScribingAnswer(answerId, scribblesInSvg) {
+export function updateScribingAnswer(answerId, scribblesInJSON) {
   const data = {
-    scribing_answer: {
-      scribbles: scribblesInSvg,
-    },
+    content: scribblesInJSON,
+    answer_id: answerId
   }
 
   return (dispatch) => {

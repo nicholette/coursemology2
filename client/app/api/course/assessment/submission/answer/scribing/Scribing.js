@@ -19,19 +19,11 @@ export default class ScribingsAPI extends BaseSubmissionAPI {
     return this.getClient().get(`${this._getUrlPrefix()}/${answerId}/scribing/${answerId}`);
   }
 
-
   /**
-   * Updates a Scribing answer
-   *
-   * @param {number} answerId
-   * @param {object} data - params in the format of
-   *                                { scribing_answer: { scribbles: [string] } }
-   * @return {Promise}
-   * success response: scribing_answer
-   * error response: { errors: [{ attribute: string }] }
+   * Updates a Scribble
    */
   update(answerId, data) {
-    return this.getClient().patch(`${this._getUrlPrefix()}/${answerId}/scribing/${answerId}`, data);
+    return this.getClient().post(`${this._getUrlPrefix()}/${answerId}/scribing/scribbles`, data);
   }
 
   _getUrlPrefix() {

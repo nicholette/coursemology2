@@ -23,17 +23,19 @@ const propTypes = {
     // answer: answerShape,
     is_loading: PropTypes.bool,
     save_errors: PropTypes.array(PropTypes.string),
-  })
+  }),
+  data: PropTypes.object.isRequired,
 };
 
 const ScribingAnswer = (props) => {
-  const { dispatch, scribingAnswer } = props;
+  const { dispatch, scribingAnswer, data } = props;
   const actions = bindActionCreators(scribingAnswerActionCreators, dispatch);
   // TODO: get scribing answer id
   return (
     <ScribingAnswerForm
       actions={actions}
       scribingAnswer={scribingAnswer}
+      data={data}
     />
   );
 };

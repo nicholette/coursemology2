@@ -5,15 +5,21 @@ import storeCreator from './scribing/store';
 import ScribingAnswer from './scribing/ScribingAnswer';
 
 $(document).ready(() => {
-  const mountNode = document.getElementById('scribing-answer');
-  if (mountNode) {
-    const store = storeCreator({ scribingAnswer: {} });
+  const mountNodeElems = document.getElementsByClassName('scribing-answer');
+  console.log(mountNodeElems);
+  if (mountNodeElems) {
 
-    render(
-      <ProviderWrapper {...{ store }}>
-        <ScribingAnswer />
-      </ProviderWrapper>,
-      mountNode
-    );
+    for (var i=0; i<mountNodeElems.length; i++) {
+      const mountNode = mountNodeElems[i];
+      const store = storeCreator({ scribingAnswer: {} });
+      const data = JSON.parse(mountNode.getAttribute('data'));
+
+      render(
+        <ProviderWrapper {...{ store }}>
+          <ScribingAnswer data={data} />
+        </ProviderWrapper>,
+        mountNode
+      );
+    }
   }
 });

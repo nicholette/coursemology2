@@ -18,7 +18,8 @@ import { tools } from '../../constants';
 const propTypes = {
   actions: React.PropTypes.shape({
     setCanvasLoaded: PropTypes.func.isRequired,
-    fetchScribingAnswer: PropTypes.func.isRequired,
+    // fetchScribingAnswer: PropTypes.func.isRequired,
+    setUpScribingAnswer: PropTypes.func.isRequired,
     updateScribingAnswer: PropTypes.func.isRequired,
   }),
   scribingAnswer: PropTypes.shape({
@@ -28,6 +29,7 @@ const propTypes = {
     is_canvas_loaded: PropTypes.bool,
     save_errors: PropTypes.array(PropTypes.string),
   }),
+  data: PropTypes.object.isRequired,
 }
 
 const styles = {
@@ -56,7 +58,6 @@ class ScribingAnswerForm extends React.Component {
     }
     this.onClickDrawingMode = this.onClickDrawingMode.bind(this);
     this.onClickSelectionMode = this.onClickSelectionMode.bind(this);
-    this.onClickSave = this.onClickSave.bind(this);
     this.onClickDelete = this.onClickDelete.bind(this);
   }
 
@@ -77,16 +78,15 @@ class ScribingAnswerForm extends React.Component {
   };
 
   initializeAnswer() {
-    var answer = document.getElementById('scribing-answer');
-    var scribingAnswerId = answer.dataset.scribingAnswerId;
+    // var answer = document.getElementById('scribing-answer');
+    // var data = JSON.parse(answer.getAttribute('data'));
 
-    if (scribingAnswerId) {
-      this.props.actions.fetchScribingAnswer(scribingAnswerId);
-    }
+    this.props.actions.setUpScribingAnswer(this.props.data);
   }
 
   initializeCanvas(imagePath) {
     const _self = this;
+    const answerId = this.props.scribingAnswer.answer.answer_id;
     const imageUrl = window.location.origin + '\\' + imagePath;
     const image = new Image();
     image.src = imageUrl;
@@ -101,7 +101,7 @@ class ScribingAnswerForm extends React.Component {
       _self.refs.canvas.height = height;
 
       // Takes in canvas's id for initialization
-      const canvas = new fabric.Canvas('canvas', { width, height });
+      const canvas = new fabric.Canvas(`canvas-${answerId}`, { width, height });
 
       const fabricImage = new fabric.Image(
         image,
@@ -110,6 +110,9 @@ class ScribingAnswerForm extends React.Component {
       canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
 
       _self.canvas = canvas;
+      _self.canvas.on('mouse:up', (options) => {
+        _self.saveScribbles();
+      })
 
       _self.initializeScribbles();
 
@@ -231,9 +234,9 @@ class ScribingAnswerForm extends React.Component {
     return '{"objects":'+ json +'}';
   }
 
-  onClickSave() {
+  saveScribbles() {
     const objects = this.canvas._objects;
-    const answerId = document.getElementById('scribing-answer').dataset.scribingAnswerId;
+    const answerId = this.props.scribingAnswer.answer.answer_id;
     const json = this.getScribbleJSON();
     this.props.actions.updateScribingAnswer(answerId, json);
   }
@@ -287,19 +290,17 @@ class ScribingAnswerForm extends React.Component {
           />
           { this.renderPopover() }
         </ToolbarGroup>
-        <ToolbarGroup>
-          <RaisedButton label="Save" primary={true} onClick={this.onClickSave} />
-        </ToolbarGroup>
       </Toolbar>
     )
   }
 
   render() {
     // TODO: Make the height/width automatic
+    const answerId = this.props.scribingAnswer.answer.answer_id;
     return (
       <div style={styles.canvas_div}>
         { this.renderToolBar() }
-        <canvas style={styles.canvas} id="canvas" ref="canvas" />
+        <canvas style={styles.canvas} id={`canvas-${answerId}`} ref="canvas" />
       </div>
     );
   }

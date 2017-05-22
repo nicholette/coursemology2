@@ -10,24 +10,37 @@ export function setCanvasLoaded(loaded) {
   }
 }
 
-export function fetchScribingAnswer(answerId) {
+// For using API call to get scribing answer
+
+// export function fetchScribingAnswer(answerId) {
+//   return (dispatch) => {
+//     dispatch({ type: actionTypes.FETCH_SCRIBING_ANSWER_REQUEST });
+//     return CourseAPI.answer.scribing.scribings.fetch(answerId)
+//       .then((response) => {
+//         dispatch({
+//           answerId,
+//           type: actionTypes.FETCH_SCRIBING_ANSWER_SUCCESS,
+//           data: response.data,
+//         });
+//       })
+//       .catch((error) => {
+//         dispatch({ type: actionTypes.FETCH_SCRIBING_ANSWER_FAILURE });
+//         if (error.response && error.response.data) {
+//           throw new SubmissionError(error.response.data.errors);
+//         }
+//       });
+//   };
+// }
+
+// For using data attribute to get scribing answer
+export function setUpScribingAnswer(data) {
   return (dispatch) => {
-    dispatch({ type: actionTypes.FETCH_SCRIBING_ANSWER_REQUEST });
-    return CourseAPI.answer.scribing.scribings.fetch(answerId)
-      .then((response) => {
-        dispatch({
-          answerId,
-          type: actionTypes.FETCH_SCRIBING_ANSWER_SUCCESS,
-          data: response.data,
-        });
-      })
-      .catch((error) => {
-        dispatch({ type: actionTypes.FETCH_SCRIBING_ANSWER_FAILURE });
-        if (error.response && error.response.data) {
-          throw new SubmissionError(error.response.data.errors);
-        }
-      });
-  };
+    dispatch({
+      answerId: data.scribing_answer.answer_id,
+      type: actionTypes.FETCH_SCRIBING_ANSWER_SUCCESS,
+      data,
+    });
+  }
 }
 
 export function updateScribingAnswer(answerId, scribblesInJSON) {

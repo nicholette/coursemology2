@@ -23,7 +23,7 @@ class Course::Assessment::Question::ScribingController < \
   def create
     # special handling for PDF files
     respond_to do |format|
-      if file_for_uploading? && scribing_question_service(scribing_question_params[:file]).save_question
+      if file_for_uploading? && scribing_question_creator_service(scribing_question_params[:file]).save_question
         format.json { render_success_json t('.success') }
       else
         format.json { render_failure_json t('.failure') }
@@ -99,9 +99,9 @@ class Course::Assessment::Question::ScribingController < \
     allowed_file_types.include? scribing_question_params.dig(:file)&.content_type&.downcase
   end
 
-  def scribing_question_service(file)
+  def scribing_question_creator_service(file)
     max_weight = @assessment.questions.pluck(:weight).max
-    @service ||= Course::Assessment::Question::Scribing::ScribingQuestionService.new(
+    @service ||= Course::Assessment::Question::Scribing::ScribingQuestionCreatorService.new(
       @scribing_question, file, current_user, @assessment
     )
   end

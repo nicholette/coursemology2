@@ -158,20 +158,10 @@ Rails.application.routes.draw do
 
       resources :announcements, concerns: :paginatable
       scope module: :achievement do
-        resources :achievements do
+        resources :achievements, except: [:new] do
           concerns :conditional
           resources :course_users, only: [:index]
           post 'reorder', on: :collection
-        end
-      end
-
-      collection do
-        namespace :assessment do
-          resources :programming_evaluations, only: [:index, :show], defaults: { format: 'json' } do
-            post 'allocate' => 'programming_evaluations#allocate', on: :collection
-            get 'package' => 'programming_evaluations#package'
-            put 'result' => 'programming_evaluations#update_result'
-          end
         end
       end
 
@@ -182,6 +172,7 @@ Rails.application.routes.draw do
             resources :multiple_responses, only: [:new, :create, :edit, :update, :destroy]
             resources :text_responses, only: [:new, :create, :edit, :update, :destroy]
             resources :programming, only: [:new, :create, :edit, :update, :destroy]
+            resources :scribing, only: [:show, :new, :create, :edit, :update, :destroy]
           end
           scope module: :submission do
             resources :submissions, only: [:index, :create, :edit, :update] do
@@ -338,6 +329,6 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :attachment_references, path: 'attachments', only: [:show]
+  resources :attachment_references, path: 'attachments', only: [:show, :destroy]
   resources :attachments, only: [:create]
 end

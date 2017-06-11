@@ -12,10 +12,11 @@ RSpec.describe Course::Assessment do
       create(:assessment, :with_all_question_types, course: course, published: false)
     end
     let(:published_started_assessment) do
-      create(:assessment, :published_with_mcq_question, course: course)
+      create(:assessment, :published_with_all_question_types, course: course)
     end
     let(:published_not_started_assessment) do
-      create(:assessment, :published_with_mcq_question, start_at: 1.day.from_now, course: course)
+      create(:assessment, :published_with_all_question_types,
+             start_at: 1.day.from_now, course: course)
     end
     let(:published_assessment_with_attemping_submission) do
       create(:assessment, :published_with_all_question_types, course: course)
@@ -37,6 +38,12 @@ RSpec.describe Course::Assessment do
              assessment: published_started_assessment, creator: coursemate.user)
     end
 
+    def get_text_response_answer_for(submission)
+      submission.latest_answers.select do |ans|
+        ans.specific.class == Course::Assessment::Answer::TextResponse
+      end.first.specific
+    end
+
     context 'when the user is a Course Student' do
       let(:user) { course_user.user }
 
@@ -54,6 +61,20 @@ RSpec.describe Course::Assessment do
       it { is_expected.to be_able_to(:read, submitted_submission) }
       it { is_expected.not_to be_able_to(:update, coursemate_attempting_submission) }
       it { is_expected.not_to be_able_to(:read, coursemate_submitted_submission) }
+
+      it do
+        is_expected.to be_able_to(:destroy_attachment,
+                                  get_text_response_answer_for(attempting_submission))
+      end
+      it do
+        is_expected.not_to be_able_to(:destroy_attachment,
+                                      get_text_response_answer_for(submitted_submission))
+      end
+      it do
+        is_expected.
+          not_to be_able_to(:destroy_attachment,
+                            get_text_response_answer_for(coursemate_attempting_submission))
+      end
 
       context 'when the course is self directed' do
         let(:course) { create(:course, advance_start_at_duration_days: 3) }
@@ -73,6 +94,10 @@ RSpec.describe Course::Assessment do
       let(:user) { create(:course_teaching_assistant, course: course).user }
       it { is_expected.to be_able_to(:manage, published_started_assessment) }
       it { is_expected.not_to be_able_to(:publish_grades, published_started_assessment) }
+      it do
+        is_expected.not_to be_able_to(:destroy_attachment,
+                                      get_text_response_answer_for(attempting_submission))
+      end
     end
 
     context 'when the user is a Course Staff' do

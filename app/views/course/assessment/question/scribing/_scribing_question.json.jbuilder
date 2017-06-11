@@ -1,17 +1,18 @@
 json.question do
   json.(@scribing_question, :id, :title, :description, :staff_only_comments, :maximum_grade,
     :weight)
-  
-  if @scribing_question.attachment_references.present?
+
+  if @scribing_question.attachment_reference
     json.attachment_reference do
-      json.name @scribing_question.attachment_references[0].name
-      json.path attachment_reference_path(@scribing_question.attachment_references[0])
-      json.updater_name @scribing_question.attachment_references[0].updater.name
+      json.partial! 'attachments/attachment_reference',
+                    attachment_reference: @scribing_question.attachment_reference
     end
   else
     json.attachment_reference nil
   end
 
+  # To shift order into model scopes.
+  # To shift skill data into individual json files.
   json.skill_ids @scribing_question.skills.order('LOWER(title) ASC').as_json(only: [:id, :title])
   json.skills current_course.assessment_skills.order('LOWER(title) ASC') do |skill|
     json.(skill, :id, :title)

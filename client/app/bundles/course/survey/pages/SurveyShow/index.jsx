@@ -1,5 +1,6 @@
 /* eslint-disable new-cap */
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { injectIntl, defineMessages, intlShape } from 'react-intl';
 import { DragDropContext } from 'react-dnd';
@@ -8,7 +9,7 @@ import Subheader from 'material-ui/Subheader';
 import surveyTranslations from 'course/survey/translations';
 import { surveyShape } from 'course/survey/propTypes';
 import * as surveyActions from 'course/survey/actions/surveys';
-import LoadingIndicator from 'course/survey/components/LoadingIndicator';
+import LoadingIndicator from 'lib/components/LoadingIndicator';
 import SurveyDetails from './SurveyDetails';
 import Section from './Section';
 
@@ -40,12 +41,12 @@ class SurveyShow extends React.Component {
         <Subheader>{ intl.formatMessage(surveyTranslations.questions) }</Subheader>
         {
           sections.map((section, index) =>
-            <Section
+            (<Section
               key={section.id}
               first={index === 0}
               last={index === lastIndex}
               {...{ section, index, survey, disabled }}
-            />
+            />)
           )
         }
       </div>

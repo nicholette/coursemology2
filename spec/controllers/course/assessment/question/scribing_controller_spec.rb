@@ -10,15 +10,15 @@ RSpec.describe Course::Assessment::Question::ScribingController do
     let(:course) { create(:course, creator: user) }
     let(:assessment) { create(:assessment, course: course) }
     let(:question_scribing_attributes) do
-      attributes_for(:course_assessment_question_scribings).
+      attributes_for(:course_assessment_question_scribing).
         slice(:title, :description, :staff_only_comments, :maximum_grade, :file)
     end
     let(:question_scribing_update_attributes) do
-      attributes_for(:course_assessment_question_scribings).
+      attributes_for(:course_assessment_question_scribing).
         slice(:title, :description, :staff_only_comments, :maximum_grade)
     end
     let(:immutable_scribing_question) do
-      create(:course_assessment_question_scribings, assessment: assessment).tap do |question|
+      create(:course_assessment_question_scribing, assessment: assessment).tap do |question|
         allow(question).to receive(:save).and_return(false)
         allow(question).to receive(:destroy).and_return(false)
       end
@@ -55,7 +55,7 @@ RSpec.describe Course::Assessment::Question::ScribingController do
 
       context 'when attaching an image attachment' do
         let(:question_scribing_attributes) do
-          attributes_for(:course_assessment_question_scribings).
+          attributes_for(:course_assessment_question_scribing).
             slice(:title, :description, :maximum_grade, :file).tap do |result|
             result[:file] = fixture_file_upload('files/picture.jpg', 'image/jpeg')
           end
@@ -72,19 +72,39 @@ RSpec.describe Course::Assessment::Question::ScribingController do
 
       context 'when attaching a pdf attachment' do
         let(:question_scribing_attributes) do
-          attributes_for(:course_assessment_question_scribings).
+          attributes_for(:course_assessment_question_scribing).
             slice(:title, :description, :maximum_grade, :file).tap do |result|
-            result[:file] = fixture_file_upload('files/document.pdf', 'application/pdf')
+            result[:file] = fixture_file_upload(file_path, 'application/pdf')
           end
         end
 
-        it 'creates paged PNG image' do
-          subject
-          body = JSON.parse(response.body)
-          expect(AttachmentReference.exists?(creator: user, name: 'document[1].png')).to eq(true)
-          expect(body['message']).to eq(
-            I18n.t('course.assessment.question.scribing.create.success')
-          )
+        context 'when the pdf is one page' do
+          let(:file_path) { 'files/one-page-document.pdf' }
+          it 'creates one scribing question with a png attachment' do
+            expect { subject }.to change { Course::Assessment::Question::Scribing.count }.by(1)
+
+            message = JSON.parse(response.body)['message']
+            expect(message).to eq(I18n.t('course.assessment.question.scribing.create.success'))
+
+            attachment = assessment.questions.last.specific.attachment
+            expect(attachment.present?).to be_truthy
+            expect(attachment.name).to eq('one-page-document[1].png')
+          end
+        end
+
+        context 'when the pdf is two pages' do
+          let(:file_path) { 'files/two-page-document.pdf' }
+          it 'creates one scribing question with a png attachment for each pdf page' do
+            expect { subject }.to change { Course::Assessment::Question::Scribing.count }.by(2)
+
+            message = JSON.parse(response.body)['message']
+            expect(message).to eq(I18n.t('course.assessment.question.scribing.create.success'))
+
+            assessment.questions.map { |q| q.specific.attachment }.each.with_index(1) do |a, i|
+              expect(a.present?).to be_truthy
+              expect(a.name).to eq("two-page-document[#{i}].png")
+            end
+          end
         end
       end
     end

@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import { Card, CardText } from 'material-ui/Card';
@@ -6,7 +7,7 @@ import Subheader from 'material-ui/Subheader';
 import surveyTranslations from 'course/survey/translations';
 import { surveyShape, responseShape } from 'course/survey/propTypes';
 import { fetchEditableResponse, updateResponse } from 'course/survey/actions/responses';
-import LoadingIndicator from 'course/survey/components/LoadingIndicator';
+import LoadingIndicator from 'lib/components/LoadingIndicator';
 import ResponseForm, { buildInitialValues, buildResponsePayload } from 'course/survey/containers/ResponseForm';
 
 const translations = defineMessages({

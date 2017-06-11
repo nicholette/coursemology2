@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import Subheader from 'material-ui/Subheader';
@@ -6,7 +7,7 @@ import TitleBar from 'lib/components/TitleBar';
 import { fetchSurveys } from 'course/survey/actions/surveys';
 import surveyTranslations from 'course/survey/translations';
 import { surveyShape } from 'course/survey/propTypes';
-import LoadingIndicator from 'course/survey/components/LoadingIndicator';
+import LoadingIndicator from 'lib/components/LoadingIndicator';
 import SurveysTable from './SurveysTable';
 import NewSurveyButton from './NewSurveyButton';
 

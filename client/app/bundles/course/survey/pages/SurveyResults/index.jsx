@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import Subheader from 'material-ui/Subheader';
@@ -6,7 +7,7 @@ import Toggle from 'material-ui/Toggle';
 import { Card, CardText } from 'material-ui/Card';
 import surveyTranslations from 'course/survey/translations';
 import { fetchResults } from 'course/survey/actions/surveys';
-import LoadingIndicator from 'course/survey/components/LoadingIndicator';
+import LoadingIndicator from 'lib/components/LoadingIndicator';
 import { surveyShape, sectionShape } from 'course/survey/propTypes';
 import ResultsSection from './ResultsSection';
 
@@ -99,11 +100,11 @@ class SurveyResults extends React.Component {
         <Subheader><FormattedMessage {...surveyTranslations.questions} /></Subheader>
         {
           this.props.sections.map((section, index) =>
-            <ResultsSection
+            (<ResultsSection
               key={section.id}
               includePhantoms={this.state.includePhantoms}
               {...{ section, index, anonymous }}
-            />
+            />)
           )
         }
       </div>

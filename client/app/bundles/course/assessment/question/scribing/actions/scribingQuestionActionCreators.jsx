@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import API from 'api';
 import CourseAPI from 'api/course';
 import { getCourseId, getAssessmentId, getScribingId } from 'lib/helpers/url-helpers';
 import { submit, SubmissionError } from 'redux-form';

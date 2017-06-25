@@ -5,6 +5,7 @@ import MaterialFoldersAPI from './MaterialFolders';
 import LessonPlanAPI from './LessonPlan';
 import SurveyAPI from './Survey';
 import ScribingQuestionAPI from './assessment/question/scribing';
+import ScribingAnswerAPI from './assessment/submission/answer/scribing';
 
 const CourseAPI = {
   assessments: new AssessmentsAPI(),
@@ -16,6 +17,9 @@ const CourseAPI = {
   question: {
     scribing: ScribingQuestionAPI,
   },
+  answer: {
+    scribing: ScribingAnswerAPI,
+  }
 };
 
 Object.freeze(CourseAPI);

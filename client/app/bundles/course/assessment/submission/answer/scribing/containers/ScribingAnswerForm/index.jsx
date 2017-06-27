@@ -54,6 +54,13 @@ const styles = {
     textTransform: `uppercase`,
     fontFamily: `Roboto, sans-serif`,
   },
+  custom_line: {
+    width: `30px`,
+    marginRight: '12px',
+    height: `55%`,
+    display: `block`,
+    transform: `translate(50%, 0px) scale(0.70, 0.2) rotate(85deg) skewX(70deg)`,
+  }
 }
 
 class ScribingAnswerForm extends React.Component {
@@ -66,6 +73,7 @@ class ScribingAnswerForm extends React.Component {
       isPopoverOpen: false,
     }
     this.onClickDrawingMode = this.onClickDrawingMode.bind(this);
+    this.onClickLineMode = this.onClickLineMode.bind(this);
     this.onClickSelectionMode = this.onClickSelectionMode.bind(this);
     this.onClickDelete = this.onClickDelete.bind(this);
   }
@@ -85,6 +93,11 @@ class ScribingAnswerForm extends React.Component {
       isPopoverOpen: false,
     });
   };
+
+  getMousePoint(event) {
+    let pointer = this.canvas.getPointer(event.e);
+    return [pointer.x, pointer.y];
+  }
 
   initializeAnswer() {
     // var answer = document.getElementById('scribing-answer');
@@ -119,8 +132,28 @@ class ScribingAnswerForm extends React.Component {
       canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
 
       _self.canvas = canvas;
+      _self.canvas.on('mouse:down', (options) => {
+        this.mouseDragFlag = false;
+        this.mouseDragStartPoint = this.getMousePoint(options.e);
+      })
+
+      _self.canvas.on('mouse:move', (options) => {
+        this.mouseDragFlag = true;
+      })
+
       _self.canvas.on('mouse:up', (options) => {
         _self.saveScribbles();
+
+        // This is a drag as the mouse move occurs after mouse down.
+        if (this.mouseDragFlag === true) {
+          this.mouseDragEndPoint = this.getMousePoint(options.e);
+          if (this.state.selectedTool === tools.LINE) {
+            _self.canvas.add(new fabric.Line(
+              [...this.mouseDragStartPoint, ...this.mouseDragEndPoint],
+              {fill: 'black', stroke: 'black', strokeWidth: 1, selectable: true}
+            ))
+          }
+        }
       })
 
       _self.initializeScribbles();
@@ -202,6 +235,11 @@ class ScribingAnswerForm extends React.Component {
   onClickDrawingMode() {
     this.canvas.isDrawingMode = true;
     this.setState({selectedTool: tools.DRAW})
+  }
+
+  onClickLineMode() {
+    this.canvas.isLineMode = true;
+    this.setState({selectedTool: tools.LINE})
   }
 
   onClickSelectionMode() {
@@ -304,11 +342,17 @@ class ScribingAnswerForm extends React.Component {
   }
 
   renderToolBar() {
+    const lineToolStyle = { 
+      ...styles.custom_line,
+      background: this.state.selectedTool === tools.LINE ? `black` : `rgba(0, 0, 0, 0.4)`,
+    } 
+
     return (
       <Toolbar style={styles.toolbar}>
         <ToolbarGroup>
           <FontIcon className="fa fa-pencil" style={this.state.selectedTool === tools.DRAW ? {color: `black`} : {}}
             onClick={this.onClickDrawingMode} />
+          <FontIcon style={lineToolStyle} onClick={this.onClickLineMode} />
           <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ? {color: `black`} : {}}
             onClick={this.onClickSelectionMode}/>
           <FontIcon className="fa fa-trash-o" style={this.state.selectedTool === tools.DELETE ? {color: `black`} : {}}

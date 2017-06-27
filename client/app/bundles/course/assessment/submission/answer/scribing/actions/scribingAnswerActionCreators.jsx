@@ -42,6 +42,12 @@ export function setUpScribingAnswer(data) {
   }
 }
 
+export function clearSavingStatus() {
+  return (dispatch) => {
+    dispatch({ type: actionTypes.CLEAR_SAVING_STATUS });
+  }
+}
+
 export function updateScribingAnswer(answerId, scribblesInJSON) {
   const data = {
     content: scribblesInJSON,
@@ -49,7 +55,9 @@ export function updateScribingAnswer(answerId, scribblesInJSON) {
   }
 
   return (dispatch) => {
-    CourseAPI.answer.scribing.scribings.update(answerId, data)
+    dispatch({ type: actionTypes.UPDATE_SCRIBING_ANSWER_REQUEST });
+    
+    return CourseAPI.answer.scribing.scribings.update(answerId, data)
     .then((response) => {
       dispatch({
         answerId,

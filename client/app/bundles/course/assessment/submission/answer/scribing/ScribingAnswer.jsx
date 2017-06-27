@@ -21,6 +21,8 @@ const propTypes = {
   dispatch: PropTypes.func.isRequired,
   scribingAnswer: PropTypes.shape({
     // answer: answerShape,
+    is_saving: PropTypes.bool,
+    is_saved: PropTypes.bool,
     is_loading: PropTypes.bool,
     save_errors: PropTypes.array(PropTypes.string),
   }),

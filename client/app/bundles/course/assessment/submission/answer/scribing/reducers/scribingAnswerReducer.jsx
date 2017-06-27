@@ -7,6 +7,8 @@ export const initialState = {
   },
   is_canvas_loaded: false,
   is_loading: false,
+  is_saving: false,
+  is_saved: false,
   save_errors: undefined,
 };
 
@@ -21,12 +23,20 @@ export default function scribingAnswerReducer(state = initialState, action) {
       };
     }
     case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST:
-    case actionTypes.FETCH_SCRIBING_ANSWER_REQUEST:
+    case actionTypes.FETCH_SCRIBING_ANSWER_REQUEST: {
+      const { isLoading } = action;
+      return {
+        ...state,
+        is_loading: true,
+        save_errors: undefined,
+      };
+    }
     case actionTypes.UPDATE_SCRIBING_ANSWER_REQUEST: {
       const { isLoading } = action;
       return {
         ...state,
         is_loading: true,
+        is_saving: true,
         save_errors: undefined,
       };
     }
@@ -50,14 +60,19 @@ export default function scribingAnswerReducer(state = initialState, action) {
     case actionTypes.UPDATE_SCRIBING_ANSWER_SUCCESS: {
       return {
         ...state,
+        is_saving: false,
+        is_saved: true,
         is_loading: false,
       };
     }
     case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE:
     case actionTypes.FETCH_SCRIBING_ANSWER_FAILURE:
-    case actionTypes.UPDATE_SCRIBING_ANSWER_FAILURE: {
+    case actionTypes.UPDATE_SCRIBING_ANSWER_FAILURE:
+    case actionTypes.CLEAR_SAVING_STATUS: {
       return {
         ...state,
+        is_saving: false,
+        is_saved: false,
         is_loading: false,
       };
     }

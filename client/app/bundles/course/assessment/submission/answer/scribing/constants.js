@@ -11,6 +11,7 @@ export const actionTypes = mirrorCreator([
   'UPDATE_SCRIBING_ANSWER_REQUEST',
   'UPDATE_SCRIBING_ANSWER_SUCCESS',
   'UPDATE_SCRIBING_ANSWER_FAILURE',
+  'CLEAR_SAVING_STATUS',
 ]);
 
 export const tools = mirrorCreator([

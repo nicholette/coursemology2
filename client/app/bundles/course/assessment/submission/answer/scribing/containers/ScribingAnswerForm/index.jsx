@@ -27,6 +27,8 @@ const propTypes = {
     // answer: answerShape,
     is_loading: PropTypes.bool,
     is_canvas_loaded: PropTypes.bool,
+    is_saving: PropTypes.bool,
+    is_saved: PropTypes.bool,
     save_errors: PropTypes.array(PropTypes.string),
   }),
   data: PropTypes.object.isRequired,
@@ -44,6 +46,14 @@ const styles = {
   toolbar: {
     marginBottom: `1em`,
   },
+  saving_status_label: {
+    color: '#bdc3c7',
+    fontSize: `14px`,
+    fontWeight: `500`,
+    letterSpacing: `0px`,
+    textTransform: `uppercase`,
+    fontFamily: `Roboto, sans-serif`,
+  },
 }
 
 class ScribingAnswerForm extends React.Component {
@@ -54,7 +64,6 @@ class ScribingAnswerForm extends React.Component {
       imageWidth: 0,
       imageHeight: 0,
       isPopoverOpen: false,
-      layers: [],
     }
     this.onClickDrawingMode = this.onClickDrawingMode.bind(this);
     this.onClickSelectionMode = this.onClickSelectionMode.bind(this);
@@ -242,8 +251,7 @@ class ScribingAnswerForm extends React.Component {
   }
 
   renderPopover() {
-
-    return this.layers ? (
+    return this.layers && this.layers.length !== 0 ? (
       <Popover
         open={this.state.isPopoverOpen}
         anchorEl={this.state.anchorEl}
@@ -274,6 +282,27 @@ class ScribingAnswerForm extends React.Component {
     ) : null;
   }
 
+  renderSavingStatus() {
+    var status = '';
+
+    if (this.props.scribingAnswer.is_saving) {
+      status = 'Saving..';
+    } else if (this.props.scribingAnswer.is_saved) {
+      status = 'Saved';
+      // TODO: make fading animation
+      setTimeout(this.props.actions.clearSavingStatus.bind(this), 3000);
+    } else if (this.props.scribingAnswer.save_errors) {
+      // TODO: add warning color
+      status = 'Save errors.'
+    }
+
+    return (
+      <div>
+        <label style={styles.saving_status_label}>{status}</label>
+      </div>
+    );
+  }
+
   renderToolBar() {
     return (
       <Toolbar style={styles.toolbar}>
@@ -287,8 +316,12 @@ class ScribingAnswerForm extends React.Component {
           <RaisedButton
             onTouchTap={this.handlePopoverTouchTap}
             label="Layers"
+            disabled={this.layers && this.layers.length === 0}
           />
           { this.renderPopover() }
+        </ToolbarGroup>
+        <ToolbarGroup>
+          { this.renderSavingStatus() }
         </ToolbarGroup>
       </Toolbar>
     )

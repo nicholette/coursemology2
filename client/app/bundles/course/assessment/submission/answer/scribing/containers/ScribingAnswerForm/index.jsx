@@ -96,7 +96,10 @@ class ScribingAnswerForm extends React.Component {
 
   getMousePoint(event) {
     let pointer = this.canvas.getPointer(event.e);
-    return [pointer.x, pointer.y];
+    return {
+      x: pointer.x,
+      y: pointer.y,
+    };
   }
 
   initializeAnswer() {
@@ -144,12 +147,18 @@ class ScribingAnswerForm extends React.Component {
       _self.canvas.on('mouse:up', (options) => {
         _self.saveScribbles();
 
+        this.mouseDragEndPoint = this.getMousePoint(options.e);
+        let minDistThreshold = 25;
+        let dist = Math.abs((this.mouseDragStartPoint.x - this.mouseDragEndPoint.x) << 1)
+                    + Math.abs((this.mouseDragStartPoint.y - this.mouseDragEndPoint.y) << 1);
+        let passedDistThreshold = dist > minDistThreshold;
+
         // This is a drag as the mouse move occurs after mouse down.
-        if (this.mouseDragFlag === true) {
-          this.mouseDragEndPoint = this.getMousePoint(options.e);
+        if (this.mouseDragFlag === true && passedDistThreshold) {
           if (this.state.selectedTool === tools.LINE) {
             _self.canvas.add(new fabric.Line(
-              [...this.mouseDragStartPoint, ...this.mouseDragEndPoint],
+              [this.mouseDragStartPoint.x, this.mouseDragStartPoint.y,
+               this.mouseDragEndPoint.x, this.mouseDragEndPoint.y],
               {fill: 'black', stroke: 'black', strokeWidth: 1, selectable: true}
             ))
           }

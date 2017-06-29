@@ -253,18 +253,42 @@ class ScribingAnswerForm extends React.Component {
     return nextProps.scribingAnswer.is_canvas_loaded;
   }
 
+  disableObjectSelection() {
+    this.canvas.forEachObject(function(o) {
+      o.selectable = false;
+    });
+  }
+
+  enableObjectSelection() {
+    // this clears the selection-disabled scribbles
+    // and reloads them to enable selection again
+    this.props.actions.updateScribingAnswerInLocal(this.getScribbleJSON());
+    this.canvas.clear();
+    this.initializeScribbles();
+  }
+
   onClickDrawingMode() {
+    // isDrawingMode automatically disables selection mode 
+    // in fabric.js library
     this.canvas.isDrawingMode = true;
     this.setState({selectedTool: tools.DRAW})
   }
 
   onClickLineMode() {
     this.canvas.isDrawingMode = false;
+    this.disableObjectSelection();
     this.setState({selectedTool: tools.LINE})
+  }
+
+  onClickShapeMode() {
+    this.canvas.isDrawingMode = false;
+    this.disableObjectSelection();
+    this.setState({selectedTool: tools.SHAPE});
   }
 
   onClickSelectionMode() {
     this.canvas.isDrawingMode = false;
+    this.enableObjectSelection();
     this.setState({selectedTool: tools.SELECT})
   }
 

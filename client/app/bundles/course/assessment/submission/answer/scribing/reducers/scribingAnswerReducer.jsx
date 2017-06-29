@@ -3,7 +3,9 @@ import { actionTypes } from '../constants';
 export const initialState = {
   answer: {
     scribbles: [],
-    image_path: ''
+    image_path: '',
+    user_id: '',
+    answer_id: '',
   },
   is_canvas_loaded: false,
   is_loading: false,
@@ -75,6 +77,14 @@ export default function scribingAnswerReducer(state = initialState, action) {
         is_saved: false,
         is_loading: false,
       };
+    }
+    case actionTypes.UPDATE_SCRIBING_ANSWER_IN_LOCAL: {
+      state.answer.scribbles.forEach((scribble) => {
+        if (scribble.creator_id === state.answer.user_id) {
+          scribble.content = action.data;
+        }
+      });
+      return state;
     }
     default: {
       return state;

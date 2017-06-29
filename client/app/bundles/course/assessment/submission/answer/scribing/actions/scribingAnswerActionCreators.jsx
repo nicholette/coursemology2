@@ -48,6 +48,15 @@ export function clearSavingStatus() {
   }
 }
 
+export function updateScribingAnswerInLocal(scribblesInJSON) {
+  return (dispatch) => {
+    dispatch({
+      type: actionTypes.UPDATE_SCRIBING_ANSWER_IN_LOCAL,
+      data: scribblesInJSON,
+    });
+  }
+}
+
 export function updateScribingAnswer(answerId, scribblesInJSON) {
   const data = {
     content: scribblesInJSON,

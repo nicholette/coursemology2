@@ -26,5 +26,4 @@ export const tools = mirrorCreator([
 export const shapes = mirrorCreator([
   'RECT',
   'ELLIPSE',
-  'POLYGON',
 ]);

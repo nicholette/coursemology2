@@ -5,6 +5,8 @@ import FontIcon from 'material-ui/FontIcon';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
 import RaisedButton from 'material-ui/RaisedButton';
 import Popover from 'material-ui/Popover';
+import IconMenu from 'material-ui/IconMenu';
+import IconButton from 'material-ui/IconButton';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
 
@@ -59,6 +61,7 @@ const styles = {
     marginRight: '12px',
     height: `55%`,
     display: `block`,
+    marginLeft: `24px`,
     transform: `translate(50%, 0px) scale(0.70, 0.2) rotate(85deg) skewX(70deg)`,
   }
 }
@@ -434,8 +437,32 @@ class ScribingAnswerForm extends React.Component {
           <FontIcon className="fa fa-pencil" style={this.state.selectedTool === tools.DRAW ? {color: `black`} : {}}
             onClick={this.onClickDrawingMode} />
           <FontIcon style={lineToolStyle} onClick={this.onClickLineMode} />
-          <FontIcon className="fa fa-square-o" style={this.state.selectedTool === tools.SHAPE ? {color: `black`} : {}}
-            onClick={this.onClickShapeMode}/>
+          <IconMenu
+            iconButtonElement={
+              <IconButton>
+                <FontIcon
+                  className={
+                    this.state.selectedShape === shapes.RECT ? 'fa fa-square-o' : 'fa fa-circle-o'
+                  }
+                  onClick={this.onClickShapeMode}
+                />
+              </IconButton>}
+            style={{
+              paddingLeft:  `24px`,
+            }}
+            iconStyle={{
+              color: this.state.selectedTool === tools.SHAPE ? 'black' : `rgba(0, 0, 0, 0.4)`
+            }}
+            onChange={this.handleChangeSingle}
+            value={this.state.valueSingle}
+          >
+            <MenuItem value={shapes.RECT}>
+              <FontIcon className="fa fa-square-o" onClick={() => (this.setState({selectedShape: shapes.RECT}))}/>
+            </MenuItem>
+            <MenuItem value={shapes.ELLIPSE}>
+              <FontIcon className="fa fa-circle-o" onClick={() => (this.setState({selectedShape: shapes.ELLIPSE}))}/>
+            </MenuItem>
+          </IconMenu>
           <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ? {color: `black`} : {}}
             onClick={this.onClickSelectionMode}/>
           <FontIcon className="fa fa-trash-o" style={this.state.selectedTool === tools.DELETE ? {color: `black`} : {}}

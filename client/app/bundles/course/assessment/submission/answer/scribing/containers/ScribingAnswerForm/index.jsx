@@ -144,9 +144,8 @@ class ScribingAnswerForm extends React.Component {
         this.mouseDragFlag = true;
       })
 
+      // REFACTOR!!!
       _self.canvas.on('mouse:up', (options) => {
-        _self.saveScribbles();
-
         this.mouseDragEndPoint = this.getMousePoint(options.e);
         let minDistThreshold = 25;
         let dist = Math.abs((this.mouseDragStartPoint.x - this.mouseDragEndPoint.x) << 1)
@@ -156,13 +155,15 @@ class ScribingAnswerForm extends React.Component {
         // This is a drag as the mouse move occurs after mouse down.
         if (this.mouseDragFlag === true && passedDistThreshold) {
           if (this.state.selectedTool === tools.LINE) {
-            _self.canvas.add(new fabric.Line(
+            let line = new fabric.Line(
               [this.mouseDragStartPoint.x, this.mouseDragStartPoint.y,
                this.mouseDragEndPoint.x, this.mouseDragEndPoint.y],
-              {fill: 'black', stroke: 'black', strokeWidth: 1, selectable: true}
-            ))
+              {fill: 'black', stroke: 'black', strokeWidth: 1, selectable: false}
+            );
+            this.canvas.add(line);
           }
         }
+        _self.saveScribbles();
       })
 
       _self.initializeScribbles();
@@ -181,7 +182,18 @@ class ScribingAnswerForm extends React.Component {
 
         for (var i = 0; i < objects.length; i++) {
           var klass = fabric.util.getKlass(objects[i].type);
-          klass.fromObject(objects[i], (obj)=>(fabricObjs.push(obj)));
+
+          switch (objects[i].type) {
+            case 'path': {
+              klass.fromObject(objects[i], (obj)=>(fabricObjs.push(obj)));
+              break;
+            }
+            case 'line': {
+              let obj = klass.fromObject(objects[i]);
+              fabricObjs.push(obj);
+              break;
+            }
+          }
         }
 
         if (scribble.creator_id !== user_id) {
@@ -247,7 +259,7 @@ class ScribingAnswerForm extends React.Component {
   }
 
   onClickLineMode() {
-    this.canvas.isLineMode = true;
+    this.canvas.isDrawingMode = false;
     this.setState({selectedTool: tools.LINE})
   }
 

@@ -13,7 +13,7 @@ import { injectIntl, intlShape } from 'react-intl';
 import translations from './ScribingAnswerForm.intl';
 
 import { answerShape } from '../../propTypes';
-import { tools } from '../../constants';
+import { tools, shapes } from '../../constants';
 
 const propTypes = {
   actions: React.PropTypes.shape({
@@ -68,12 +68,14 @@ class ScribingAnswerForm extends React.Component {
     super();
     this.state = {
       selectedTool: tools.SELECT,
+      selectedShape: shapes.RECT,
       imageWidth: 0,
       imageHeight: 0,
       isPopoverOpen: false,
     }
     this.onClickDrawingMode = this.onClickDrawingMode.bind(this);
     this.onClickLineMode = this.onClickLineMode.bind(this);
+    this.onClickShapeMode = this.onClickShapeMode.bind(this);
     this.onClickSelectionMode = this.onClickSelectionMode.bind(this);
     this.onClickDelete = this.onClickDelete.bind(this);
   }
@@ -100,6 +102,16 @@ class ScribingAnswerForm extends React.Component {
       x: pointer.x,
       y: pointer.y,
     };
+  }
+
+  // Generates the left, top, width and height of the drag
+  generateMouseDragProperties(point1, point2) {
+    return {
+      left: point1.x < point2.x ? point1.x : point2.x,
+      top: point1.y < point2.y ? point1.y : point2.y,
+      width: Math.abs(point1.x - point2.x),
+      height: Math.abs(point1.y - point2.y),
+    }
   }
 
   initializeAnswer() {
@@ -161,6 +173,29 @@ class ScribingAnswerForm extends React.Component {
               {fill: 'black', stroke: 'black', strokeWidth: 1, selectable: false}
             );
             this.canvas.add(line);
+          } else if (this.state.selectedTool === tools.SHAPE) {
+            switch (this.state.selectedShape) {
+              case shapes.RECT: {
+                let dragProps = this.generateMouseDragProperties(this.mouseDragStartPoint, this.mouseDragEndPoint);
+                let rect = new fabric.Rect({
+                  left: dragProps.left,
+                  top: dragProps.top,
+                  stroke: 'black',
+                  fill: 'transparent',
+                  width: dragProps.width,
+                  height: dragProps.height,
+                  selectable: false,
+                });
+                this.canvas.add(rect);
+                break;
+              }
+              case shapes.ELLIPSE: {
+                break;
+              }
+              case shapes.POLYGON: {
+                break;
+              }
+            }
           }
         }
         _self.saveScribbles();
@@ -188,7 +223,8 @@ class ScribingAnswerForm extends React.Component {
               klass.fromObject(objects[i], (obj)=>(fabricObjs.push(obj)));
               break;
             }
-            case 'line': {
+            case 'line':
+            case 'rect': {
               let obj = klass.fromObject(objects[i]);
               fabricObjs.push(obj);
               break;
@@ -398,6 +434,8 @@ class ScribingAnswerForm extends React.Component {
           <FontIcon className="fa fa-pencil" style={this.state.selectedTool === tools.DRAW ? {color: `black`} : {}}
             onClick={this.onClickDrawingMode} />
           <FontIcon style={lineToolStyle} onClick={this.onClickLineMode} />
+          <FontIcon className="fa fa-square-o" style={this.state.selectedTool === tools.SHAPE ? {color: `black`} : {}}
+            onClick={this.onClickShapeMode}/>
           <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ? {color: `black`} : {}}
             onClick={this.onClickSelectionMode}/>
           <FontIcon className="fa fa-trash-o" style={this.state.selectedTool === tools.DELETE ? {color: `black`} : {}}

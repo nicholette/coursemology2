@@ -18,6 +18,13 @@ export const actionTypes = mirrorCreator([
 export const tools = mirrorCreator([
   'DRAW',
   'LINE',
+  'SHAPE',
   'SELECT',
   'DELETE',
+]);
+
+export const shapes = mirrorCreator([
+  'RECT',
+  'ELLIPSE',
+  'POLYGON',
 ]);

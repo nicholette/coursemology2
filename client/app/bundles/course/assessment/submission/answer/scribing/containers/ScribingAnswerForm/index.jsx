@@ -193,9 +193,17 @@ class ScribingAnswerForm extends React.Component {
                 break;
               }
               case shapes.ELLIPSE: {
-                break;
-              }
-              case shapes.POLYGON: {
+                let dragProps = this.generateMouseDragProperties(this.mouseDragStartPoint, this.mouseDragEndPoint);
+                let ellipse = new fabric.Ellipse({
+                  left: dragProps.left,
+                  top: dragProps.top,
+                  stroke: 'black',
+                  fill: 'transparent',
+                  rx: dragProps.width / 2,
+                  ry: dragProps.height / 2,
+                  selectable: false,
+                });
+                this.canvas.add(ellipse);
                 break;
               }
             }
@@ -227,7 +235,8 @@ class ScribingAnswerForm extends React.Component {
               break;
             }
             case 'line':
-            case 'rect': {
+            case 'rect':
+            case 'ellipse': {
               let obj = klass.fromObject(objects[i]);
               fabricObjs.push(obj);
               break;

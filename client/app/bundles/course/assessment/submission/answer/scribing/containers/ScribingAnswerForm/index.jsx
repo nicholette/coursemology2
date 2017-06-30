@@ -350,6 +350,14 @@ class ScribingAnswerForm extends React.Component {
     this.setState({selectedTool: tools.SELECT})
   }
 
+  onClickZoomIn() {
+
+  }
+
+  onClickZoomOut() {
+
+  }
+
   onClickDelete() {
     const canvas = this.canvas;
     const activeGroup = canvas.getActiveGroup();
@@ -484,16 +492,26 @@ class ScribingAnswerForm extends React.Component {
               <FontIcon className="fa fa-circle-o" onClick={() => (this.setState({selectedShape: shapes.ELLIPSE}))}/>
             </MenuItem>
           </IconMenu>
+        </ToolbarGroup>
+        <ToolbarGroup>
           <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ? {color: `black`} : {}}
             onClick={this.onClickSelectionMode}/>
-          <FontIcon className="fa fa-trash-o" style={this.state.selectedTool === tools.DELETE ? {color: `black`} : {}}
-            onClick={this.onClickDelete}/>
           <RaisedButton
             onTouchTap={this.handlePopoverTouchTap}
             label="Layers"
             disabled={this.layers && this.layers.length === 0}
           />
           { this.renderPopover() }
+        </ToolbarGroup>
+        <ToolbarGroup>
+          <FontIcon className="fa fa-search-plus" style={this.state.selectedTool === tools.ZOOM_IN ? {color: `black`} : {}}
+            onClick={this.onClickZoomIn} />
+          <FontIcon className="fa fa-search-minus" style={this.state.selectedTool === tools.ZOOM_OUT ? {color: `black`} : {}}
+            onClick={this.onClickZoomOut} />
+        </ToolbarGroup>
+        <ToolbarGroup>
+          <FontIcon className="fa fa-trash-o" style={this.state.selectedTool === tools.DELETE ? {color: `black`} : {}}
+            onClick={this.onClickDelete}/>
         </ToolbarGroup>
         <ToolbarGroup>
           { this.renderSavingStatus() }

@@ -16,6 +16,7 @@ export const actionTypes = mirrorCreator([
 ]);
 
 export const tools = mirrorCreator([
+  'TYPE',
   'DRAW',
   'LINE',
   'SHAPE',

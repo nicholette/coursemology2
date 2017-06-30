@@ -76,6 +76,7 @@ class ScribingAnswerForm extends React.Component {
       imageHeight: 0,
       isPopoverOpen: false,
     }
+    this.onClickTypingMode = this.onClickTypingMode.bind(this);
     this.onClickDrawingMode = this.onClickDrawingMode.bind(this);
     this.onClickLineMode = this.onClickLineMode.bind(this);
     this.onClickShapeMode = this.onClickShapeMode.bind(this);
@@ -167,8 +168,11 @@ class ScribingAnswerForm extends React.Component {
                     + Math.abs((this.mouseDragStartPoint.y - this.mouseDragEndPoint.y) << 1);
         let passedDistThreshold = dist > minDistThreshold;
 
-        // This is a drag as the mouse move occurs after mouse down.
-        if (this.mouseDragFlag === true && passedDistThreshold) {
+        if (this.state.selectedTool === tools.TYPE) {
+          // TODO: add typing functionality
+          console.log('TYPE TOOL selected');
+        } else if (this.mouseDragFlag === true && passedDistThreshold) {
+          // This is a drag as the mouse move occurs after mouse down.
           if (this.state.selectedTool === tools.LINE) {
             let line = new fabric.Line(
               [this.mouseDragStartPoint.x, this.mouseDragStartPoint.y,
@@ -315,6 +319,12 @@ class ScribingAnswerForm extends React.Component {
     this.initializeScribbles();
   }
 
+  onClickTypingMode() {
+    this.canvas.isDrawingMode = false;
+    this.disableObjectSelection();
+    this.setState({selectedTool: tools.TYPE});
+  }
+
   onClickDrawingMode() {
     // isDrawingMode automatically disables selection mode 
     // in fabric.js library
@@ -443,6 +453,8 @@ class ScribingAnswerForm extends React.Component {
     return (
       <Toolbar style={styles.toolbar}>
         <ToolbarGroup>
+          <FontIcon className="fa fa-font" style={this.state.selectedTool === tools.TYPE ? {color: `black`} : {}}
+            onClick={this.onClickTypingMode} />
           <FontIcon className="fa fa-pencil" style={this.state.selectedTool === tools.DRAW ? {color: `black`} : {}}
             onClick={this.onClickDrawingMode} />
           <FontIcon style={lineToolStyle} onClick={this.onClickLineMode} />

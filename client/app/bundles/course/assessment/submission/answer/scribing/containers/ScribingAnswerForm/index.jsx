@@ -81,6 +81,8 @@ class ScribingAnswerForm extends React.Component {
     this.onClickLineMode = this.onClickLineMode.bind(this);
     this.onClickShapeMode = this.onClickShapeMode.bind(this);
     this.onClickSelectionMode = this.onClickSelectionMode.bind(this);
+    this.onClickZoomIn = this.onClickZoomIn.bind(this);
+    this.onClickZoomOut = this.onClickZoomOut.bind(this);
     this.onClickDelete = this.onClickDelete.bind(this);
   }
 
@@ -351,11 +353,19 @@ class ScribingAnswerForm extends React.Component {
   }
 
   onClickZoomIn() {
-
+    let newZoom = this.canvas.getZoom() + 0.1;
+    this.canvas.zoomToPoint({
+      x: this.canvas.height / 2,
+      y: this.canvas.width / 2,
+    }, newZoom);
   }
 
   onClickZoomOut() {
-
+    let newZoom = Math.max(this.canvas.getZoom() - 0.1, 1);
+    this.canvas.zoomToPoint({
+      x: this.canvas.height / 2,
+      y: this.canvas.width / 2,
+    }, newZoom);
   }
 
   onClickDelete() {

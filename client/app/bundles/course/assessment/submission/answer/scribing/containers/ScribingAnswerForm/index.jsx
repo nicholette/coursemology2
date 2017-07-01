@@ -76,11 +76,16 @@ class ScribingAnswerForm extends React.Component {
       imageHeight: 0,
       isPopoverOpen: false,
     }
+
+    this.viewportLeft = 0;
+    this.viewportTop = 0;
+
     this.onClickTypingMode = this.onClickTypingMode.bind(this);
     this.onClickDrawingMode = this.onClickDrawingMode.bind(this);
     this.onClickLineMode = this.onClickLineMode.bind(this);
     this.onClickShapeMode = this.onClickShapeMode.bind(this);
     this.onClickSelectionMode = this.onClickSelectionMode.bind(this);
+    this.onClickPanMode = this.onClickPanMode.bind(this);
     this.onClickZoomIn = this.onClickZoomIn.bind(this);
     this.onClickZoomOut = this.onClickZoomOut.bind(this);
     this.onClickDelete = this.onClickDelete.bind(this);
@@ -103,6 +108,13 @@ class ScribingAnswerForm extends React.Component {
   };
 
   getMousePoint(event) {
+    return {
+      x: event.clientX,
+      y: event.clientY,
+    }
+  }
+
+  getCanvasPoint(event) {
     let pointer = this.canvas.getPointer(event.e);
     return {
       x: pointer.x,
@@ -155,37 +167,77 @@ class ScribingAnswerForm extends React.Component {
       _self.canvas = canvas;
       _self.canvas.on('mouse:down', (options) => {
         this.mouseDragFlag = false;
-        this.mouseDragStartPoint = this.getMousePoint(options.e);
+        this.mouseCanvasDragStartPoint = this.getCanvasPoint(options.e);
+
+        // To facilitate panning
+        this.mouseDownFlag = true;
+        this.viewportLeft = this.canvas.viewportTransform[4];
+        this.viewportTop = this.canvas.viewportTransform[5];
+        this.mouseStartPoint = this.getMousePoint(options.e);
       })
 
       _self.canvas.on('mouse:move', (options) => {
         this.mouseDragFlag = true;
-      })
+
+        // Do panning action
+        let tryPan = (finalLeft, finalTop) => {
+          // limit panning
+          finalLeft = Math.min(finalLeft, 0);
+          finalLeft = Math.max(finalLeft, (this.canvas.getZoom() - 1) * this.canvas.getWidth() * -1);
+          finalTop = Math.min(finalTop, 0);
+          finalTop = Math.max(finalTop, (this.canvas.getZoom() - 1) * this.canvas.getHeight() * -1);
+
+          console.log({
+            finalLeft, 
+            zoom: this.canvas.getZoom(), 
+            width: this.canvas.getWidth()
+          })
+
+          // apply calculated pan transforms
+          this.canvas.viewportTransform[4] = finalLeft;
+          this.canvas.viewportTransform[5] = finalTop;
+          this.canvas.renderAll();
+        };
+
+        if (this.state.selectedTool === tools.PAN && this.mouseDownFlag) {
+          let mouseCurrentPoint = this.getMousePoint(options.e);
+          var deltaLeft = mouseCurrentPoint.x - this.mouseStartPoint.x;
+          var deltaTop = mouseCurrentPoint.y - this.mouseStartPoint.y;
+          var newLeft = this.viewportLeft + deltaLeft;
+          var newTop = this.viewportTop + deltaTop;
+          tryPan(newLeft, newTop);
+        // } else if (options['isForced']) {
+        //   tryPan(this.canvas.viewportTransform[4], this.canvas.viewportTransform[5]);
+        }
+      });
 
       // REFACTOR!!!
       _self.canvas.on('mouse:up', (options) => {
-        this.mouseDragEndPoint = this.getMousePoint(options.e);
+        this.mouseDownFlag = false;
+        this.mouseCanvasDragEndPoint = this.getCanvasPoint(options.e);
+
         let minDistThreshold = 25;
-        let dist = Math.abs((this.mouseDragStartPoint.x - this.mouseDragEndPoint.x) << 1)
-                    + Math.abs((this.mouseDragStartPoint.y - this.mouseDragEndPoint.y) << 1);
+        let dist = Math.abs((this.mouseCanvasDragStartPoint.x - this.mouseCanvasDragEndPoint.x) << 1)
+                    + Math.abs((this.mouseCanvasDragStartPoint.y - this.mouseCanvasDragEndPoint.y) << 1);
         let passedDistThreshold = dist > minDistThreshold;
+        let isMouseDrag = this.mouseDragFlag === true && passedDistThreshold;
 
         if (this.state.selectedTool === tools.TYPE) {
           // TODO: add typing functionality
           console.log('TYPE TOOL selected');
-        } else if (this.mouseDragFlag === true && passedDistThreshold) {
+        } else if (isMouseDrag) {
           // This is a drag as the mouse move occurs after mouse down.
           if (this.state.selectedTool === tools.LINE) {
             let line = new fabric.Line(
-              [this.mouseDragStartPoint.x, this.mouseDragStartPoint.y,
-               this.mouseDragEndPoint.x, this.mouseDragEndPoint.y],
+              [this.mouseCanvasDragStartPoint.x, this.mouseCanvasDragStartPoint.y,
+               this.mouseCanvasDragEndPoint.x, this.mouseCanvasDragEndPoint.y],
               {fill: 'black', stroke: 'black', strokeWidth: 1, selectable: false}
             );
             this.canvas.add(line);
           } else if (this.state.selectedTool === tools.SHAPE) {
             switch (this.state.selectedShape) {
               case shapes.RECT: {
-                let dragProps = this.generateMouseDragProperties(this.mouseDragStartPoint, this.mouseDragEndPoint);
+                let dragProps = this.generateMouseDragProperties(this.mouseCanvasDragStartPoint, this.mouseCanvasDragEndPoint);
                 let rect = new fabric.Rect({
                   left: dragProps.left,
                   top: dragProps.top,
@@ -199,7 +251,7 @@ class ScribingAnswerForm extends React.Component {
                 break;
               }
               case shapes.ELLIPSE: {
-                let dragProps = this.generateMouseDragProperties(this.mouseDragStartPoint, this.mouseDragEndPoint);
+                let dragProps = this.generateMouseDragProperties(this.mouseCanvasDragStartPoint, this.mouseCanvasDragEndPoint);
                 let ellipse = new fabric.Ellipse({
                   left: dragProps.left,
                   top: dragProps.top,
@@ -350,6 +402,12 @@ class ScribingAnswerForm extends React.Component {
     this.canvas.isDrawingMode = false;
     this.enableObjectSelection();
     this.setState({selectedTool: tools.SELECT})
+  }
+
+  onClickPanMode() {
+    this.canvas.isDrawingMode = false;
+    this.disableObjectSelection();
+    this.setState({selectedTool: tools.PAN})
   }
 
   onClickZoomIn() {
@@ -514,6 +572,8 @@ class ScribingAnswerForm extends React.Component {
           { this.renderPopover() }
         </ToolbarGroup>
         <ToolbarGroup>
+          <FontIcon className="fa fa-arrows" style={this.state.selectedTool === tools.PAN ? {color: `black`} : {}}
+            onClick={this.onClickPanMode} />
           <FontIcon className="fa fa-search-plus" style={this.state.selectedTool === tools.ZOOM_IN ? {color: `black`} : {}}
             onClick={this.onClickZoomIn} />
           <FontIcon className="fa fa-search-minus" style={this.state.selectedTool === tools.ZOOM_OUT ? {color: `black`} : {}}

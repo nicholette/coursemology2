@@ -21,6 +21,7 @@ export const tools = mirrorCreator([
   'LINE',
   'SHAPE',
   'SELECT',
+  'PAN',
   'ZOOM_IN',
   'ZOOM_OUT',
   'DELETE',

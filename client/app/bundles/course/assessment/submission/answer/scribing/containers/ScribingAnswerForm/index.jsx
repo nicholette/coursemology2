@@ -38,11 +38,12 @@ const propTypes = {
 
 const styles = {
   canvas_div: {
-    width: `890px`,
+    // width: `890px`,
     alignItems: `center`,
     margin: `auto`,
   },
   canvas: {
+    width: `100%`,
     border: `1px solid black`,
   },
   toolbar: {
@@ -147,10 +148,15 @@ class ScribingAnswerForm extends React.Component {
     image.src = imageUrl;
     image.onload = () => {
       // A4 size width
-      const CANVAS_MAX_WIDTH = 890;
-      const width = Math.min(image.width, CANVAS_MAX_WIDTH);
-      const scale = Math.min(width / image.width, 1);
-      const height = scale * image.height;
+      // const CANVAS_MAX_WIDTH = 890;
+      
+      // Get the calculated width of canvas, 750 is min width for scribing toolbar
+      const element = document.getElementById(`canvas-${answerId}`);
+      this.CANVAS_MAX_WIDTH = Math.max(element.getBoundingClientRect().width, 750);
+
+      const width = Math.min(image.width, this.CANVAS_MAX_WIDTH);
+      this.scale = Math.min(width / image.width, 1);
+      const height = this.scale * image.height;
 
       _self.refs.canvas.width = width;
       _self.refs.canvas.height = height;
@@ -160,7 +166,7 @@ class ScribingAnswerForm extends React.Component {
 
       const fabricImage = new fabric.Image(
         image,
-        {opacity: 1, scaleX: scale, scaleY: scale}
+        {opacity: 1, scaleX: this.scale, scaleY: this.scale}
       );
       canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
 
@@ -186,13 +192,7 @@ class ScribingAnswerForm extends React.Component {
           finalLeft = Math.max(finalLeft, (this.canvas.getZoom() - 1) * this.canvas.getWidth() * -1);
           finalTop = Math.min(finalTop, 0);
           finalTop = Math.max(finalTop, (this.canvas.getZoom() - 1) * this.canvas.getHeight() * -1);
-
-          console.log({
-            finalLeft, 
-            zoom: this.canvas.getZoom(), 
-            width: this.canvas.getWidth()
-          })
-
+          
           // apply calculated pan transforms
           this.canvas.viewportTransform[4] = finalLeft;
           this.canvas.viewportTransform[5] = finalTop;
@@ -277,6 +277,14 @@ class ScribingAnswerForm extends React.Component {
   }
 
   initializeScribbles() {
+
+    let scaleScribble = (scribble) => {
+      scribble.scaleX *= this.scale;
+      scribble.scaleY *= this.scale;
+      scribble.left *= this.scale;
+      scribble.top *= this.scale;
+    }
+
     const { scribbles, user_id } = this.props.scribingAnswer.answer;
     this.layers = [];
     if (scribbles) {
@@ -289,13 +297,17 @@ class ScribingAnswerForm extends React.Component {
 
           switch (objects[i].type) {
             case 'path': {
-              klass.fromObject(objects[i], (obj)=>(fabricObjs.push(obj)));
+              klass.fromObject(objects[i], (obj)=>{
+                scaleScribble(obj);
+                fabricObjs.push(obj);
+              });
               break;
             }
             case 'line':
             case 'rect':
             case 'ellipse': {
               let obj = klass.fromObject(objects[i]);
+              scaleScribble(obj);
               fabricObjs.push(obj);
               break;
             }
@@ -441,6 +453,7 @@ class ScribingAnswerForm extends React.Component {
         canvas.remove(object);
       });
     }
+    this.saveScribbles();
   }
 
   getScribbleJSON() {
@@ -461,7 +474,17 @@ class ScribingAnswerForm extends React.Component {
   }
 
   saveScribbles() {
+
+    let rescaleScribble = (scribble) => {
+      scribble.scaleX /= this.scale;
+      scribble.scaleY /= this.scale;
+      scribble.left /= this.scale;
+      scribble.top /= this.scale;
+    };
+
     const objects = this.canvas._objects;
+    objects.forEach((obj) => (rescaleScribble(obj)));
+
     const answerId = this.props.scribingAnswer.answer.answer_id;
     const json = this.getScribbleJSON();
     this.props.actions.updateScribingAnswer(answerId, json);
@@ -527,7 +550,7 @@ class ScribingAnswerForm extends React.Component {
     } 
 
     return (
-      <Toolbar style={styles.toolbar}>
+      <Toolbar style={{...styles.toolbar, width: this.CANVAS_MAX_WIDTH}}>
         <ToolbarGroup>
           <FontIcon className="fa fa-font" style={this.state.selectedTool === tools.TYPE ? {color: `black`} : {}}
             onClick={this.onClickTypingMode} />

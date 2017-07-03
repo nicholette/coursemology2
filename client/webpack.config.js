@@ -133,6 +133,7 @@ if (development) {
     compress: true,
     port: devServerPort,
     headers: { 'Access-Control-Allow-Origin': '*' },
+    disableHostCheck: true,
   };
   config.output.publicPath = `//localhost:${devServerPort}/webpack/`;
   config.devtool = 'cheap-module-eval-source-map';

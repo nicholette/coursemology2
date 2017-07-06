@@ -58,12 +58,18 @@ const styles = {
     fontFamily: `Roboto, sans-serif`,
   },
   custom_line: {
+    display: `inline-block`,
+    position: `inherit`,
     width: `30px`,
-    marginRight: '12px',
-    height: `55%`,
+    height: `24px`,
     display: `block`,
-    marginLeft: `24px`,
-    transform: `translate(50%, 0px) scale(0.70, 0.2) rotate(85deg) skewX(70deg)`,
+    marginLeft: `-2px`,
+    transform: `scale(1.0, 0.2) rotate(85deg) skewX(72deg)`,
+  },
+  tool: {
+    position: `relative`,
+    display: `inline-block`,
+    paddingLeft: `24px`,
   }
 }
 
@@ -552,29 +558,51 @@ class ScribingAnswerForm extends React.Component {
     return (
       <Toolbar style={{...styles.toolbar, width: this.CANVAS_MAX_WIDTH}}>
         <ToolbarGroup>
-          <FontIcon className="fa fa-font" style={this.state.selectedTool === tools.TYPE ? {color: `black`} : {}}
-            onClick={this.onClickTypingMode} />
-          <FontIcon className="fa fa-pencil" style={this.state.selectedTool === tools.DRAW ? {color: `black`} : {}}
-            onClick={this.onClickDrawingMode} />
-          <FontIcon style={lineToolStyle} onClick={this.onClickLineMode} />
           <IconMenu
             iconButtonElement={
               <IconButton>
-                <FontIcon
-                  className={
-                    this.state.selectedShape === shapes.RECT ? 'fa fa-square-o' : 'fa fa-circle-o'
-                  }
-                  onClick={this.onClickShapeMode}
-                />
+                <div style={styles.tool} onClick={this.onClickTypingMode}>
+                  <FontIcon className="fa fa-font" style={this.state.selectedTool === tools.TYPE ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}/>
+                  <div style={{width:`23px`, height:`8px`, background: `black`}}/>
+                </div>
               </IconButton>}
-            style={{
-              paddingLeft:  `24px`,
-            }}
-            iconStyle={{
-              color: this.state.selectedTool === tools.SHAPE ? 'black' : `rgba(0, 0, 0, 0.4)`
-            }}
-            onChange={this.handleChangeSingle}
-            value={this.state.valueSingle}
+          >
+          </IconMenu>
+
+          <IconMenu
+            iconButtonElement={
+              <IconButton>
+                <div style={styles.tool} onClick={this.onClickDrawingMode}>
+                  <FontIcon className="fa fa-pencil" style={this.state.selectedTool === tools.DRAW ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}/>
+                  <div style={{width:`23px`, height:`8px`, background: `black`}}/>
+                </div>
+              </IconButton>}
+          >
+          </IconMenu>
+
+          <IconMenu
+            iconButtonElement={
+              <IconButton>
+                <div style={styles.tool} onClick={this.onClickLineMode} >
+                  <FontIcon style={lineToolStyle}/>
+                  <div style={{width:`23px`, height:`8px`, background: `black`}}/>
+                </div>
+              </IconButton>}
+          >
+          </IconMenu>
+          <IconMenu
+            iconButtonElement={
+              <IconButton>
+                <div onClick={this.onClickShapeMode}>
+                  <FontIcon
+                    className={
+                      this.state.selectedShape === shapes.RECT ? 'fa fa-square-o' : 'fa fa-circle-o'
+                    }
+                    style={this.state.selectedTool === tools.SHAPE ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}
+                  />
+                  <div style={{width:`23px`, height:`8px`, background: `black`}}/>
+                </div>
+              </IconButton>}
           >
             <MenuItem value={shapes.RECT}>
               <FontIcon className="fa fa-square-o" onClick={() => (this.setState({selectedShape: shapes.RECT}))}/>

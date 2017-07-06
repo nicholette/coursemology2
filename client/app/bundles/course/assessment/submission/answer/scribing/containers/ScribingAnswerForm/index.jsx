@@ -277,14 +277,6 @@ class ScribingAnswerForm extends React.Component {
   }
 
   initializeScribbles() {
-
-    let scaleScribble = (scribble) => {
-      scribble.scaleX *= this.scale;
-      scribble.scaleY *= this.scale;
-      scribble.left *= this.scale;
-      scribble.top *= this.scale;
-    }
-
     const { scribbles, user_id } = this.props.scribingAnswer.answer;
     this.layers = [];
     if (scribbles) {
@@ -298,7 +290,7 @@ class ScribingAnswerForm extends React.Component {
           switch (objects[i].type) {
             case 'path': {
               klass.fromObject(objects[i], (obj)=>{
-                scaleScribble(obj);
+                this.scaleScribble(obj);
                 fabricObjs.push(obj);
               });
               break;
@@ -307,7 +299,7 @@ class ScribingAnswerForm extends React.Component {
             case 'rect':
             case 'ellipse': {
               let obj = klass.fromObject(objects[i]);
-              scaleScribble(obj);
+              this.scaleScribble(obj);
               fabricObjs.push(obj);
               break;
             }
@@ -380,7 +372,6 @@ class ScribingAnswerForm extends React.Component {
   enableObjectSelection() {
     // this clears the selection-disabled scribbles
     // and reloads them to enable selection again
-    this.props.actions.updateScribingAnswerInLocal(this.getScribbleJSON());
     this.canvas.clear();
     this.initializeScribbles();
   }
@@ -456,6 +447,20 @@ class ScribingAnswerForm extends React.Component {
     this.saveScribbles();
   }
 
+  scaleScribble(scribble) {
+    scribble.scaleX *= this.scale;
+    scribble.scaleY *= this.scale;
+    scribble.left *= this.scale;
+    scribble.top *= this.scale;
+  }
+
+  rescaleScribble(scribble) {
+    scribble.scaleX /= this.scale;
+    scribble.scaleY /= this.scale;
+    scribble.left /= this.scale;
+    scribble.top /= this.scale;
+  }
+
   getScribbleJSON() {
     // Remove non-user scribings in canvas
     this.layers.forEach((layer) => {
@@ -463,9 +468,14 @@ class ScribingAnswerForm extends React.Component {
         layer.showLayer(false)
       }
     })
-    
-    // Only save user scribings
-    const json = JSON.stringify(this.canvas._objects);
+
+    // only save rescaled user scribings
+    const objects = this.canvas._objects;
+    objects.forEach((obj) => (this.rescaleScribble(obj)));
+    const json = JSON.stringify(objects);
+
+    // scale back user scribings
+    objects.forEach((obj) => (this.scaleScribble(obj)));
 
     // Add back non-user scribings according canvas state
     this.layers.forEach((layer) => (layer.showLayer(layer.showLayer)));
@@ -474,19 +484,9 @@ class ScribingAnswerForm extends React.Component {
   }
 
   saveScribbles() {
-
-    let rescaleScribble = (scribble) => {
-      scribble.scaleX /= this.scale;
-      scribble.scaleY /= this.scale;
-      scribble.left /= this.scale;
-      scribble.top /= this.scale;
-    };
-
-    const objects = this.canvas._objects;
-    objects.forEach((obj) => (rescaleScribble(obj)));
-
     const answerId = this.props.scribingAnswer.answer.answer_id;
     const json = this.getScribbleJSON();
+    this.props.actions.updateScribingAnswerInLocal(json);
     this.props.actions.updateScribingAnswer(answerId, json);
   }
 

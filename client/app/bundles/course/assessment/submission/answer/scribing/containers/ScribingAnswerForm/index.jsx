@@ -3,6 +3,7 @@ import { Canvas } from 'react-fabricjs';
 
 import FontIcon from 'material-ui/FontIcon';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
+import Divider from 'material-ui/Divider';
 import RaisedButton from 'material-ui/RaisedButton';
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
 import IconMenu from 'material-ui/IconMenu';
@@ -592,10 +593,18 @@ class ScribingAnswerForm extends React.Component {
               animation={PopoverAnimationVertical}
             >
               <Menu>
-                <MenuItem primaryText="Refresh" />
-                <MenuItem primaryText="Help &amp; feedback" />
-                <MenuItem primaryText="Settings" />
-                <MenuItem primaryText="Sign out" />
+                <div>
+                  <label>Font</label>
+                </div>
+                <div>
+                  <label>Font Family:</label>
+                </div>
+                <div>
+                  <label>Size:</label>
+                </div>
+                <div>
+                  <label>Colour:</label>
+                </div>
               </Menu>
             </Popover>
 
@@ -619,10 +628,15 @@ class ScribingAnswerForm extends React.Component {
               animation={PopoverAnimationVertical}
             >
               <Menu>
-                <MenuItem primaryText="Refresh" />
-                <MenuItem primaryText="Help &amp; feedback" />
-                <MenuItem primaryText="Settings" />
-                <MenuItem primaryText="Sign out" />
+                <div>
+                  <label>Pencil</label>
+                </div>
+                <div>
+                  <label>Thickness:</label>
+                </div>
+                <div>
+                  <label>Colour:</label>
+                </div>
               </Menu>
             </Popover>
           </div>
@@ -645,35 +659,78 @@ class ScribingAnswerForm extends React.Component {
               animation={PopoverAnimationVertical}
             >
               <Menu>
-                <MenuItem primaryText="Refresh" />
-                <MenuItem primaryText="Help &amp; feedback" />
-                <MenuItem primaryText="Settings" />
-                <MenuItem primaryText="Sign out" />
+                <div>
+                  <label>Line</label>
+                </div>
+                <div>
+                  <label>Colour:</label>
+                </div>
+                <div>
+                  <label>Style:</label>
+                </div>
               </Menu>
             </Popover>
           </div>
 
-          <IconMenu
-            iconButtonElement={
-              <IconButton>
-                <div onClick={this.onClickShapeMode}>
-                  <FontIcon
-                    className={
-                      this.state.selectedShape === shapes.RECT ? 'fa fa-square-o' : 'fa fa-circle-o'
-                    }
-                    style={this.state.selectedTool === tools.SHAPE ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}
-                  />
-                  <div style={{width:`23px`, height:`8px`, background: `black`}}/>
+          <div style={styles.tool} onClick={this.onClickShapeMode} >
+            <div style={styles.innerTool}>
+              <FontIcon
+                className={
+                  this.state.selectedShape === shapes.RECT ? 'fa fa-square-o' : 'fa fa-circle-o'
+                }
+                style={this.state.selectedTool === tools.SHAPE ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}
+              />
+              <div style={{width:`23px`, height:`8px`, background: `black`}}/>
+            </div>
+            <div style={styles.innerTool}>
+              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.handlePopoverTouchTap(event, popoverTypes.SHAPE))}/>
+            </div>
+
+            <Popover
+              open={this.state.popovers.SHAPE}
+              anchorEl={this.state.popoverAnchor}
+              anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+              targetOrigin={{horizontal: 'left', vertical: 'top'}}
+              onRequestClose={() => (this.handlePopoverRequestClose(popoverTypes.SHAPE))}
+              animation={PopoverAnimationVertical}
+            >
+              <Menu>
+                <div>
+                  <div>
+                    <label>Shape</label>
+                  </div>
+                  <div>
+                    <IconButton tooltip="Square" tooltipPosition="top-center">
+                      <FontIcon className="fa fa-square-o" onClick={() => (this.setState({selectedShape: shapes.RECT}))}/>
+                    </IconButton>
+                    <IconButton tooltip="Ellipse" tooltipPosition="top-center">
+                      <FontIcon className="fa fa-circle-o" onClick={() => (this.setState({selectedShape: shapes.ELLIPSE}))}/>
+                    </IconButton>
+                  </div>
                 </div>
-              </IconButton>}
-          >
-            <MenuItem value={shapes.RECT}>
-              <FontIcon className="fa fa-square-o" onClick={() => (this.setState({selectedShape: shapes.RECT}))}/>
-            </MenuItem>
-            <MenuItem value={shapes.ELLIPSE}>
-              <FontIcon className="fa fa-circle-o" onClick={() => (this.setState({selectedShape: shapes.ELLIPSE}))}/>
-            </MenuItem>
-          </IconMenu>
+                <Divider />
+                <div>
+                  <div>
+                    <label>Border</label>
+                  </div>
+                  <div>
+                    <label>Colour:</label>
+                  </div>
+                  <div>
+                    <label>Style:</label>
+                  </div>
+                </div>
+                <Divider />
+                <div>
+                  <label>Fill</label>
+                </div>
+                <div>
+                  <label>Colour:</label>
+                </div>
+              </Menu>
+            </Popover>
+          </div>
+
         </ToolbarGroup>
         <ToolbarGroup>
           <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ? {color: `black`} : {}}
@@ -705,7 +762,6 @@ class ScribingAnswerForm extends React.Component {
   }
 
   render() {
-    // TODO: Make the height/width automatic
     const answerId = this.props.scribingAnswer.answer.answer_id;
     return (
       <div style={styles.canvas_div}>

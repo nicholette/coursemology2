@@ -663,10 +663,13 @@ class ScribingAnswerForm extends React.Component {
                   <label>Line</label>
                 </div>
                 <div>
-                  <label>Colour:</label>
+                  <label>Style:</label>
                 </div>
                 <div>
-                  <label>Style:</label>
+                  <label>Thickness:</label>
+                </div>
+                <div>
+                  <label>Colour:</label>
                 </div>
               </Menu>
             </Popover>
@@ -714,10 +717,13 @@ class ScribingAnswerForm extends React.Component {
                     <label>Border</label>
                   </div>
                   <div>
-                    <label>Colour:</label>
+                    <label>Style:</label>
                   </div>
                   <div>
-                    <label>Style:</label>
+                    <label>Thickness:</label>
+                  </div>
+                  <div>
+                    <label>Colour:</label>
                   </div>
                 </div>
                 <Divider />

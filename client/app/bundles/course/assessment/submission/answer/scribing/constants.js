@@ -15,6 +15,14 @@ export const actionTypes = mirrorCreator([
   'CLEAR_SAVING_STATUS',
 ]);
 
+export const popoverTypes = mirrorCreator([
+  'TYPE',
+  'DRAW',
+  'LINE',
+  'SHAPE',
+  'LAYER',
+]);
+
 export const tools = mirrorCreator([
   'TYPE',
   'DRAW',

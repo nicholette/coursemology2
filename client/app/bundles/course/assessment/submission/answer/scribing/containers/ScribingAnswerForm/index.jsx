@@ -4,7 +4,7 @@ import { Canvas } from 'react-fabricjs';
 import FontIcon from 'material-ui/FontIcon';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
 import RaisedButton from 'material-ui/RaisedButton';
-import Popover from 'material-ui/Popover';
+import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
 import IconMenu from 'material-ui/IconMenu';
 import IconButton from 'material-ui/IconButton';
 import Menu from 'material-ui/Menu';
@@ -15,7 +15,7 @@ import { injectIntl, intlShape } from 'react-intl';
 import translations from './ScribingAnswerForm.intl';
 
 import { answerShape } from '../../propTypes';
-import { tools, shapes } from '../../constants';
+import { tools, shapes, popoverTypes } from '../../constants';
 
 const propTypes = {
   actions: React.PropTypes.shape({
@@ -60,16 +60,23 @@ const styles = {
   custom_line: {
     display: `inline-block`,
     position: `inherit`,
-    width: `30px`,
-    height: `24px`,
-    display: `block`,
+    width: `25px`,
+    height: `21px`,
     marginLeft: `-2px`,
-    transform: `scale(1.0, 0.2) rotate(85deg) skewX(72deg)`,
+    transform: `scale(1.0, 0.2) rotate(90deg) skewX(76deg)`,
   },
   tool: {
     position: `relative`,
     display: `inline-block`,
-    paddingLeft: `24px`,
+    paddingRight: `24px`,
+  },
+  innerTool: {
+    display: `inline-block`,
+  },
+  chevron: {
+    fontSize:`12px`,
+    padding: `10px 0px 10px 0px`,
+    border: `black 1px solid`,
   }
 }
 
@@ -82,6 +89,8 @@ class ScribingAnswerForm extends React.Component {
       imageWidth: 0,
       imageHeight: 0,
       isPopoverOpen: false,
+      popovers: [],
+      popoverAnchor: undefined,
     }
 
     this.viewportLeft = 0;
@@ -98,19 +107,19 @@ class ScribingAnswerForm extends React.Component {
     this.onClickDelete = this.onClickDelete.bind(this);
   }
 
-  handlePopoverTouchTap = (event) => {
+  handlePopoverTouchTap = (event, popoverType) => {
     // This prevents ghost click.
-    // event.preventDefault();
+    event.preventDefault();
 
     this.setState({
-      isPopoverOpen: true,
-      anchorEl: event.currentTarget,
+      popovers: { ...this.state.popovers, [popoverType]: true },
+      popoverAnchor: event.currentTarget.parentElement.parentElement,
     });
   };
 
-  handlePopoverRequestClose = () => {
+  handlePopoverRequestClose = (popoverType) => {
     this.setState({
-      isPopoverOpen: false,
+      popovers: { ...this.state.popovers, [popoverType]: false },
     });
   };
 
@@ -136,6 +145,12 @@ class ScribingAnswerForm extends React.Component {
       top: point1.y < point2.y ? point1.y : point2.y,
       width: Math.abs(point1.x - point2.x),
       height: Math.abs(point1.y - point2.y),
+    }
+  }
+
+  initializePopovers() {
+    for (var popoverType in popoverTypes) {
+      this.state.popovers[popoverType] = false;
     }
   }
 
@@ -355,6 +370,7 @@ class ScribingAnswerForm extends React.Component {
   componentDidMount() {
     // Retrieve answer in async call
     this.initializeAnswer();
+    this.initializePopovers();
   }
 
   shouldComponentUpdate(nextProps) {
@@ -503,7 +519,7 @@ class ScribingAnswerForm extends React.Component {
         anchorEl={this.state.anchorEl}
         anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
         targetOrigin={{horizontal: 'left', vertical: 'top'}}
-        onRequestClose={this.handlePopoverRequestClose}
+        onRequestClose={() => (this.handlePopoverRequestClose(popoverTypes.LAYER))}
       >
         <Menu>
           { this.layers.map((layer) => (
@@ -558,38 +574,85 @@ class ScribingAnswerForm extends React.Component {
     return (
       <Toolbar style={{...styles.toolbar, width: this.CANVAS_MAX_WIDTH}}>
         <ToolbarGroup>
-          <IconMenu
-            iconButtonElement={
-              <IconButton>
-                <div style={styles.tool} onClick={this.onClickTypingMode}>
-                  <FontIcon className="fa fa-font" style={this.state.selectedTool === tools.TYPE ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}/>
-                  <div style={{width:`23px`, height:`8px`, background: `black`}}/>
-                </div>
-              </IconButton>}
-          >
-          </IconMenu>
+          <div style={styles.tool} onClick={this.onClickTypingMode}>
+            <div style={styles.innerTool}>
+              <FontIcon className="fa fa-font" style={this.state.selectedTool === tools.TYPE ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}/>
+              <div style={{width:`23px`, height:`8px`, background: `black`}}/>
+            </div>
+            <div style={styles.innerTool}>
+              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.handlePopoverTouchTap(event, popoverTypes.TYPE))}/>
+            </div>
 
-          <IconMenu
-            iconButtonElement={
-              <IconButton>
-                <div style={styles.tool} onClick={this.onClickDrawingMode}>
-                  <FontIcon className="fa fa-pencil" style={this.state.selectedTool === tools.DRAW ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}/>
-                  <div style={{width:`23px`, height:`8px`, background: `black`}}/>
-                </div>
-              </IconButton>}
-          >
-          </IconMenu>
+            <Popover
+              open={this.state.popovers.TYPE}
+              anchorEl={this.state.popoverAnchor}
+              anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+              targetOrigin={{horizontal: 'left', vertical: 'top'}}
+              onRequestClose={() => (this.handlePopoverRequestClose(popoverTypes.TYPE))}
+              animation={PopoverAnimationVertical}
+            >
+              <Menu>
+                <MenuItem primaryText="Refresh" />
+                <MenuItem primaryText="Help &amp; feedback" />
+                <MenuItem primaryText="Settings" />
+                <MenuItem primaryText="Sign out" />
+              </Menu>
+            </Popover>
 
-          <IconMenu
-            iconButtonElement={
-              <IconButton>
-                <div style={styles.tool} onClick={this.onClickLineMode} >
-                  <FontIcon style={lineToolStyle}/>
-                  <div style={{width:`23px`, height:`8px`, background: `black`}}/>
-                </div>
-              </IconButton>}
-          >
-          </IconMenu>
+          </div>
+
+          <div style={styles.tool} onClick={this.onClickDrawingMode}>
+            <div style={styles.innerTool}>
+              <FontIcon className="fa fa-pencil" style={this.state.selectedTool === tools.DRAW ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}/>
+              <div style={{width:`23px`, height:`8px`, background: `black`}}/>
+            </div>
+            <div style={styles.innerTool}>
+              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.handlePopoverTouchTap(event, popoverTypes.DRAW))}/>
+            </div>
+
+            <Popover
+              open={this.state.popovers.DRAW}
+              anchorEl={this.state.popoverAnchor}
+              anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+              targetOrigin={{horizontal: 'left', vertical: 'top'}}
+              onRequestClose={() => (this.handlePopoverRequestClose(popoverTypes.DRAW))}
+              animation={PopoverAnimationVertical}
+            >
+              <Menu>
+                <MenuItem primaryText="Refresh" />
+                <MenuItem primaryText="Help &amp; feedback" />
+                <MenuItem primaryText="Settings" />
+                <MenuItem primaryText="Sign out" />
+              </Menu>
+            </Popover>
+          </div>
+
+          <div style={styles.tool} onClick={this.onClickLineMode} >
+            <div style={styles.innerTool}>
+              <div style={lineToolStyle}/>
+              <div style={{width:`23px`, height:`8px`, background: `black`}}/>
+            </div>
+            <div style={styles.innerTool}>
+              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.handlePopoverTouchTap(event, popoverTypes.LINE))}/>
+            </div>
+
+            <Popover
+              open={this.state.popovers.LINE}
+              anchorEl={this.state.popoverAnchor}
+              anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+              targetOrigin={{horizontal: 'left', vertical: 'top'}}
+              onRequestClose={() => (this.handlePopoverRequestClose(popoverTypes.LINE))}
+              animation={PopoverAnimationVertical}
+            >
+              <Menu>
+                <MenuItem primaryText="Refresh" />
+                <MenuItem primaryText="Help &amp; feedback" />
+                <MenuItem primaryText="Settings" />
+                <MenuItem primaryText="Sign out" />
+              </Menu>
+            </Popover>
+          </div>
+
           <IconMenu
             iconButtonElement={
               <IconButton>
@@ -616,7 +679,7 @@ class ScribingAnswerForm extends React.Component {
           <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ? {color: `black`} : {}}
             onClick={this.onClickSelectionMode}/>
           <RaisedButton
-            onTouchTap={this.handlePopoverTouchTap}
+            onTouchTap={(event) => (this.handlePopoverTouchTap(event, popoverTypes.LAYER))}
             label="Layers"
             disabled={this.layers && this.layers.length === 0}
           />

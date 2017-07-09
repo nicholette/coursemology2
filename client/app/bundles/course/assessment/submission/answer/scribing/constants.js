@@ -23,6 +23,15 @@ export const popoverTypes = mirrorCreator([
   'LAYER',
 ]);
 
+export const coloringTools = mirrorCreator([
+  'TYPE',
+  'DRAW',
+  'LINE',
+  'SHAPE_BORDER',
+  'SHAPE_FILL',
+]);
+
+
 export const tools = mirrorCreator([
   'TYPE',
   'DRAW',

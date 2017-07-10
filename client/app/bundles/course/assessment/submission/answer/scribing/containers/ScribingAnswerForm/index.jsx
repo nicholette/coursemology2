@@ -137,6 +137,10 @@ class ScribingAnswerForm extends React.Component {
   }
 
   handleOnChangeCompleteColor = (color, coloringTool) => {
+    if (coloringTool === toolColor.DRAW) {
+      this.canvas.freeDrawingBrush.color = color.hex;
+    }
+
     this.setState({
       colors: { ...this.state.colors, [coloringTool]: color.hex },
       colorDropdowns: { ...this.state.colorDropdowns, [coloringTool]: false },
@@ -178,7 +182,10 @@ class ScribingAnswerForm extends React.Component {
   }
 
   handleSliderThicknessOnChange = (event, toolType, value) => {
-    console.log('thickness', value);
+    if (toolType === toolThickness.DRAW) {
+      this.canvas.freeDrawingBrush.width = value;
+    }
+
     this.setState({
       thickness: { ...this.state.thickness, [toolType]: value}
     })
@@ -759,7 +766,7 @@ class ScribingAnswerForm extends React.Component {
                 <div>
                   <label>Thickness:</label>
                   <Slider 
-                    style={styles.slider} min={1} max={5} step={1} value={this.state.thickness[toolThickness.DRAW]}
+                    style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.DRAW]}
                     onChange={(event, newValue) => (this.handleSliderThicknessOnChange(event, toolThickness.DRAW, newValue))}
                    />
                 </div>

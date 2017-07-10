@@ -42,6 +42,13 @@ const propTypes = {
 }
 
 const styles = {
+  cover: {
+    position: 'fixed',
+    top: '0px',
+    right: '0px',
+    bottom: '0px',
+    left: '0px',
+  },
   canvas_div: {
     // width: `890px`,
     alignItems: `center`,
@@ -143,7 +150,6 @@ class ScribingAnswerForm extends React.Component {
 
     this.setState({
       colors: { ...this.state.colors, [coloringTool]: color.hex },
-      colorDropdowns: { ...this.state.colorDropdowns, [coloringTool]: false },
     });
   }
 
@@ -153,6 +159,12 @@ class ScribingAnswerForm extends React.Component {
 
     this.setState({
       colorDropdowns: { ...this.state.popovers, [toolType]: true },
+    });
+  }
+
+  handleColorPickerClose = (event, toolType) => {
+    this.setState({
+      colorDropdowns: { ...this.state.popovers, [toolType]: false },
     });
   }
 
@@ -776,10 +788,13 @@ class ScribingAnswerForm extends React.Component {
                     style={{background: this.state.colors[toolColor.DRAW], ...styles.colorPicker }}
                     onClick={(event) => (this.handleColorPickerClick(event, toolColor.DRAW))} />
                   { this.state.colorDropdowns[toolColor.DRAW] ?
-                    <SketchPicker
-                      color={ this.state.colors[toolColor.DRAW] }
-                      onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.DRAW))}
-                    /> : []
+                    <div>
+                      <div style={ styles.cover } onClick={(event) => (this.handleColorPickerClose(event, toolColor.DRAW)) }/>
+                      <SketchPicker
+                        color={ this.state.colors[toolColor.DRAW] }
+                        onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.DRAW))}
+                      />
+                    </div> : []
                   }
                 </div>
               </Menu>
@@ -826,10 +841,13 @@ class ScribingAnswerForm extends React.Component {
                     style={{background: this.state.colors[toolColor.LINE], ...styles.colorPicker }}
                     onClick={(event) => (this.handleColorPickerClick(event, toolColor.LINE))} />
                   { this.state.colorDropdowns[toolColor.LINE] ?
-                    <SketchPicker
-                      color={ this.state.colors[toolColor.LINE] }
-                      onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.LINE))}
-                    /> : []
+                    <div>
+                      <div style={ styles.cover } onClick={ (event) => (this.handleColorPickerClose(event, toolColor.LINE)) }/>
+                      <SketchPicker
+                        color={ this.state.colors[toolColor.LINE] }
+                        onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.LINE))}
+                      />
+                    </div> : []
                   }
                 </div>
               </Menu>
@@ -896,10 +914,13 @@ class ScribingAnswerForm extends React.Component {
                       style={{background: this.state.colors[toolColor.SHAPE_BORDER], ...styles.colorPicker }}
                       onClick={(event) => (this.handleColorPickerClick(event, toolColor.SHAPE_BORDER))} />
                     { this.state.colorDropdowns[toolColor.SHAPE_BORDER] ?
-                      <SketchPicker
-                        color={ this.state.colors[toolColor.SHAPE_BORDER] }
-                        onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.SHAPE_BORDER))}
-                      /> : []
+                      <div>
+                        <div style={ styles.cover } onClick={ (event) => (this.handleColorPickerClose(event, toolColor.SHAPE_BORDER)) }/>
+                        <SketchPicker
+                          color={ this.state.colors[toolColor.SHAPE_BORDER] }
+                          onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.SHAPE_BORDER))}
+                        />
+                      </div> : []
                     }
                   </div>
                 </div>
@@ -915,10 +936,13 @@ class ScribingAnswerForm extends React.Component {
                       ...styles.colorPicker }}
                     onClick={(event) => (this.handleColorPickerClick(event, toolColor.SHAPE_FILL))} />
                   { this.state.colorDropdowns[toolColor.SHAPE_FILL] ?
-                    <SketchPicker
-                      color={ this.state.colors[toolColor.SHAPE_FILL] }
-                      onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.SHAPE_FILL))}
-                    /> : []
+                    <div>
+                      <div style={ styles.cover } onClick={ (event) => (this.handleColorPickerClose(event, toolColor.SHAPE_FILL)) }/>
+                      <SketchPicker
+                        color={ this.state.colors[toolColor.SHAPE_FILL] }
+                        onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.SHAPE_FILL))}
+                      />
+                    </div> : []
                   }
                 </div>
               </Menu>

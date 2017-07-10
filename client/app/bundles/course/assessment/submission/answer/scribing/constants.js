@@ -23,7 +23,7 @@ export const popoverTypes = mirrorCreator([
   'LAYER',
 ]);
 
-export const coloringTools = mirrorCreator([
+export const toolColor = mirrorCreator([
   'TYPE',
   'DRAW',
   'LINE',
@@ -31,6 +31,17 @@ export const coloringTools = mirrorCreator([
   'SHAPE_FILL',
 ]);
 
+export const toolThickness = mirrorCreator([
+  'DRAW',
+  'LINE',
+  'SHAPE_BORDER',
+])
+
+export const toolLineStyle = mirrorCreator([
+  'DRAW',
+  'LINE',
+  'SHAPE_BORDER',
+]);
 
 export const tools = mirrorCreator([
   'TYPE',

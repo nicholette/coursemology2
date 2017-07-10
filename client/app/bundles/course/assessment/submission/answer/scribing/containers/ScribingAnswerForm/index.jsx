@@ -11,13 +11,16 @@ import IconMenu from 'material-ui/IconMenu';
 import IconButton from 'material-ui/IconButton';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
+import Slider from 'material-ui/Slider';
+import Chip from 'material-ui/Chip';
+import {cyan500, grey50} from 'material-ui/styles/colors';
 
 import { injectIntl, intlShape } from 'react-intl';
 
 import translations from './ScribingAnswerForm.intl';
 
 import { answerShape } from '../../propTypes';
-import { tools, shapes, coloringTools, popoverTypes } from '../../constants';
+import { tools, shapes, toolColor, toolThickness, toolLineStyle, popoverTypes } from '../../constants';
 
 const propTypes = {
   actions: React.PropTypes.shape({
@@ -73,22 +76,33 @@ const styles = {
     paddingRight: `24px`,
   },
   toolDropdowns: {
-    width: `220px`,
+    width: `240px`,
+    padding: `10px`,
+  },
+  slider: {
+    padding: `0px 10px`,
   },
   innerTool: {
     display: `inline-block`,
   },
   chevron: {
+    color: `rgba(0, 0, 0, 0.4)`,
     fontSize:`12px`,
     padding: `10px 0px 10px 0px`,
-    border: `black 1px solid`,
   },
   colorPicker: {
     height: `20px`,
     width: `20px`,
     display: `inline-block`,
     margin: `0px 10px`,
-  }
+  },
+  chip: {
+    margin: `4px`,
+  },
+  chipWrapper: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
 }
 
 class ScribingAnswerForm extends React.Component {
@@ -102,6 +116,8 @@ class ScribingAnswerForm extends React.Component {
       isPopoverOpen: false,
       colors: [],
       colorDropdowns: [],
+      lineStyles: [],
+      thickness: [],
       popovers: [],
       popoverAnchor: undefined,
     }
@@ -152,6 +168,15 @@ class ScribingAnswerForm extends React.Component {
     });
   };
 
+  handleTouchTapLineStyleChip = (event, toolType, style) => {
+    // This prevents ghost click.
+    event.preventDefault();
+
+    this.setState({
+      lineStyles: { ...this.state.lineStyles, [toolType]: style},
+    });
+  }
+
   getMousePoint(event) {
     return {
       x: event.clientX,
@@ -177,15 +202,27 @@ class ScribingAnswerForm extends React.Component {
     }
   }
 
-  initializeColoringTools() {
-    for (var toolType in coloringTools) {
+  initializetoolColor() {
+    for (var toolType in toolColor) {
       this.state.colors[toolType] = `#000000`;
     }
   }
 
   initializeColorDropdowns() {
-    for (var toolType in coloringTools) {
+    for (var toolType in toolColor) {
       this.state.colorDropdowns[toolType] = false;
+    }
+  }
+
+  initializeLineStyles() {
+    for (var toolType in toolLineStyle) {
+      this.state.lineStyles[toolType] = 'solid';
+    }
+  }
+
+  initializeToolThickness() {
+      for (var toolType in toolThickness) {
+      this.state.thickness[toolType] = '1px';
     }
   }
 
@@ -411,7 +448,8 @@ class ScribingAnswerForm extends React.Component {
   componentDidMount() {
     // Retrieve answer in async call
     this.initializeAnswer();
-    this.initializeColoringTools();
+    this.initializetoolColor();
+    this.initializeLineStyles();
     this.initializeColorDropdowns();
     this.initializePopovers();
   }
@@ -608,6 +646,23 @@ class ScribingAnswerForm extends React.Component {
     );
   }
 
+  renderLineStyleChips(toolType) {
+    const lineStyles = ['solid', 'dotted', 'dashed'];
+    const chips = [];
+    lineStyles.forEach((style)=>(chips.push(
+      <Chip
+        backgroundColor={this.state.lineStyles[toolType] === style ? cyan500 : undefined}
+        labelColor={this.state.lineStyles[toolType] === style ? grey50 : undefined}
+        key={toolType + style}
+        style={styles.chip}
+        onTouchTap={(event) => this.handleTouchTapLineStyleChip(event, toolType, style)}
+      >
+        {style}
+      </Chip>
+    )));
+    return chips;
+  }
+
   renderToolBar() {
     const lineToolStyle = { 
       ...styles.custom_line,
@@ -620,7 +675,7 @@ class ScribingAnswerForm extends React.Component {
           <div style={styles.tool} onClick={this.onClickTypingMode}>
             <div style={styles.innerTool}>
               <FontIcon className="fa fa-font" style={this.state.selectedTool === tools.TYPE ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}/>
-              <div style={{width:`23px`, height:`8px`, background: this.state.colors[coloringTools.TYPE]}}/>
+              <div style={{width:`23px`, height:`8px`, background: this.state.colors[toolColor.TYPE]}}/>
             </div>
             <div style={styles.innerTool}>
               <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.handlePopoverTouchTap(event, popoverTypes.TYPE))}/>
@@ -644,16 +699,17 @@ class ScribingAnswerForm extends React.Component {
                 </div>
                 <div>
                   <label>Size:</label>
+
                 </div>
                 <div>
                   <label>Colour:</label>
                   <div 
-                    style={{background: this.state.colors[coloringTools.TYPE], ...styles.colorPicker }}
-                    onClick={(event) => (this.handleColorPickerClick(event, coloringTools.TYPE))} />
-                  { this.state.colorDropdowns[coloringTools.TYPE] ?
+                    style={{background: this.state.colors[toolColor.TYPE], ...styles.colorPicker }}
+                    onClick={(event) => (this.handleColorPickerClick(event, toolColor.TYPE))} />
+                  { this.state.colorDropdowns[toolColor.TYPE] ?
                     <SketchPicker
-                      color={ this.state.colors[coloringTools.TYPE] }
-                      onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, coloringTools.TYPE))}
+                      color={ this.state.colors[toolColor.TYPE] }
+                      onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.TYPE))}
                     /> : []
                   }
                 </div>
@@ -665,7 +721,7 @@ class ScribingAnswerForm extends React.Component {
           <div style={styles.tool} onClick={this.onClickDrawingMode}>
             <div style={styles.innerTool}>
               <FontIcon className="fa fa-pencil" style={this.state.selectedTool === tools.DRAW ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}/>
-              <div style={{width:`23px`, height:`8px`, background: this.state.colors[coloringTools.DRAW]}}/>
+              <div style={{width:`23px`, height:`8px`, background: this.state.colors[toolColor.DRAW]}}/>
             </div>
             <div style={styles.innerTool}>
               <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.handlePopoverTouchTap(event, popoverTypes.DRAW))}/>
@@ -685,17 +741,24 @@ class ScribingAnswerForm extends React.Component {
                   <label>Pencil</label>
                 </div>
                 <div>
+                  <label>Style:</label>
+                  <div style={styles.chipWrapper}>
+                    { this.renderLineStyleChips(toolLineStyle.DRAW) }
+                  </div>
+                </div>
+                <div>
                   <label>Thickness:</label>
+                  <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.DRAW]} />
                 </div>
                 <div>
                   <label>Colour:</label>
                   <div 
-                    style={{background: this.state.colors[coloringTools.DRAW], ...styles.colorPicker }}
-                    onClick={(event) => (this.handleColorPickerClick(event, coloringTools.DRAW))} />
-                  { this.state.colorDropdowns[coloringTools.DRAW] ?
+                    style={{background: this.state.colors[toolColor.DRAW], ...styles.colorPicker }}
+                    onClick={(event) => (this.handleColorPickerClick(event, toolColor.DRAW))} />
+                  { this.state.colorDropdowns[toolColor.DRAW] ?
                     <SketchPicker
-                      color={ this.state.colors[coloringTools.DRAW] }
-                      onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, coloringTools.DRAW))}
+                      color={ this.state.colors[toolColor.DRAW] }
+                      onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.DRAW))}
                     /> : []
                   }
                 </div>
@@ -706,7 +769,7 @@ class ScribingAnswerForm extends React.Component {
           <div style={styles.tool} onClick={this.onClickLineMode} >
             <div style={styles.innerTool}>
               <div style={lineToolStyle}/>
-              <div style={{width:`23px`, height:`8px`, background: this.state.colors[coloringTools.LINE]}}/>
+              <div style={{width:`23px`, height:`8px`, background: this.state.colors[toolColor.LINE]}}/>
             </div>
             <div style={styles.innerTool}>
               <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.handlePopoverTouchTap(event, popoverTypes.LINE))}/>
@@ -727,19 +790,23 @@ class ScribingAnswerForm extends React.Component {
                 </div>
                 <div>
                   <label>Style:</label>
+                  <div style={styles.chipWrapper}>
+                    { this.renderLineStyleChips(toolLineStyle.LINE) }
+                  </div>
                 </div>
                 <div>
                   <label>Thickness:</label>
+                  <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.LINE]} />
                 </div>
                 <div>
                   <label>Colour:</label>
                   <div 
-                    style={{background: this.state.colors[coloringTools.LINE], ...styles.colorPicker }}
-                    onClick={(event) => (this.handleColorPickerClick(event, coloringTools.LINE))} />
-                  { this.state.colorDropdowns[coloringTools.LINE] ?
+                    style={{background: this.state.colors[toolColor.LINE], ...styles.colorPicker }}
+                    onClick={(event) => (this.handleColorPickerClick(event, toolColor.LINE))} />
+                  { this.state.colorDropdowns[toolColor.LINE] ?
                     <SketchPicker
-                      color={ this.state.colors[coloringTools.LINE] }
-                      onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, coloringTools.LINE))}
+                      color={ this.state.colors[toolColor.LINE] }
+                      onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.LINE))}
                     /> : []
                   }
                 </div>
@@ -756,8 +823,8 @@ class ScribingAnswerForm extends React.Component {
                 style={this.state.selectedTool === tools.SHAPE ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}
               />
               <div style={{width:`23px`, height:`8px`,
-                border: `${this.state.colors[coloringTools.SHAPE_BORDER]} 2px solid`,
-                background: this.state.colors[coloringTools.SHAPE_FILL]}}/>
+                border: `${this.state.colors[toolColor.SHAPE_BORDER]} 2px solid`,
+                background: this.state.colors[toolColor.SHAPE_FILL]}}/>
             </div>
             <div style={styles.innerTool}>
               <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.handlePopoverTouchTap(event, popoverTypes.SHAPE))}/>
@@ -791,21 +858,23 @@ class ScribingAnswerForm extends React.Component {
                   <div>
                     <label>Border</label>
                   </div>
-                  <div>
-                    <label>Style:</label>
+                  <label>Style:</label>
+                  <div style={styles.chipWrapper}>
+                    { this.renderLineStyleChips(toolLineStyle.SHAPE_BORDER) }
                   </div>
                   <div>
                     <label>Thickness:</label>
+                    <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.SHAPE_BORDER]} />
                   </div>
                   <div>
                     <label>Colour:</label>
                     <div 
-                      style={{background: this.state.colors[coloringTools.SHAPE_BORDER], ...styles.colorPicker }}
-                      onClick={(event) => (this.handleColorPickerClick(event, coloringTools.SHAPE_BORDER))} />
-                    { this.state.colorDropdowns[coloringTools.SHAPE_BORDER] ?
+                      style={{background: this.state.colors[toolColor.SHAPE_BORDER], ...styles.colorPicker }}
+                      onClick={(event) => (this.handleColorPickerClick(event, toolColor.SHAPE_BORDER))} />
+                    { this.state.colorDropdowns[toolColor.SHAPE_BORDER] ?
                       <SketchPicker
-                        color={ this.state.colors[coloringTools.SHAPE_BORDER] }
-                        onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, coloringTools.SHAPE_BORDER))}
+                        color={ this.state.colors[toolColor.SHAPE_BORDER] }
+                        onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.SHAPE_BORDER))}
                       /> : []
                     }
                   </div>
@@ -818,13 +887,13 @@ class ScribingAnswerForm extends React.Component {
                   <label>Colour:</label>
                     <div 
                     style={{
-                      background: this.state.colors[coloringTools.SHAPE_FILL], 
+                      background: this.state.colors[toolColor.SHAPE_FILL], 
                       ...styles.colorPicker }}
-                    onClick={(event) => (this.handleColorPickerClick(event, coloringTools.SHAPE_FILL))} />
-                  { this.state.colorDropdowns[coloringTools.SHAPE_FILL] ?
+                    onClick={(event) => (this.handleColorPickerClick(event, toolColor.SHAPE_FILL))} />
+                  { this.state.colorDropdowns[toolColor.SHAPE_FILL] ?
                     <SketchPicker
-                      color={ this.state.colors[coloringTools.SHAPE_FILL] }
-                      onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, coloringTools.SHAPE_FILL))}
+                      color={ this.state.colors[toolColor.SHAPE_FILL] }
+                      onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.SHAPE_FILL))}
                     /> : []
                   }
                 </div>

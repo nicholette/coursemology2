@@ -177,6 +177,13 @@ class ScribingAnswerForm extends React.Component {
     });
   }
 
+  handleSliderThicknessOnChange = (event, toolType, value) => {
+    console.log('thickness', value);
+    this.setState({
+      thickness: { ...this.state.thickness, [toolType]: value}
+    })
+  }
+
   getMousePoint(event) {
     return {
       x: event.clientX,
@@ -202,7 +209,7 @@ class ScribingAnswerForm extends React.Component {
     }
   }
 
-  initializetoolColor() {
+  initializeToolColor() {
     for (var toolType in toolColor) {
       this.state.colors[toolType] = `#000000`;
     }
@@ -222,7 +229,7 @@ class ScribingAnswerForm extends React.Component {
 
   initializeToolThickness() {
       for (var toolType in toolThickness) {
-      this.state.thickness[toolType] = '1px';
+      this.state.thickness[toolType] = 1;
     }
   }
 
@@ -330,7 +337,7 @@ class ScribingAnswerForm extends React.Component {
             let line = new fabric.Line(
               [this.mouseCanvasDragStartPoint.x, this.mouseCanvasDragStartPoint.y,
                this.mouseCanvasDragEndPoint.x, this.mouseCanvasDragEndPoint.y],
-              {fill: 'black', stroke: 'black', strokeWidth: 1, selectable: false}
+              {stroke: `${this.state.colors[toolColor.LINE]}`, strokeWidth: this.state.thickness[toolThickness.LINE], selectable: false}
             );
             this.canvas.add(line);
           } else if (this.state.selectedTool === tools.SHAPE) {
@@ -340,8 +347,9 @@ class ScribingAnswerForm extends React.Component {
                 let rect = new fabric.Rect({
                   left: dragProps.left,
                   top: dragProps.top,
-                  stroke: 'black',
-                  fill: 'transparent',
+                  stroke: `${this.state.colors[toolColor.SHAPE_BORDER]}`,
+                  strokeWidth: this.state.thickness[toolThickness.SHAPE_BORDER],
+                  fill: `${this.state.colors[toolColor.SHAPE_FILL]}`,
                   width: dragProps.width,
                   height: dragProps.height,
                   selectable: false,
@@ -354,8 +362,9 @@ class ScribingAnswerForm extends React.Component {
                 let ellipse = new fabric.Ellipse({
                   left: dragProps.left,
                   top: dragProps.top,
-                  stroke: 'black',
-                  fill: 'transparent',
+                  stroke: `${this.state.colors[toolColor.SHAPE_BORDER]}`,
+                  strokeWidth: this.state.thickness[toolThickness.SHAPE_BORDER],
+                  fill: `${this.state.colors[toolColor.SHAPE_FILL]}`,
                   rx: dragProps.width / 2,
                   ry: dragProps.height / 2,
                   selectable: false,
@@ -448,7 +457,8 @@ class ScribingAnswerForm extends React.Component {
   componentDidMount() {
     // Retrieve answer in async call
     this.initializeAnswer();
-    this.initializetoolColor();
+    this.initializeToolColor();
+    this.initializeToolThickness();
     this.initializeLineStyles();
     this.initializeColorDropdowns();
     this.initializePopovers();
@@ -748,7 +758,10 @@ class ScribingAnswerForm extends React.Component {
                 </div>
                 <div>
                   <label>Thickness:</label>
-                  <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.DRAW]} />
+                  <Slider 
+                    style={styles.slider} min={1} max={5} step={1} value={this.state.thickness[toolThickness.DRAW]}
+                    onChange={(event, newValue) => (this.handleSliderThicknessOnChange(event, toolThickness.DRAW, newValue))}
+                   />
                 </div>
                 <div>
                   <label>Colour:</label>
@@ -796,7 +809,9 @@ class ScribingAnswerForm extends React.Component {
                 </div>
                 <div>
                   <label>Thickness:</label>
-                  <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.LINE]} />
+                  <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.LINE]}
+                    onChange={(event, newValue) => (this.handleSliderThicknessOnChange(event, toolThickness.LINE, newValue))}
+                  />
                 </div>
                 <div>
                   <label>Colour:</label>
@@ -864,7 +879,9 @@ class ScribingAnswerForm extends React.Component {
                   </div>
                   <div>
                     <label>Thickness:</label>
-                    <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.SHAPE_BORDER]} />
+                    <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.SHAPE_BORDER]}
+                      onChange={(event, newValue) => (this.handleSliderThicknessOnChange(event, toolThickness.SHAPE_BORDER, newValue))}
+                    />
                   </div>
                   <div>
                     <label>Colour:</label>

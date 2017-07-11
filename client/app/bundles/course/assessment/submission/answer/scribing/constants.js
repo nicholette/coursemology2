@@ -38,7 +38,6 @@ export const toolThickness = mirrorCreator([
 ])
 
 export const toolLineStyle = mirrorCreator([
-  'DRAW',
   'LINE',
   'SHAPE_BORDER',
 ]);

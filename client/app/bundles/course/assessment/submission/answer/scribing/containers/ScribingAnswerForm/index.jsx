@@ -363,13 +363,33 @@ class ScribingAnswerForm extends React.Component {
         } else if (isMouseDrag) {
           // This is a drag as the mouse move occurs after mouse down.
           if (this.state.selectedTool === tools.LINE) {
+            var strokeDashArray = [];
+            if (this.state.lineStyles[toolLineStyle.LINE] === 'dotted') {
+              strokeDashArray = [1, 3];
+            } else if (this.state.lineStyles[toolLineStyle.LINE] === 'dashed') {
+              strokeDashArray = [10, 5];
+            }
+
             let line = new fabric.Line(
               [this.mouseCanvasDragStartPoint.x, this.mouseCanvasDragStartPoint.y,
                this.mouseCanvasDragEndPoint.x, this.mouseCanvasDragEndPoint.y],
-              {stroke: `${this.state.colors[toolColor.LINE]}`, strokeWidth: this.state.thickness[toolThickness.LINE], selectable: false}
+              {
+                stroke: `${this.state.colors[toolColor.LINE]}`,
+                strokeWidth: this.state.thickness[toolThickness.LINE],
+                strokeDashArray,
+                selectable: false
+              }
             );
             this.canvas.add(line);
           } else if (this.state.selectedTool === tools.SHAPE) {
+
+            var strokeDashArray = [];
+            if (this.state.lineStyles[toolLineStyle.SHAPE_BORDER] === 'dotted') {
+              strokeDashArray = [1, 3];
+            } else if (this.state.lineStyles[toolLineStyle.SHAPE_BORDER] === 'dashed') {
+              strokeDashArray = [10, 5];
+            }
+
             switch (this.state.selectedShape) {
               case shapes.RECT: {
                 let dragProps = this.generateMouseDragProperties(this.mouseCanvasDragStartPoint, this.mouseCanvasDragEndPoint);
@@ -378,6 +398,7 @@ class ScribingAnswerForm extends React.Component {
                   top: dragProps.top,
                   stroke: `${this.state.colors[toolColor.SHAPE_BORDER]}`,
                   strokeWidth: this.state.thickness[toolThickness.SHAPE_BORDER],
+                  strokeDashArray,
                   fill: `${this.state.colors[toolColor.SHAPE_FILL]}`,
                   width: dragProps.width,
                   height: dragProps.height,
@@ -393,6 +414,7 @@ class ScribingAnswerForm extends React.Component {
                   top: dragProps.top,
                   stroke: `${this.state.colors[toolColor.SHAPE_BORDER]}`,
                   strokeWidth: this.state.thickness[toolThickness.SHAPE_BORDER],
+                  strokeDashArray,
                   fill: `${this.state.colors[toolColor.SHAPE_FILL]}`,
                   rx: dragProps.width / 2,
                   ry: dragProps.height / 2,
@@ -788,12 +810,6 @@ class ScribingAnswerForm extends React.Component {
               <Menu style={styles.menu}>
                 <div>
                   <label>Pencil</label>
-                </div>
-                <div>
-                  <label>Style:</label>
-                  <div style={styles.chipWrapper}>
-                    { this.renderLineStyleChips(toolLineStyle.DRAW) }
-                  </div>
                 </div>
                 <div>
                   <label>Thickness:</label>

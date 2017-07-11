@@ -86,6 +86,10 @@ const styles = {
     width: `240px`,
     padding: `10px`,
   },
+  menu: {
+    maxHeight: `250px`,
+    overflowY: `auto`,
+  },
   slider: {
     padding: `0px 10px`,
   },
@@ -127,6 +131,7 @@ class ScribingAnswerForm extends React.Component {
       thickness: [],
       popovers: [],
       popoverAnchor: undefined,
+      popoverColorPickerAnchor: undefined,
     }
 
     this.viewportLeft = 0;
@@ -143,13 +148,17 @@ class ScribingAnswerForm extends React.Component {
     this.onClickDelete = this.onClickDelete.bind(this);
   }
 
+  getRgbaHelper(json) {
+    return 'rgba(' + json.r + ',' + json.g + ',' + json.b + ',' + json.a + ')';
+  }
+
   handleOnChangeCompleteColor = (color, coloringTool) => {
     if (coloringTool === toolColor.DRAW) {
-      this.canvas.freeDrawingBrush.color = color.hex;
+      this.canvas.freeDrawingBrush.color = this.getRgbaHelper(color.rgb);
     }
 
     this.setState({
-      colors: { ...this.state.colors, [coloringTool]: color.hex },
+      colors: { ...this.state.colors, [coloringTool]: this.getRgbaHelper(color.rgb)},
     });
   }
 
@@ -158,11 +167,12 @@ class ScribingAnswerForm extends React.Component {
     event.preventDefault();
 
     this.setState({
+      popoverColorPickerAnchor: event.currentTarget,
       colorDropdowns: { ...this.state.popovers, [toolType]: true },
     });
   }
 
-  handleColorPickerClose = (event, toolType) => {
+  handleColorPickerClose = (toolType) => {
     this.setState({
       colorDropdowns: { ...this.state.popovers, [toolType]: false },
     });
@@ -719,7 +729,7 @@ class ScribingAnswerForm extends React.Component {
               onRequestClose={() => (this.handlePopoverRequestClose(popoverTypes.TYPE))}
               animation={PopoverAnimationVertical}
             >
-              <Menu>
+              <Menu style={styles.menu}>
                 <div>
                   <label>Font</label>
                 </div>
@@ -735,12 +745,22 @@ class ScribingAnswerForm extends React.Component {
                   <div 
                     style={{background: this.state.colors[toolColor.TYPE], ...styles.colorPicker }}
                     onClick={(event) => (this.handleColorPickerClick(event, toolColor.TYPE))} />
-                  { this.state.colorDropdowns[toolColor.TYPE] ?
-                    <SketchPicker
-                      color={ this.state.colors[toolColor.TYPE] }
-                      onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.TYPE))}
-                    /> : []
-                  }
+
+                    <Popover
+                      style={styles.toolDropdowns}
+                      open={this.state.colorDropdowns[toolColor.TYPE]}
+                      anchorEl={this.state.popoverColorPickerAnchor}
+                      anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+                      targetOrigin={{horizontal: 'left', vertical: 'top'}}
+                      onRequestClose={() => (this.handleColorPickerClose(toolColor.TYPE)) }
+                      animation={PopoverAnimationVertical}
+                    >
+                      <SketchPicker
+                        color={ this.state.colors[toolColor.TYPE] }
+                        onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.TYPE))}
+                      />
+                    </Popover>
+
                 </div>
               </Menu>
             </Popover>
@@ -765,7 +785,7 @@ class ScribingAnswerForm extends React.Component {
               onRequestClose={() => (this.handlePopoverRequestClose(popoverTypes.DRAW))}
               animation={PopoverAnimationVertical}
             >
-              <Menu>
+              <Menu style={styles.menu}>
                 <div>
                   <label>Pencil</label>
                 </div>
@@ -787,15 +807,20 @@ class ScribingAnswerForm extends React.Component {
                   <div 
                     style={{background: this.state.colors[toolColor.DRAW], ...styles.colorPicker }}
                     onClick={(event) => (this.handleColorPickerClick(event, toolColor.DRAW))} />
-                  { this.state.colorDropdowns[toolColor.DRAW] ?
-                    <div>
-                      <div style={ styles.cover } onClick={(event) => (this.handleColorPickerClose(event, toolColor.DRAW)) }/>
+                    <Popover
+                      style={styles.toolDropdowns}
+                      open={this.state.colorDropdowns[toolColor.DRAW]}
+                      anchorEl={this.state.popoverColorPickerAnchor}
+                      anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+                      targetOrigin={{horizontal: 'left', vertical: 'top'}}
+                      onRequestClose={() => (this.handleColorPickerClose(toolColor.DRAW)) }
+                      animation={PopoverAnimationVertical}
+                    >
                       <SketchPicker
                         color={ this.state.colors[toolColor.DRAW] }
                         onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.DRAW))}
                       />
-                    </div> : []
-                  }
+                    </Popover>
                 </div>
               </Menu>
             </Popover>
@@ -819,7 +844,7 @@ class ScribingAnswerForm extends React.Component {
               onRequestClose={() => (this.handlePopoverRequestClose(popoverTypes.LINE))}
               animation={PopoverAnimationVertical}
             >
-              <Menu>
+              <Menu style={styles.menu}>
                 <div>
                   <label>Line</label>
                 </div>
@@ -840,15 +865,21 @@ class ScribingAnswerForm extends React.Component {
                   <div 
                     style={{background: this.state.colors[toolColor.LINE], ...styles.colorPicker }}
                     onClick={(event) => (this.handleColorPickerClick(event, toolColor.LINE))} />
-                  { this.state.colorDropdowns[toolColor.LINE] ?
-                    <div>
-                      <div style={ styles.cover } onClick={ (event) => (this.handleColorPickerClose(event, toolColor.LINE)) }/>
+                    <Popover
+                      style={styles.toolDropdowns}
+                      open={this.state.colorDropdowns[toolColor.LINE]}
+                      anchorEl={this.state.popoverColorPickerAnchor}
+                      anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+                      targetOrigin={{horizontal: 'left', vertical: 'top'}}
+                      onRequestClose={() => (this.handleColorPickerClose(toolColor.LINE)) }
+                      animation={PopoverAnimationVertical}
+                    >
                       <SketchPicker
                         color={ this.state.colors[toolColor.LINE] }
                         onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.LINE))}
+                        disableAlpha={false}
                       />
-                    </div> : []
-                  }
+                    </Popover>
                 </div>
               </Menu>
             </Popover>
@@ -879,7 +910,7 @@ class ScribingAnswerForm extends React.Component {
               onRequestClose={() => (this.handlePopoverRequestClose(popoverTypes.SHAPE))}
               animation={PopoverAnimationVertical}
             >
-              <Menu>
+              <Menu style={styles.menu}>
                 <div>
                   <div>
                     <label>Shape</label>
@@ -913,15 +944,20 @@ class ScribingAnswerForm extends React.Component {
                     <div 
                       style={{background: this.state.colors[toolColor.SHAPE_BORDER], ...styles.colorPicker }}
                       onClick={(event) => (this.handleColorPickerClick(event, toolColor.SHAPE_BORDER))} />
-                    { this.state.colorDropdowns[toolColor.SHAPE_BORDER] ?
-                      <div>
-                        <div style={ styles.cover } onClick={ (event) => (this.handleColorPickerClose(event, toolColor.SHAPE_BORDER)) }/>
+                      <Popover
+                        style={styles.toolDropdowns}
+                        open={this.state.colorDropdowns[toolColor.SHAPE_BORDER]}
+                        anchorEl={this.state.popoverColorPickerAnchor}
+                        anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+                        targetOrigin={{horizontal: 'left', vertical: 'top'}}
+                        onRequestClose={() => (this.handleColorPickerClose(toolColor.SHAPE_BORDER)) }
+                        animation={PopoverAnimationVertical}
+                      >
                         <SketchPicker
                           color={ this.state.colors[toolColor.SHAPE_BORDER] }
                           onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.SHAPE_BORDER))}
                         />
-                      </div> : []
-                    }
+                      </Popover>
                   </div>
                 </div>
                 <Divider />
@@ -935,15 +971,20 @@ class ScribingAnswerForm extends React.Component {
                       background: this.state.colors[toolColor.SHAPE_FILL], 
                       ...styles.colorPicker }}
                     onClick={(event) => (this.handleColorPickerClick(event, toolColor.SHAPE_FILL))} />
-                  { this.state.colorDropdowns[toolColor.SHAPE_FILL] ?
-                    <div>
-                      <div style={ styles.cover } onClick={ (event) => (this.handleColorPickerClose(event, toolColor.SHAPE_FILL)) }/>
+                    <Popover
+                      style={styles.toolDropdowns}
+                      open={this.state.colorDropdowns[toolColor.SHAPE_FILL]}
+                      anchorEl={this.state.popoverColorPickerAnchor}
+                      anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+                      targetOrigin={{horizontal: 'left', vertical: 'top'}}
+                      onRequestClose={() => (this.handleColorPickerClose(toolColor.SHAPE_FILL)) }
+                      animation={PopoverAnimationVertical}
+                    >
                       <SketchPicker
                         color={ this.state.colors[toolColor.SHAPE_FILL] }
                         onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.SHAPE_FILL))}
                       />
-                    </div> : []
-                  }
+                    </Popover>
                 </div>
               </Menu>
             </Popover>

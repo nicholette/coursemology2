@@ -84,15 +84,44 @@ const styles = {
     paddingRight: `24px`,
   },
   toolDropdowns: {
-    width: `240px`,
     padding: `10px`,
   },
   menu: {
     maxHeight: `250px`,
     overflowY: `auto`,
   },
+  fieldDiv: {
+    fontSize: `16px`,
+    lineHeight: `24px`,
+    width: `210px`,
+    height: `72px`,
+    display: `block`,
+    position: `relative`,
+    backgroundColor: `transparent`,
+    fontFamily: `Roboto, sans-serif`,
+    transition: `height 200ms cubic-bezier(0.23, 1, 0.32, 1) 0ms`,
+    cursor: `auto`,
+  },
+  label: {
+    position: `absolute`,
+    lineHeight: `22px`,
+    top: `38px`,
+    transition: `all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms`,
+    zIndex: `1`,
+    transform: `scale(0.75) translate(0px, -28px)`,
+    transformOrigin: `left top 0px`,
+    pointerEvents: `none`,
+    userSelect: `none`,
+    color: `rgba(0, 0, 0, 0.3)`,
+  },
+  select: {
+    width: `210px`,
+  },
+  savingStatus: {
+    width: `50px`,
+  },
   slider: {
-    padding: `0px 10px`,
+    padding: `30px 0px`,
   },
   innerTool: {
     display: `inline-block`,
@@ -102,11 +131,22 @@ const styles = {
     fontSize:`12px`,
     padding: `10px 0px 10px 0px`,
   },
+  colorPickerFieldDiv: {
+    fontSize: `16px`,
+    lineHeight: `24px`,
+    width: `210px`,
+    display: `block`,
+    position: `relative`,
+    backgroundColor: `transparent`,
+    fontFamily: `Roboto, sans-serif`,
+    transition: `height 200ms cubic-bezier(0.23, 1, 0.32, 1) 0ms`,
+    cursor: `auto`,
+  },
   colorPicker: {
     height: `20px`,
     width: `20px`,
     display: `inline-block`,
-    margin: `0px 10px`,
+    margin: `15px 0px 0px 50px`,
   },
   chip: {
     margin: `4px`,
@@ -114,6 +154,8 @@ const styles = {
   chipWrapper: {
     display: 'flex',
     flexWrap: 'wrap',
+    width: `220px`,
+    padding: `40px 0px`,
   },
 }
 
@@ -167,14 +209,12 @@ class ScribingAnswerForm extends React.Component {
   }
 
   handleFontFamilySelectChange = (event, index, value) => {
-    console.log(event, index, value);
     this.setState({
       fontFamily: value,
     });
   }
 
   handleFontSizeSelectChange = (event, index, value) => {
-    console.log(event, index, value);
     this.setState({
       fontSize: value,
     });
@@ -727,7 +767,7 @@ class ScribingAnswerForm extends React.Component {
     }
 
     return (
-      <div>
+      <div style={styles.savingStatus}>
         <label style={styles.saving_status_label}>{status}</label>
       </div>
     );
@@ -768,9 +808,11 @@ class ScribingAnswerForm extends React.Component {
 
     return (
       <SelectField
+        floatingLabelText="Font Family:"
         value={this.state.fontFamily}
         onChange={this.handleFontFamilySelectChange}
         maxHeight={150}
+        style={styles.select}
       >
         {menuItems}
       </SelectField>
@@ -785,9 +827,11 @@ class ScribingAnswerForm extends React.Component {
 
     return (
       <SelectField
+        floatingLabelText="Font Size:"
         value={this.state.fontSize}
         onChange={this.handleFontSizeSelectChange}
         maxHeight={150}
+        style={styles.select}
       >
         {menuItems}
       </SelectField>
@@ -823,18 +867,16 @@ class ScribingAnswerForm extends React.Component {
             >
               <Menu style={styles.menu}>
                 <div>
-                  <label>Font</label>
+                  <h4>Font</h4>
                 </div>
                 <div>
-                  <label>Font Family:</label>
                   {this.renderFontFamilySelect()}
                 </div>
                 <div>
-                  <label>Size:</label>
                   {this.renderFontSizeSelect()}
                 </div>
-                <div>
-                  <label>Colour:</label>
+                <div style={styles.colorPickerFieldDiv}>
+                  <label style={styles.label}>Colour:</label>
                   <div 
                     style={{background: this.state.colors[toolColor.TYPE], ...styles.colorPicker }}
                     onClick={(event) => (this.handleColorPickerClick(event, toolColor.TYPE))} />
@@ -880,17 +922,17 @@ class ScribingAnswerForm extends React.Component {
             >
               <Menu style={styles.menu}>
                 <div>
-                  <label>Pencil</label>
+                  <h4>Pencil</h4>
                 </div>
-                <div>
-                  <label>Thickness:</label>
+                <div style={styles.fieldDiv}>
+                  <label style={styles.label}>Thickness:</label>
                   <Slider 
                     style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.DRAW]}
                     onChange={(event, newValue) => (this.handleSliderThicknessOnChange(event, toolThickness.DRAW, newValue))}
                    />
                 </div>
-                <div>
-                  <label>Colour:</label>
+                <div style={styles.colorPickerFieldDiv}>
+                  <label style={styles.label}>Colour:</label>
                   <div 
                     style={{background: this.state.colors[toolColor.DRAW], ...styles.colorPicker }}
                     onClick={(event) => (this.handleColorPickerClick(event, toolColor.DRAW))} />
@@ -933,22 +975,22 @@ class ScribingAnswerForm extends React.Component {
             >
               <Menu style={styles.menu}>
                 <div>
-                  <label>Line</label>
+                  <h4>Line</h4>
                 </div>
-                <div>
-                  <label>Style:</label>
+                <div style={styles.fieldDiv}>
+                  <label style={styles.label}>Style:</label>
                   <div style={styles.chipWrapper}>
                     { this.renderLineStyleChips(toolLineStyle.LINE) }
                   </div>
                 </div>
-                <div>
-                  <label>Thickness:</label>
+                <div style={styles.fieldDiv}>
+                  <label style={styles.label}>Thickness:</label>
                   <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.LINE]}
                     onChange={(event, newValue) => (this.handleSliderThicknessOnChange(event, toolThickness.LINE, newValue))}
                   />
                 </div>
-                <div>
-                  <label>Colour:</label>
+                <div style={styles.colorPickerFieldDiv}>
+                  <label style={styles.label}>Colour:</label>
                   <div 
                     style={{background: this.state.colors[toolColor.LINE], ...styles.colorPicker }}
                     onClick={(event) => (this.handleColorPickerClick(event, toolColor.LINE))} />
@@ -1000,7 +1042,7 @@ class ScribingAnswerForm extends React.Component {
               <Menu style={styles.menu}>
                 <div>
                   <div>
-                    <label>Shape</label>
+                    <h4>Shape</h4>
                   </div>
                   <div>
                     <IconButton tooltip="Square" tooltipPosition="top-center">
@@ -1014,20 +1056,22 @@ class ScribingAnswerForm extends React.Component {
                 <Divider />
                 <div>
                   <div>
-                    <label>Border</label>
+                    <h4>Border</h4>
                   </div>
-                  <label>Style:</label>
-                  <div style={styles.chipWrapper}>
-                    { this.renderLineStyleChips(toolLineStyle.SHAPE_BORDER) }
+                  <div style={styles.fieldDiv}>
+                    <label style={styles.label}>Style:</label>
+                    <div style={styles.chipWrapper}>
+                      { this.renderLineStyleChips(toolLineStyle.SHAPE_BORDER) }
+                    </div>
                   </div>
-                  <div>
-                    <label>Thickness:</label>
+                  <div style={styles.fieldDiv}>
+                    <label style={styles.label}>Thickness:</label>
                     <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.SHAPE_BORDER]}
                       onChange={(event, newValue) => (this.handleSliderThicknessOnChange(event, toolThickness.SHAPE_BORDER, newValue))}
                     />
                   </div>
-                  <div>
-                    <label>Colour:</label>
+                  <div style={styles.colorPickerFieldDiv}>
+                    <label style={styles.label}>Colour:</label>
                     <div 
                       style={{background: this.state.colors[toolColor.SHAPE_BORDER], ...styles.colorPicker }}
                       onClick={(event) => (this.handleColorPickerClick(event, toolColor.SHAPE_BORDER))} />
@@ -1049,10 +1093,10 @@ class ScribingAnswerForm extends React.Component {
                 </div>
                 <Divider />
                 <div>
-                  <label>Fill</label>
+                  <h4>Fill</h4>
                 </div>
-                <div>
-                  <label>Colour:</label>
+                <div style={styles.colorPickerFieldDiv}>
+                  <label style={styles.label}>Colour:</label>
                     <div 
                     style={{
                       background: this.state.colors[toolColor.SHAPE_FILL], 

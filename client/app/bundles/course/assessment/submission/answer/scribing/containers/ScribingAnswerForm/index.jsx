@@ -31,15 +31,14 @@ const propTypes = {
     updateScribingAnswer: PropTypes.func.isRequired,
   }),
   scribingAnswer: PropTypes.shape({
-    // question: questionShape,
-    // answer: answerShape,
+    answer: answerShape,
     is_loading: PropTypes.bool,
     is_canvas_loaded: PropTypes.bool,
     is_saving: PropTypes.bool,
     is_saved: PropTypes.bool,
     save_errors: PropTypes.array(PropTypes.string),
   }),
-  data: PropTypes.object.isRequired,
+  data: answerShape.isRequired,
 }
 
 const styles = {
@@ -51,7 +50,6 @@ const styles = {
     left: '0px',
   },
   canvas_div: {
-    // width: `890px`,
     alignItems: `center`,
     margin: `auto`,
   },
@@ -340,8 +338,6 @@ class ScribingAnswerForm extends React.Component {
     const image = new Image();
     image.src = imageUrl;
     image.onload = () => {
-      // A4 size width
-      // const CANVAS_MAX_WIDTH = 890;
       
       // Get the calculated width of canvas, 750 is min width for scribing toolbar
       const element = document.getElementById(`canvas-${answerId}`);

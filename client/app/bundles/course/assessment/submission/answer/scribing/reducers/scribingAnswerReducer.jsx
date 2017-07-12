@@ -4,8 +4,8 @@ export const initialState = {
   answer: {
     scribbles: [],
     image_path: '',
-    user_id: '',
-    answer_id: '',
+    user_id: undefined,
+    answer_id: undefined,
   },
   is_canvas_loaded: false,
   is_loading: false,
@@ -24,7 +24,6 @@ export default function scribingAnswerReducer(state = initialState, action) {
         is_canvas_loaded: action.loaded,
       };
     }
-    case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST:
     case actionTypes.FETCH_SCRIBING_ANSWER_REQUEST: {
       const { isLoading } = action;
       return {
@@ -40,15 +39,6 @@ export default function scribingAnswerReducer(state = initialState, action) {
         is_loading: true,
         is_saving: true,
         save_errors: undefined,
-      };
-    }
-    case actionTypes.FETCH_SCRIBING_QUESTION_SUCCESS: {
-      const { question } = action.data;
-      question.maximum_grade = parseInt(question.maximum_grade, 10);
-      return {
-        ...state,
-        question,
-        is_loading: false,
       };
     }
     case actionTypes.FETCH_SCRIBING_ANSWER_SUCCESS: {
@@ -67,7 +57,6 @@ export default function scribingAnswerReducer(state = initialState, action) {
         is_loading: false,
       };
     }
-    case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE:
     case actionTypes.FETCH_SCRIBING_ANSWER_FAILURE:
     case actionTypes.UPDATE_SCRIBING_ANSWER_FAILURE:
     case actionTypes.CLEAR_SAVING_STATUS: {

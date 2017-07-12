@@ -6,9 +6,8 @@ import ScribingAnswer from './scribing/ScribingAnswer';
 
 $(document).ready(() => {
   const mountNodeElems = document.getElementsByClassName('scribing-answer');
-  console.log(mountNodeElems);
-  if (mountNodeElems) {
 
+  if (mountNodeElems) {
     for (var i=0; i<mountNodeElems.length; i++) {
       const mountNode = mountNodeElems[i];
       const store = storeCreator({ scribingAnswer: {} });

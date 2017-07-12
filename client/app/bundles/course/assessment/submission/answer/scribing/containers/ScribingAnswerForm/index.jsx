@@ -9,6 +9,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
 import IconMenu from 'material-ui/IconMenu';
 import IconButton from 'material-ui/IconButton';
+import SelectField from 'material-ui/SelectField';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
 import Slider from 'material-ui/Slider';
@@ -125,6 +126,8 @@ class ScribingAnswerForm extends React.Component {
       imageWidth: 0,
       imageHeight: 0,
       isPopoverOpen: false,
+      fontFamily: 'Arial',
+      fontSize: 12,
       colors: [],
       colorDropdowns: [],
       lineStyles: [],
@@ -137,6 +140,7 @@ class ScribingAnswerForm extends React.Component {
     this.viewportLeft = 0;
     this.viewportTop = 0;
 
+    this.addText = this.addText.bind(this);
     this.onClickTypingMode = this.onClickTypingMode.bind(this);
     this.onClickDrawingMode = this.onClickDrawingMode.bind(this);
     this.onClickLineMode = this.onClickLineMode.bind(this);
@@ -159,6 +163,20 @@ class ScribingAnswerForm extends React.Component {
 
     this.setState({
       colors: { ...this.state.colors, [coloringTool]: this.getRgbaHelper(color.rgb)},
+    });
+  }
+
+  handleFontFamilySelectChange = (event, index, value) => {
+    console.log(event, index, value);
+    this.setState({
+      fontFamily: value,
+    });
+  }
+
+  handleFontSizeSelectChange = (event, index, value) => {
+    console.log(event, index, value);
+    this.setState({
+      fontSize: value,
     });
   }
 
@@ -357,10 +375,7 @@ class ScribingAnswerForm extends React.Component {
         let passedDistThreshold = dist > minDistThreshold;
         let isMouseDrag = this.mouseDragFlag === true && passedDistThreshold;
 
-        if (this.state.selectedTool === tools.TYPE) {
-          // TODO: add typing functionality
-          console.log('TYPE TOOL selected');
-        } else if (isMouseDrag) {
+        if (isMouseDrag) {
           // This is a drag as the mouse move occurs after mouse down.
           if (this.state.selectedTool === tools.LINE) {
             var strokeDashArray = [];
@@ -454,6 +469,7 @@ class ScribingAnswerForm extends React.Component {
               });
               break;
             }
+            case 'i-text':
             case 'line':
             case 'rect':
             case 'ellipse': {
@@ -538,6 +554,16 @@ class ScribingAnswerForm extends React.Component {
     // and reloads them to enable selection again
     this.canvas.clear();
     this.initializeScribbles();
+  }
+
+  addText() {
+    this.canvas.add(new fabric.IText('Text', { 
+      fontFamily: this.state.fontFamily,
+      fontSize: this.state.fontSize,
+      fill: this.state.colors[toolColor.TYPE],
+      left: this.canvas.width / 2, 
+      top: this.canvas.height / 2 ,
+    }));
   }
 
   onClickTypingMode() {
@@ -724,6 +750,50 @@ class ScribingAnswerForm extends React.Component {
     return chips;
   }
 
+  renderFontFamilySelect() {
+    const fontFamilies = [
+      'Arial',
+      'Arial Black',
+      'Comic Sans MS',
+      'Georgia',
+      'Impact',
+      'Lucida Sans Unicode',
+      'Palatino Linotype',
+      'Tahoma',
+      'Times New Roman',
+    ];
+
+    const menuItems = [];
+    fontFamilies.forEach((font) => {menuItems.push(<MenuItem key={font} value={font} primaryText={font} />);} )
+
+    return (
+      <SelectField
+        value={this.state.fontFamily}
+        onChange={this.handleFontFamilySelectChange}
+        maxHeight={150}
+      >
+        {menuItems}
+      </SelectField>
+    );
+  }
+
+  renderFontSizeSelect() {
+    const menuItems = [];
+    for (var i=1; i<=60; i++) {
+      menuItems.push(<MenuItem key={i} value={i} primaryText={i} />);
+    }
+
+    return (
+      <SelectField
+        value={this.state.fontSize}
+        onChange={this.handleFontSizeSelectChange}
+        maxHeight={150}
+      >
+        {menuItems}
+      </SelectField>
+    )
+  }
+
   renderToolBar() {
     const lineToolStyle = { 
       ...styles.custom_line,
@@ -734,7 +804,7 @@ class ScribingAnswerForm extends React.Component {
       <Toolbar style={{...styles.toolbar, width: this.CANVAS_MAX_WIDTH}}>
         <ToolbarGroup>
           <div style={styles.tool} onClick={this.onClickTypingMode}>
-            <div style={styles.innerTool}>
+            <div style={styles.innerTool} onClick={this.addText}>
               <FontIcon className="fa fa-font" style={this.state.selectedTool === tools.TYPE ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}/>
               <div style={{width:`23px`, height:`8px`, background: this.state.colors[toolColor.TYPE]}}/>
             </div>
@@ -757,10 +827,11 @@ class ScribingAnswerForm extends React.Component {
                 </div>
                 <div>
                   <label>Font Family:</label>
+                  {this.renderFontFamilySelect()}
                 </div>
                 <div>
                   <label>Size:</label>
-
+                  {this.renderFontSizeSelect()}
                 </div>
                 <div>
                   <label>Colour:</label>

@@ -23,6 +23,8 @@ import translations from './ScribingAnswerForm.intl';
 import { answerShape } from '../../propTypes';
 import { tools, shapes, toolColor, toolThickness, toolLineStyle, popoverTypes } from '../../constants';
 
+import SavingIndicator from '../../components/SavingIndicator';
+
 const propTypes = {
   actions: React.PropTypes.shape({
     setCanvasLoaded: PropTypes.func.isRequired,
@@ -61,14 +63,6 @@ const styles = {
   },
   toolbar: {
     marginBottom: `1em`,
-  },
-  saving_status_label: {
-    color: '#bdc3c7',
-    fontSize: `14px`,
-    fontWeight: `500`,
-    letterSpacing: `0px`,
-    textTransform: `uppercase`,
-    fontFamily: `Roboto, sans-serif`,
   },
   custom_line: {
     display: `inline-block`,
@@ -116,9 +110,6 @@ const styles = {
   },
   select: {
     width: `210px`,
-  },
-  savingStatus: {
-    width: `50px`,
   },
   slider: {
     padding: `30px 0px`,
@@ -182,7 +173,6 @@ class ScribingAnswerForm extends React.Component {
     this.viewportLeft = 0;
     this.viewportTop = 0;
   }
-
 
   // Event handlers
 
@@ -744,27 +734,6 @@ class ScribingAnswerForm extends React.Component {
     ) : null;
   }
 
-  renderSavingStatus() {
-    var status = '';
-
-    if (this.props.scribingAnswer.is_saving) {
-      status = 'Saving..';
-    } else if (this.props.scribingAnswer.is_saved) {
-      status = 'Saved';
-      // TODO: make fading animation
-      setTimeout(this.props.actions.clearSavingStatus.bind(this), 3000);
-    } else if (this.props.scribingAnswer.save_errors) {
-      // TODO: add warning color
-      status = 'Save errors.'
-    }
-
-    return (
-      <div style={styles.savingStatus}>
-        <label style={styles.saving_status_label}>{status}</label>
-      </div>
-    );
-  }
-
   renderLineStyleChips(toolType) {
     const lineStyles = ['solid', 'dotted', 'dashed'];
     const chips = [];
@@ -1137,7 +1106,12 @@ class ScribingAnswerForm extends React.Component {
             onClick={this.onClickDelete}/>
         </ToolbarGroup>
         <ToolbarGroup>
-          { this.renderSavingStatus() }
+          <SavingIndicator 
+            is_saving={this.props.scribingAnswer.is_saving}
+            is_saved={this.props.scribingAnswer.is_saved}
+            save_errors={this.props.scribingAnswer.save_errors}
+            clearSavingStatus={this.props.actions.clearSavingStatus}
+          />
         </ToolbarGroup>
       </Toolbar>
     )

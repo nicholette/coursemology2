@@ -28,7 +28,9 @@ const propTypes = {
     setCanvasLoaded: PropTypes.func.isRequired,
     // fetchScribingAnswer: PropTypes.func.isRequired,
     setUpScribingAnswer: PropTypes.func.isRequired,
+    clearSavingStatus: PropTypes.func.isRequired,
     updateScribingAnswer: PropTypes.func.isRequired,
+    updateScribingAnswerInLocal: PropTypes.func.isRequired,
   }),
   scribingAnswer: PropTypes.shape({
     answer: answerShape,
@@ -179,24 +181,12 @@ class ScribingAnswerForm extends React.Component {
 
     this.viewportLeft = 0;
     this.viewportTop = 0;
-
-    this.addText = this.addText.bind(this);
-    this.onClickTypingMode = this.onClickTypingMode.bind(this);
-    this.onClickDrawingMode = this.onClickDrawingMode.bind(this);
-    this.onClickLineMode = this.onClickLineMode.bind(this);
-    this.onClickShapeMode = this.onClickShapeMode.bind(this);
-    this.onClickSelectionMode = this.onClickSelectionMode.bind(this);
-    this.onClickPanMode = this.onClickPanMode.bind(this);
-    this.onClickZoomIn = this.onClickZoomIn.bind(this);
-    this.onClickZoomOut = this.onClickZoomOut.bind(this);
-    this.onClickDelete = this.onClickDelete.bind(this);
   }
 
-  getRgbaHelper(json) {
-    return 'rgba(' + json.r + ',' + json.g + ',' + json.b + ',' + json.a + ')';
-  }
 
-  handleOnChangeCompleteColor = (color, coloringTool) => {
+  // Event handlers
+
+  onChangeCompleteColor = (color, coloringTool) => {
     if (coloringTool === toolColor.DRAW) {
       this.canvas.freeDrawingBrush.color = this.getRgbaHelper(color.rgb);
     }
@@ -206,19 +196,19 @@ class ScribingAnswerForm extends React.Component {
     });
   }
 
-  handleFontFamilySelectChange = (event, index, value) => {
+  onChangeFontFamily = (event, index, value) => {
     this.setState({
       fontFamily: value,
     });
   }
 
-  handleFontSizeSelectChange = (event, index, value) => {
+  onChangeFontSize = (event, index, value) => {
     this.setState({
       fontSize: value,
     });
   }
 
-  handleColorPickerClick = (event, toolType) => {
+  onClickColorPicker = (event, toolType) => {
     // This prevents ghost click.
     event.preventDefault();
 
@@ -228,13 +218,13 @@ class ScribingAnswerForm extends React.Component {
     });
   }
 
-  handleColorPickerClose = (toolType) => {
+  onCloseColorPicker = (toolType) => {
     this.setState({
       colorDropdowns: { ...this.state.popovers, [toolType]: false },
     });
   }
 
-  handlePopoverTouchTap = (event, popoverType) => {
+  onTouchTapPopover = (event, popoverType) => {
     // This prevents ghost click.
     event.preventDefault();
 
@@ -242,15 +232,15 @@ class ScribingAnswerForm extends React.Component {
       popovers: { ...this.state.popovers, [popoverType]: true },
       popoverAnchor: event.currentTarget.parentElement.parentElement,
     });
-  };
+  }
 
-  handlePopoverRequestClose = (popoverType) => {
+  onRequestClosePopover = (popoverType) => {
     this.setState({
       popovers: { ...this.state.popovers, [popoverType]: false },
     });
-  };
+  }
 
-  handleTouchTapLineStyleChip = (event, toolType, style) => {
+  onTouchTapLineStyleChip = (event, toolType, style) => {
     // This prevents ghost click.
     event.preventDefault();
 
@@ -259,7 +249,7 @@ class ScribingAnswerForm extends React.Component {
     });
   }
 
-  handleSliderThicknessOnChange = (event, toolType, value) => {
+  onChangeSliderThickness = (event, toolType, value) => {
     if (toolType === toolThickness.DRAW) {
       this.canvas.freeDrawingBrush.width = value;
     }
@@ -267,6 +257,83 @@ class ScribingAnswerForm extends React.Component {
     this.setState({
       thickness: { ...this.state.thickness, [toolType]: value}
     })
+  }
+
+  onClickTypingMode = () => {
+    this.canvas.isDrawingMode = false;
+    this.disableObjectSelection();
+    this.setState({selectedTool: tools.TYPE});
+  }
+
+  onClickDrawingMode = () => {
+    // isDrawingMode automatically disables selection mode 
+    // in fabric.js library
+    this.canvas.isDrawingMode = true;
+    this.setState({selectedTool: tools.DRAW})
+  }
+
+  onClickLineMode = () => {
+    this.canvas.isDrawingMode = false;
+    this.disableObjectSelection();
+    this.setState({selectedTool: tools.LINE})
+  }
+
+  onClickShapeMode = () => {
+    this.canvas.isDrawingMode = false;
+    this.disableObjectSelection();
+    this.setState({selectedTool: tools.SHAPE});
+  }
+
+  onClickSelectionMode = () => {
+    this.canvas.isDrawingMode = false;
+    this.enableObjectSelection();
+    this.setState({selectedTool: tools.SELECT})
+  }
+
+  onClickPanMode = () => {
+    this.canvas.isDrawingMode = false;
+    this.disableObjectSelection();
+    this.setState({selectedTool: tools.PAN})
+  }
+
+  onClickZoomIn = () => {
+    let newZoom = this.canvas.getZoom() + 0.1;
+    this.canvas.zoomToPoint({
+      x: this.canvas.height / 2,
+      y: this.canvas.width / 2,
+    }, newZoom);
+  }
+
+  onClickZoomOut = () => {
+    let newZoom = Math.max(this.canvas.getZoom() - 0.1, 1);
+    this.canvas.zoomToPoint({
+      x: this.canvas.height / 2,
+      y: this.canvas.width / 2,
+    }, newZoom);
+  }
+
+  onClickDelete = () => {
+    const canvas = this.canvas;
+    const activeGroup = canvas.getActiveGroup();
+    const activeObject = canvas.getActiveObject();
+
+    if (activeObject) {
+      canvas.remove(activeObject);
+    }
+    else if (activeGroup) {
+      const objectsInGroup = activeGroup.getObjects();
+      canvas.discardActiveGroup();
+      objectsInGroup.forEach(function(object) {
+        canvas.remove(object);
+      });
+    }
+    this.saveScribbles();
+  }
+
+  // Helpers
+
+  getRgbaHelper(json) {
+    return 'rgba(' + json.r + ',' + json.g + ',' + json.b + ',' + json.a + ')';
   }
 
   getMousePoint(event) {
@@ -602,77 +669,6 @@ class ScribingAnswerForm extends React.Component {
     }));
   }
 
-  onClickTypingMode() {
-    this.canvas.isDrawingMode = false;
-    this.disableObjectSelection();
-    this.setState({selectedTool: tools.TYPE});
-  }
-
-  onClickDrawingMode() {
-    // isDrawingMode automatically disables selection mode 
-    // in fabric.js library
-    this.canvas.isDrawingMode = true;
-    this.setState({selectedTool: tools.DRAW})
-  }
-
-  onClickLineMode() {
-    this.canvas.isDrawingMode = false;
-    this.disableObjectSelection();
-    this.setState({selectedTool: tools.LINE})
-  }
-
-  onClickShapeMode() {
-    this.canvas.isDrawingMode = false;
-    this.disableObjectSelection();
-    this.setState({selectedTool: tools.SHAPE});
-  }
-
-  onClickSelectionMode() {
-    this.canvas.isDrawingMode = false;
-    this.enableObjectSelection();
-    this.setState({selectedTool: tools.SELECT})
-  }
-
-  onClickPanMode() {
-    this.canvas.isDrawingMode = false;
-    this.disableObjectSelection();
-    this.setState({selectedTool: tools.PAN})
-  }
-
-  onClickZoomIn() {
-    let newZoom = this.canvas.getZoom() + 0.1;
-    this.canvas.zoomToPoint({
-      x: this.canvas.height / 2,
-      y: this.canvas.width / 2,
-    }, newZoom);
-  }
-
-  onClickZoomOut() {
-    let newZoom = Math.max(this.canvas.getZoom() - 0.1, 1);
-    this.canvas.zoomToPoint({
-      x: this.canvas.height / 2,
-      y: this.canvas.width / 2,
-    }, newZoom);
-  }
-
-  onClickDelete() {
-    const canvas = this.canvas;
-    const activeGroup = canvas.getActiveGroup();
-    const activeObject = canvas.getActiveObject();
-
-    if (activeObject) {
-      canvas.remove(activeObject);
-    }
-    else if (activeGroup) {
-      const objectsInGroup = activeGroup.getObjects();
-      canvas.discardActiveGroup();
-      objectsInGroup.forEach(function(object) {
-        canvas.remove(object);
-      });
-    }
-    this.saveScribbles();
-  }
-
   scaleScribble(scribble) {
     scribble.scaleX *= this.scale;
     scribble.scaleY *= this.scale;
@@ -723,7 +719,7 @@ class ScribingAnswerForm extends React.Component {
         anchorEl={this.state.anchorEl}
         anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
         targetOrigin={{horizontal: 'left', vertical: 'top'}}
-        onRequestClose={() => (this.handlePopoverRequestClose(popoverTypes.LAYER))}
+        onRequestClose={() => (this.onRequestClosePopover(popoverTypes.LAYER))}
       >
         <Menu>
           { this.layers.map((layer) => (
@@ -778,7 +774,7 @@ class ScribingAnswerForm extends React.Component {
         labelColor={this.state.lineStyles[toolType] === style ? grey50 : undefined}
         key={toolType + style}
         style={styles.chip}
-        onTouchTap={(event) => this.handleTouchTapLineStyleChip(event, toolType, style)}
+        onTouchTap={(event) => this.onTouchTapLineStyleChip(event, toolType, style)}
       >
         {style}
       </Chip>
@@ -806,7 +802,7 @@ class ScribingAnswerForm extends React.Component {
       <SelectField
         floatingLabelText="Font Family:"
         value={this.state.fontFamily}
-        onChange={this.handleFontFamilySelectChange}
+        onChange={this.onChangeFontFamily}
         maxHeight={150}
         style={styles.select}
       >
@@ -825,7 +821,7 @@ class ScribingAnswerForm extends React.Component {
       <SelectField
         floatingLabelText="Font Size:"
         value={this.state.fontSize}
-        onChange={this.handleFontSizeSelectChange}
+        onChange={this.onChangeFontSize}
         maxHeight={150}
         style={styles.select}
       >
@@ -849,7 +845,7 @@ class ScribingAnswerForm extends React.Component {
               <div style={{width:`23px`, height:`8px`, background: this.state.colors[toolColor.TYPE]}}/>
             </div>
             <div style={styles.innerTool}>
-              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.handlePopoverTouchTap(event, popoverTypes.TYPE))}/>
+              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.onTouchTapPopover(event, popoverTypes.TYPE))}/>
             </div>
 
             <Popover
@@ -858,7 +854,7 @@ class ScribingAnswerForm extends React.Component {
               anchorEl={this.state.popoverAnchor}
               anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
               targetOrigin={{horizontal: 'left', vertical: 'top'}}
-              onRequestClose={() => (this.handlePopoverRequestClose(popoverTypes.TYPE))}
+              onRequestClose={() => (this.onRequestClosePopover(popoverTypes.TYPE))}
               animation={PopoverAnimationVertical}
             >
               <Menu style={styles.menu}>
@@ -875,7 +871,7 @@ class ScribingAnswerForm extends React.Component {
                   <label style={styles.label}>Colour:</label>
                   <div 
                     style={{background: this.state.colors[toolColor.TYPE], ...styles.colorPicker }}
-                    onClick={(event) => (this.handleColorPickerClick(event, toolColor.TYPE))} />
+                    onClick={(event) => (this.onClickColorPicker(event, toolColor.TYPE))} />
 
                     <Popover
                       style={styles.toolDropdowns}
@@ -883,12 +879,12 @@ class ScribingAnswerForm extends React.Component {
                       anchorEl={this.state.popoverColorPickerAnchor}
                       anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
                       targetOrigin={{horizontal: 'left', vertical: 'top'}}
-                      onRequestClose={() => (this.handleColorPickerClose(toolColor.TYPE)) }
+                      onRequestClose={() => (this.onCloseColorPicker(toolColor.TYPE)) }
                       animation={PopoverAnimationVertical}
                     >
                       <SketchPicker
                         color={ this.state.colors[toolColor.TYPE] }
-                        onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.TYPE))}
+                        onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.TYPE))}
                       />
                     </Popover>
 
@@ -904,7 +900,7 @@ class ScribingAnswerForm extends React.Component {
               <div style={{width:`23px`, height:`8px`, background: this.state.colors[toolColor.DRAW]}}/>
             </div>
             <div style={styles.innerTool}>
-              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.handlePopoverTouchTap(event, popoverTypes.DRAW))}/>
+              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.onTouchTapPopover(event, popoverTypes.DRAW))}/>
             </div>
 
             <Popover
@@ -913,7 +909,7 @@ class ScribingAnswerForm extends React.Component {
               anchorEl={this.state.popoverAnchor}
               anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
               targetOrigin={{horizontal: 'left', vertical: 'top'}}
-              onRequestClose={() => (this.handlePopoverRequestClose(popoverTypes.DRAW))}
+              onRequestClose={() => (this.onRequestClosePopover(popoverTypes.DRAW))}
               animation={PopoverAnimationVertical}
             >
               <Menu style={styles.menu}>
@@ -924,26 +920,26 @@ class ScribingAnswerForm extends React.Component {
                   <label style={styles.label}>Thickness:</label>
                   <Slider 
                     style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.DRAW]}
-                    onChange={(event, newValue) => (this.handleSliderThicknessOnChange(event, toolThickness.DRAW, newValue))}
+                    onChange={(event, newValue) => (this.onChangeSliderThickness(event, toolThickness.DRAW, newValue))}
                    />
                 </div>
                 <div style={styles.colorPickerFieldDiv}>
                   <label style={styles.label}>Colour:</label>
                   <div 
                     style={{background: this.state.colors[toolColor.DRAW], ...styles.colorPicker }}
-                    onClick={(event) => (this.handleColorPickerClick(event, toolColor.DRAW))} />
+                    onClick={(event) => (this.onClickColorPicker(event, toolColor.DRAW))} />
                     <Popover
                       style={styles.toolDropdowns}
                       open={this.state.colorDropdowns[toolColor.DRAW]}
                       anchorEl={this.state.popoverColorPickerAnchor}
                       anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
                       targetOrigin={{horizontal: 'left', vertical: 'top'}}
-                      onRequestClose={() => (this.handleColorPickerClose(toolColor.DRAW)) }
+                      onRequestClose={() => (this.onCloseColorPicker(toolColor.DRAW)) }
                       animation={PopoverAnimationVertical}
                     >
                       <SketchPicker
                         color={ this.state.colors[toolColor.DRAW] }
-                        onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.DRAW))}
+                        onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.DRAW))}
                       />
                     </Popover>
                 </div>
@@ -957,7 +953,7 @@ class ScribingAnswerForm extends React.Component {
               <div style={{width:`23px`, height:`8px`, background: this.state.colors[toolColor.LINE]}}/>
             </div>
             <div style={styles.innerTool}>
-              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.handlePopoverTouchTap(event, popoverTypes.LINE))}/>
+              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.onTouchTapPopover(event, popoverTypes.LINE))}/>
             </div>
 
             <Popover
@@ -966,7 +962,7 @@ class ScribingAnswerForm extends React.Component {
               anchorEl={this.state.popoverAnchor}
               anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
               targetOrigin={{horizontal: 'left', vertical: 'top'}}
-              onRequestClose={() => (this.handlePopoverRequestClose(popoverTypes.LINE))}
+              onRequestClose={() => (this.onRequestClosePopover(popoverTypes.LINE))}
               animation={PopoverAnimationVertical}
             >
               <Menu style={styles.menu}>
@@ -982,26 +978,26 @@ class ScribingAnswerForm extends React.Component {
                 <div style={styles.fieldDiv}>
                   <label style={styles.label}>Thickness:</label>
                   <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.LINE]}
-                    onChange={(event, newValue) => (this.handleSliderThicknessOnChange(event, toolThickness.LINE, newValue))}
+                    onChange={(event, newValue) => (this.onChangeSliderThickness(event, toolThickness.LINE, newValue))}
                   />
                 </div>
                 <div style={styles.colorPickerFieldDiv}>
                   <label style={styles.label}>Colour:</label>
                   <div 
                     style={{background: this.state.colors[toolColor.LINE], ...styles.colorPicker }}
-                    onClick={(event) => (this.handleColorPickerClick(event, toolColor.LINE))} />
+                    onClick={(event) => (this.onClickColorPicker(event, toolColor.LINE))} />
                     <Popover
                       style={styles.toolDropdowns}
                       open={this.state.colorDropdowns[toolColor.LINE]}
                       anchorEl={this.state.popoverColorPickerAnchor}
                       anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
                       targetOrigin={{horizontal: 'left', vertical: 'top'}}
-                      onRequestClose={() => (this.handleColorPickerClose(toolColor.LINE)) }
+                      onRequestClose={() => (this.onCloseColorPicker(toolColor.LINE)) }
                       animation={PopoverAnimationVertical}
                     >
                       <SketchPicker
                         color={ this.state.colors[toolColor.LINE] }
-                        onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.LINE))}
+                        onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.LINE))}
                         disableAlpha={false}
                       />
                     </Popover>
@@ -1023,7 +1019,7 @@ class ScribingAnswerForm extends React.Component {
                 background: this.state.colors[toolColor.SHAPE_FILL]}}/>
             </div>
             <div style={styles.innerTool}>
-              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.handlePopoverTouchTap(event, popoverTypes.SHAPE))}/>
+              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.onTouchTapPopover(event, popoverTypes.SHAPE))}/>
             </div>
 
             <Popover
@@ -1032,7 +1028,7 @@ class ScribingAnswerForm extends React.Component {
               anchorEl={this.state.popoverAnchor}
               anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
               targetOrigin={{horizontal: 'left', vertical: 'top'}}
-              onRequestClose={() => (this.handlePopoverRequestClose(popoverTypes.SHAPE))}
+              onRequestClose={() => (this.onRequestClosePopover(popoverTypes.SHAPE))}
               animation={PopoverAnimationVertical}
             >
               <Menu style={styles.menu}>
@@ -1063,26 +1059,26 @@ class ScribingAnswerForm extends React.Component {
                   <div style={styles.fieldDiv}>
                     <label style={styles.label}>Thickness:</label>
                     <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.SHAPE_BORDER]}
-                      onChange={(event, newValue) => (this.handleSliderThicknessOnChange(event, toolThickness.SHAPE_BORDER, newValue))}
+                      onChange={(event, newValue) => (this.onChangeSliderThickness(event, toolThickness.SHAPE_BORDER, newValue))}
                     />
                   </div>
                   <div style={styles.colorPickerFieldDiv}>
                     <label style={styles.label}>Colour:</label>
                     <div 
                       style={{background: this.state.colors[toolColor.SHAPE_BORDER], ...styles.colorPicker }}
-                      onClick={(event) => (this.handleColorPickerClick(event, toolColor.SHAPE_BORDER))} />
+                      onClick={(event) => (this.onClickColorPicker(event, toolColor.SHAPE_BORDER))} />
                       <Popover
                         style={styles.toolDropdowns}
                         open={this.state.colorDropdowns[toolColor.SHAPE_BORDER]}
                         anchorEl={this.state.popoverColorPickerAnchor}
                         anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
                         targetOrigin={{horizontal: 'left', vertical: 'top'}}
-                        onRequestClose={() => (this.handleColorPickerClose(toolColor.SHAPE_BORDER)) }
+                        onRequestClose={() => (this.onCloseColorPicker(toolColor.SHAPE_BORDER)) }
                         animation={PopoverAnimationVertical}
                       >
                         <SketchPicker
                           color={ this.state.colors[toolColor.SHAPE_BORDER] }
-                          onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.SHAPE_BORDER))}
+                          onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.SHAPE_BORDER))}
                         />
                       </Popover>
                   </div>
@@ -1097,19 +1093,19 @@ class ScribingAnswerForm extends React.Component {
                     style={{
                       background: this.state.colors[toolColor.SHAPE_FILL], 
                       ...styles.colorPicker }}
-                    onClick={(event) => (this.handleColorPickerClick(event, toolColor.SHAPE_FILL))} />
+                    onClick={(event) => (this.onClickColorPicker(event, toolColor.SHAPE_FILL))} />
                     <Popover
                       style={styles.toolDropdowns}
                       open={this.state.colorDropdowns[toolColor.SHAPE_FILL]}
                       anchorEl={this.state.popoverColorPickerAnchor}
                       anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
                       targetOrigin={{horizontal: 'left', vertical: 'top'}}
-                      onRequestClose={() => (this.handleColorPickerClose(toolColor.SHAPE_FILL)) }
+                      onRequestClose={() => (this.onCloseColorPicker(toolColor.SHAPE_FILL)) }
                       animation={PopoverAnimationVertical}
                     >
                       <SketchPicker
                         color={ this.state.colors[toolColor.SHAPE_FILL] }
-                        onChangeComplete={(color) => (this.handleOnChangeCompleteColor(color, toolColor.SHAPE_FILL))}
+                        onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.SHAPE_FILL))}
                       />
                     </Popover>
                 </div>
@@ -1122,7 +1118,7 @@ class ScribingAnswerForm extends React.Component {
           <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ? {color: `black`} : {}}
             onClick={this.onClickSelectionMode}/>
           <RaisedButton
-            onTouchTap={(event) => (this.handlePopoverTouchTap(event, popoverTypes.LAYER))}
+            onTouchTap={(event) => (this.onTouchTapPopover(event, popoverTypes.LAYER))}
             label="Layers"
             disabled={this.layers && this.layers.length === 0}
           />

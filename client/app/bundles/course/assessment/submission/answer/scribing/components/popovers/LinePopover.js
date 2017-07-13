@@ -4,13 +4,18 @@ import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
 import Slider from 'material-ui/Slider';
+import Chip from 'material-ui/Chip';
 import SelectField from 'material-ui/SelectField';
 import FontIcon from 'material-ui/FontIcon';
+import {cyan500, grey50} from 'material-ui/styles/colors';
 
 const propTypes = {
+  toolType: PropTypes.string,
   open: PropTypes.bool,
   anchorEl: PropTypes.object,
   onRequestClose: PropTypes.func,
+  selectedLineStyle: PropTypes.string,
+  onTouchTapLineStyleChip: PropTypes.func,
   toolThicknessValue: PropTypes.number,
   onChangeSliderThickness: PropTypes.func,
   colorPickerColor: PropTypes.string,
@@ -71,7 +76,16 @@ const styles = {
   },
   slider: {
     padding: `30px 0px`,
-  }
+  },
+  chip: {
+    margin: `4px`,
+  },
+  chipWrapper: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    width: `220px`,
+    padding: `40px 0px`,
+  },
 }
 
 const popoverStyles = {
@@ -85,7 +99,36 @@ const popoverStyles = {
   }
 }
 
-export default class DrawPopover extends Component {
+export default class LinePopover extends Component {
+
+  renderLineStyleChips() {
+    const { toolType, selectedLineStyle, onTouchTapLineStyleChip } = this.props;
+    const lineStyles = ['solid', 'dotted', 'dashed'];
+    const chips = [];
+    lineStyles.forEach((style)=>(chips.push(
+      <Chip
+        backgroundColor={selectedLineStyle === style ? cyan500 : undefined}
+        labelColor={selectedLineStyle === style ? grey50 : undefined}
+        key={toolType + style}
+        style={styles.chip}
+        onTouchTap={(event) => onTouchTapLineStyleChip(event, toolType, style)}
+      >
+        {style}
+      </Chip>
+    )));
+    return chips;
+  }
+
+  renderLineStyleField() {
+    return (
+      <div style={styles.fieldDiv}>
+        <label style={styles.label}>Style:</label>
+        <div style={styles.chipWrapper}>
+          { this.renderLineStyleChips() }
+        </div>
+      </div>
+    );
+  }
 
   renderThicknessField() {
     const { toolThicknessValue, onChangeSliderThickness } = this.props;
@@ -145,8 +188,9 @@ export default class DrawPopover extends Component {
       >
         <Menu style={styles.menu}>
           <div>
-            <h4>Pencil</h4>
+            <h4>Line</h4>
           </div>
+          { this.renderLineStyleField() }
           { this.renderThicknessField() }
           { this.renderColorPickerField() }
         </Menu>
@@ -155,4 +199,4 @@ export default class DrawPopover extends Component {
   }
 } 
 
-DrawPopover.propTypes = propTypes;
+LinePopover.propTypes = propTypes;

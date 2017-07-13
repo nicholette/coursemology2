@@ -1,26 +1,21 @@
 import React, { PropTypes } from 'react';
 import { Canvas } from 'react-fabricjs';
+import { injectIntl, intlShape } from 'react-intl';
+import translations from './ScribingAnswerForm.intl';
 
 import FontIcon from 'material-ui/FontIcon';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
-import RaisedButton from 'material-ui/RaisedButton';
-import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
-import Menu from 'material-ui/Menu';
-import MenuItem from 'material-ui/MenuItem';
-
-import { injectIntl, intlShape } from 'react-intl';
-
-import translations from './ScribingAnswerForm.intl';
-
-import { answerShape } from '../../propTypes';
-import { tools, shapes, toolColor, toolThickness, toolLineStyle, popoverTypes } from '../../constants';
 
 import SavingIndicator from '../../components/SavingIndicator';
 import ToolDropdown from '../../components/ToolDropdown';
+import LayersComponent from '../../components/LayersComponent';
 import TypePopover from '../../components/popovers/TypePopover';
 import DrawPopover from '../../components/popovers/DrawPopover';
 import LinePopover from '../../components/popovers/LinePopover';
 import ShapePopover from '../../components/popovers/ShapePopover';
+
+import { answerShape } from '../../propTypes';
+import { tools, shapes, toolColor, toolThickness, toolLineStyle, popoverTypes } from '../../constants';
 
 const propTypes = {
   actions: React.PropTypes.shape({
@@ -84,7 +79,6 @@ class ScribingAnswerForm extends React.Component {
       selectedShape: shapes.RECT,
       imageWidth: 0,
       imageHeight: 0,
-      isPopoverOpen: false,
       fontFamily: 'Arial',
       fontSize: 12,
       colors: [],
@@ -146,7 +140,9 @@ class ScribingAnswerForm extends React.Component {
 
     this.setState({
       popovers: { ...this.state.popovers, [popoverType]: true },
-      popoverAnchor: event.currentTarget.parentElement.parentElement,
+      popoverAnchor: popoverType === popoverTypes.LAYER ? 
+            event.currentTarget : 
+            event.currentTarget.parentElement.parentElement,
     });
   }
 
@@ -634,38 +630,6 @@ class ScribingAnswerForm extends React.Component {
     this.props.actions.updateScribingAnswer(answerId, json);
   }
 
-  renderLayersPopover() {
-    return this.layers && this.layers.length !== 0 ? (
-      <Popover
-        open={this.state.isPopoverOpen}
-        anchorEl={this.state.anchorEl}
-        anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-        targetOrigin={{horizontal: 'left', vertical: 'top'}}
-        onRequestClose={() => (this.onRequestClosePopover(popoverTypes.LAYER))}
-      >
-        <Menu>
-          { this.layers.map((layer) => (
-              <MenuItem 
-                key={layer.creator_id}
-                primaryText={layer.creator_name}
-                checked={layer.isDisplayed}
-                onTouchTap={(event) => {
-                  // Shift to props for updating
-                    const layersClone = _.cloneDeep(this.layers);
-                    const temp = _.find(layersClone, {creator_id: layer.creator_id});
-                    temp.isDisplayed = !temp.isDisplayed;
-                    this.layers = layersClone;
-                    this.updateScribbles();
-                    this.forceUpdate();
-                }}
-              />
-            ))
-          }
-        </Menu>
-      </Popover>
-    ) : null;
-  }
-
   renderToolBar() {
     const lineToolStyle = { 
       ...styles.custom_line,
@@ -795,12 +759,22 @@ class ScribingAnswerForm extends React.Component {
         <ToolbarGroup>
           <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ? {color: `black`} : {}}
             onClick={this.onClickSelectionMode}/>
-          <RaisedButton
+          <LayersComponent
             onTouchTap={(event) => (this.onTouchTapPopover(event, popoverTypes.LAYER))}
-            label="Layers"
             disabled={this.layers && this.layers.length === 0}
+            open={this.state.popovers[popoverTypes.LAYER]}
+            anchorEl={this.state.popoverAnchor}
+            onRequestClose={() => (this.onRequestClosePopover(popoverTypes.LAYER))}
+            layers={this.layers}
+            onTouchTapLayer={(layer) => {
+              const layersClone = _.cloneDeep(this.layers);
+              const temp = _.find(layersClone, {creator_id: layer.creator_id});
+              temp.isDisplayed = !temp.isDisplayed;
+              this.layers = layersClone;
+              this.updateScribbles();
+              this.forceUpdate();
+            }}
           />
-          { this.renderLayersPopover() }
         </ToolbarGroup>
         <ToolbarGroup>
           <FontIcon className="fa fa-arrows" style={this.state.selectedTool === tools.PAN ? {color: `black`} : {}}

@@ -26,6 +26,7 @@ import { tools, shapes, toolColor, toolThickness, toolLineStyle, popoverTypes } 
 import SavingIndicator from '../../components/SavingIndicator';
 import ToolDropdown from '../../components/ToolDropdown';
 import TypePopover from '../../components/popovers/TypePopover';
+import DrawPopover from '../../components/popovers/DrawPopover';
 
 const propTypes = {
   actions: React.PropTypes.shape({
@@ -753,53 +754,6 @@ class ScribingAnswerForm extends React.Component {
     return chips;
   }
 
-  renderDrawPopover() {
-    return (
-      <Popover
-        style={styles.toolDropdowns}
-        open={this.state.popovers.DRAW}
-        anchorEl={this.state.popoverAnchor}
-        anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-        targetOrigin={{horizontal: 'left', vertical: 'top'}}
-        onRequestClose={() => (this.onRequestClosePopover(popoverTypes.DRAW))}
-        animation={PopoverAnimationVertical}
-      >
-        <Menu style={styles.menu}>
-          <div>
-            <h4>Pencil</h4>
-          </div>
-          <div style={styles.fieldDiv}>
-            <label style={styles.label}>Thickness:</label>
-            <Slider 
-              style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.DRAW]}
-              onChange={(event, newValue) => (this.onChangeSliderThickness(event, toolThickness.DRAW, newValue))}
-             />
-          </div>
-          <div style={styles.colorPickerFieldDiv}>
-            <label style={styles.label}>Colour:</label>
-            <div 
-              style={{background: this.state.colors[toolColor.DRAW], ...styles.colorPicker }}
-              onClick={(event) => (this.onClickColorPicker(event, toolColor.DRAW))} />
-              <Popover
-                style={styles.toolDropdowns}
-                open={this.state.colorDropdowns[toolColor.DRAW]}
-                anchorEl={this.state.popoverColorPickerAnchor}
-                anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-                targetOrigin={{horizontal: 'left', vertical: 'top'}}
-                onRequestClose={() => (this.onRequestCloseColorPicker(toolColor.DRAW)) }
-                animation={PopoverAnimationVertical}
-              >
-                <SketchPicker
-                  color={ this.state.colors[toolColor.DRAW] }
-                  onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.DRAW))}
-                />
-              </Popover>
-          </div>
-        </Menu>
-      </Popover>
-    );
-  }
-
   renderLinePopover() {
     return (
       <Popover
@@ -988,7 +942,21 @@ class ScribingAnswerForm extends React.Component {
             colorBar={this.state.colors[toolColor.DRAW]}
             onTouchTapChevron={(event) => (this.onTouchTapPopover(event, popoverTypes.DRAW))}
             iconClassname="fa fa-pencil"
-            popoverComponent={()=>(this.renderDrawPopover())}
+            popoverComponent={()=>(
+              <DrawPopover
+                open={this.state.popovers.DRAW}
+                anchorEl={this.state.popoverAnchor}
+                onRequestClose={() => (this.onRequestClosePopover(popoverTypes.DRAW))}
+                toolThicknessValue={this.state.thickness[toolThickness.DRAW]}
+                onChangeToolThickness={(event, newValue) => (this.onChangeSliderThickness(event, toolThickness.DRAW, newValue))}
+                colorPickerColor={this.state.colors[toolColor.DRAW]}
+                onClickColorPicker={(event) => (this.onClickColorPicker(event, toolColor.DRAW))}
+                colorPickerPopoverOpen={this.state.colorDropdowns[toolColor.DRAW]}
+                colorPickerPopoverAnchorEl={this.state.popoverColorPickerAnchor}
+                onRequestCloseColorPickerPopover={() => (this.onRequestCloseColorPicker(toolColor.DRAW)) }
+                onChangeCompleteColorPicker={(color) => (this.onChangeCompleteColor(color, toolColor.DRAW))}
+              />
+            )}
           />
           <ToolDropdown
             toolType={tools.DRAW}

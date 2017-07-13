@@ -24,6 +24,8 @@ import { answerShape } from '../../propTypes';
 import { tools, shapes, toolColor, toolThickness, toolLineStyle, popoverTypes } from '../../constants';
 
 import SavingIndicator from '../../components/SavingIndicator';
+import ToolDropdown from '../../components/ToolDropdown';
+import TypePopover from '../../components/popovers/TypePopover';
 
 const propTypes = {
   actions: React.PropTypes.shape({
@@ -208,7 +210,7 @@ class ScribingAnswerForm extends React.Component {
     });
   }
 
-  onCloseColorPicker = (toolType) => {
+  onRequestCloseColorPicker = (toolType) => {
     this.setState({
       colorDropdowns: { ...this.state.popovers, [toolType]: false },
     });
@@ -649,7 +651,7 @@ class ScribingAnswerForm extends React.Component {
     this.initializeScribbles();
   }
 
-  addText() {
+  addText = () => {
     this.canvas.add(new fabric.IText('Text', { 
       fontFamily: this.state.fontFamily,
       fontSize: this.state.fontSize,
@@ -702,7 +704,7 @@ class ScribingAnswerForm extends React.Component {
     this.props.actions.updateScribingAnswer(answerId, json);
   }
 
-  renderPopover() {
+  renderLayersPopover() {
     return this.layers && this.layers.length !== 0 ? (
       <Popover
         open={this.state.isPopoverOpen}
@@ -751,52 +753,198 @@ class ScribingAnswerForm extends React.Component {
     return chips;
   }
 
-  renderFontFamilySelect() {
-    const fontFamilies = [
-      'Arial',
-      'Arial Black',
-      'Comic Sans MS',
-      'Georgia',
-      'Impact',
-      'Lucida Sans Unicode',
-      'Palatino Linotype',
-      'Tahoma',
-      'Times New Roman',
-    ];
-
-    const menuItems = [];
-    fontFamilies.forEach((font) => {menuItems.push(<MenuItem key={font} value={font} primaryText={font} />);} )
-
+  renderDrawPopover() {
     return (
-      <SelectField
-        floatingLabelText="Font Family:"
-        value={this.state.fontFamily}
-        onChange={this.onChangeFontFamily}
-        maxHeight={150}
-        style={styles.select}
+      <Popover
+        style={styles.toolDropdowns}
+        open={this.state.popovers.DRAW}
+        anchorEl={this.state.popoverAnchor}
+        anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+        targetOrigin={{horizontal: 'left', vertical: 'top'}}
+        onRequestClose={() => (this.onRequestClosePopover(popoverTypes.DRAW))}
+        animation={PopoverAnimationVertical}
       >
-        {menuItems}
-      </SelectField>
+        <Menu style={styles.menu}>
+          <div>
+            <h4>Pencil</h4>
+          </div>
+          <div style={styles.fieldDiv}>
+            <label style={styles.label}>Thickness:</label>
+            <Slider 
+              style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.DRAW]}
+              onChange={(event, newValue) => (this.onChangeSliderThickness(event, toolThickness.DRAW, newValue))}
+             />
+          </div>
+          <div style={styles.colorPickerFieldDiv}>
+            <label style={styles.label}>Colour:</label>
+            <div 
+              style={{background: this.state.colors[toolColor.DRAW], ...styles.colorPicker }}
+              onClick={(event) => (this.onClickColorPicker(event, toolColor.DRAW))} />
+              <Popover
+                style={styles.toolDropdowns}
+                open={this.state.colorDropdowns[toolColor.DRAW]}
+                anchorEl={this.state.popoverColorPickerAnchor}
+                anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+                targetOrigin={{horizontal: 'left', vertical: 'top'}}
+                onRequestClose={() => (this.onRequestCloseColorPicker(toolColor.DRAW)) }
+                animation={PopoverAnimationVertical}
+              >
+                <SketchPicker
+                  color={ this.state.colors[toolColor.DRAW] }
+                  onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.DRAW))}
+                />
+              </Popover>
+          </div>
+        </Menu>
+      </Popover>
     );
   }
 
-  renderFontSizeSelect() {
-    const menuItems = [];
-    for (var i=1; i<=60; i++) {
-      menuItems.push(<MenuItem key={i} value={i} primaryText={i} />);
-    }
-
+  renderLinePopover() {
     return (
-      <SelectField
-        floatingLabelText="Font Size:"
-        value={this.state.fontSize}
-        onChange={this.onChangeFontSize}
-        maxHeight={150}
-        style={styles.select}
+      <Popover
+        style={styles.toolDropdowns}
+        open={this.state.popovers.LINE}
+        anchorEl={this.state.popoverAnchor}
+        anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+        targetOrigin={{horizontal: 'left', vertical: 'top'}}
+        onRequestClose={() => (this.onRequestClosePopover(popoverTypes.LINE))}
+        animation={PopoverAnimationVertical}
       >
-        {menuItems}
-      </SelectField>
-    )
+        <Menu style={styles.menu}>
+          <div>
+            <h4>Line</h4>
+          </div>
+          <div style={styles.fieldDiv}>
+            <label style={styles.label}>Style:</label>
+            <div style={styles.chipWrapper}>
+              { this.renderLineStyleChips(toolLineStyle.LINE) }
+            </div>
+          </div>
+          <div style={styles.fieldDiv}>
+            <label style={styles.label}>Thickness:</label>
+            <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.LINE]}
+              onChange={(event, newValue) => (this.onChangeSliderThickness(event, toolThickness.LINE, newValue))}
+            />
+          </div>
+          <div style={styles.colorPickerFieldDiv}>
+            <label style={styles.label}>Colour:</label>
+            <div 
+              style={{background: this.state.colors[toolColor.LINE], ...styles.colorPicker }}
+              onClick={(event) => (this.onClickColorPicker(event, toolColor.LINE))} />
+              <Popover
+                style={styles.toolDropdowns}
+                open={this.state.colorDropdowns[toolColor.LINE]}
+                anchorEl={this.state.popoverColorPickerAnchor}
+                anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+                targetOrigin={{horizontal: 'left', vertical: 'top'}}
+                onRequestClose={() => (this.onRequestCloseColorPicker(toolColor.LINE)) }
+                animation={PopoverAnimationVertical}
+              >
+                <SketchPicker
+                  color={ this.state.colors[toolColor.LINE] }
+                  onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.LINE))}
+                  disableAlpha={false}
+                />
+              </Popover>
+          </div>
+        </Menu>
+      </Popover>
+    );
+  }
+
+  renderShapePopover() {
+    return (
+      <Popover
+        style={styles.toolDropdowns}
+        open={this.state.popovers.SHAPE}
+        anchorEl={this.state.popoverAnchor}
+        anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+        targetOrigin={{horizontal: 'left', vertical: 'top'}}
+        onRequestClose={() => (this.onRequestClosePopover(popoverTypes.SHAPE))}
+        animation={PopoverAnimationVertical}
+      >
+        <Menu style={styles.menu}>
+          <div>
+            <div>
+              <h4>Shape</h4>
+            </div>
+            <div>
+              <IconButton tooltip="Square" tooltipPosition="top-center">
+                <FontIcon className="fa fa-square-o" onClick={() => (this.setState({selectedShape: shapes.RECT}))}/>
+              </IconButton>
+              <IconButton tooltip="Ellipse" tooltipPosition="top-center">
+                <FontIcon className="fa fa-circle-o" onClick={() => (this.setState({selectedShape: shapes.ELLIPSE}))}/>
+              </IconButton>
+            </div>
+          </div>
+          <Divider />
+          <div>
+            <div>
+              <h4>Border</h4>
+            </div>
+            <div style={styles.fieldDiv}>
+              <label style={styles.label}>Style:</label>
+              <div style={styles.chipWrapper}>
+                { this.renderLineStyleChips(toolLineStyle.SHAPE_BORDER) }
+              </div>
+            </div>
+            <div style={styles.fieldDiv}>
+              <label style={styles.label}>Thickness:</label>
+              <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.SHAPE_BORDER]}
+                onChange={(event, newValue) => (this.onChangeSliderThickness(event, toolThickness.SHAPE_BORDER, newValue))}
+              />
+            </div>
+            <div style={styles.colorPickerFieldDiv}>
+              <label style={styles.label}>Colour:</label>
+              <div 
+                style={{background: this.state.colors[toolColor.SHAPE_BORDER], ...styles.colorPicker }}
+                onClick={(event) => (this.onClickColorPicker(event, toolColor.SHAPE_BORDER))} />
+                <Popover
+                  style={styles.toolDropdowns}
+                  open={this.state.colorDropdowns[toolColor.SHAPE_BORDER]}
+                  anchorEl={this.state.popoverColorPickerAnchor}
+                  anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+                  targetOrigin={{horizontal: 'left', vertical: 'top'}}
+                  onRequestClose={() => (this.onRequestCloseColorPicker(toolColor.SHAPE_BORDER)) }
+                  animation={PopoverAnimationVertical}
+                >
+                  <SketchPicker
+                    color={ this.state.colors[toolColor.SHAPE_BORDER] }
+                    onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.SHAPE_BORDER))}
+                  />
+                </Popover>
+            </div>
+          </div>
+          <Divider />
+          <div>
+            <h4>Fill</h4>
+          </div>
+          <div style={styles.colorPickerFieldDiv}>
+            <label style={styles.label}>Colour:</label>
+              <div 
+              style={{
+                background: this.state.colors[toolColor.SHAPE_FILL], 
+                ...styles.colorPicker }}
+              onClick={(event) => (this.onClickColorPicker(event, toolColor.SHAPE_FILL))} />
+              <Popover
+                style={styles.toolDropdowns}
+                open={this.state.colorDropdowns[toolColor.SHAPE_FILL]}
+                anchorEl={this.state.popoverColorPickerAnchor}
+                anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+                targetOrigin={{horizontal: 'left', vertical: 'top'}}
+                onRequestClose={() => (this.onRequestCloseColorPicker(toolColor.SHAPE_FILL)) }
+                animation={PopoverAnimationVertical}
+              >
+                <SketchPicker
+                  color={ this.state.colors[toolColor.SHAPE_FILL] }
+                  onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.SHAPE_FILL))}
+                />
+              </Popover>
+          </div>
+        </Menu>
+      </Popover>
+    );
   }
 
   renderToolBar() {
@@ -808,280 +956,67 @@ class ScribingAnswerForm extends React.Component {
     return (
       <Toolbar style={{...styles.toolbar, width: this.CANVAS_MAX_WIDTH}}>
         <ToolbarGroup>
-          <div style={styles.tool} onClick={this.onClickTypingMode}>
-            <div style={styles.innerTool} onClick={this.addText}>
-              <FontIcon className="fa fa-font" style={this.state.selectedTool === tools.TYPE ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}/>
-              <div style={{width:`23px`, height:`8px`, background: this.state.colors[toolColor.TYPE]}}/>
-            </div>
-            <div style={styles.innerTool}>
-              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.onTouchTapPopover(event, popoverTypes.TYPE))}/>
-            </div>
-
-            <Popover
-              style={styles.toolDropdowns}
-              open={this.state.popovers.TYPE}
-              anchorEl={this.state.popoverAnchor}
-              anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-              targetOrigin={{horizontal: 'left', vertical: 'top'}}
-              onRequestClose={() => (this.onRequestClosePopover(popoverTypes.TYPE))}
-              animation={PopoverAnimationVertical}
-            >
-              <Menu style={styles.menu}>
-                <div>
-                  <h4>Font</h4>
-                </div>
-                <div>
-                  {this.renderFontFamilySelect()}
-                </div>
-                <div>
-                  {this.renderFontSizeSelect()}
-                </div>
-                <div style={styles.colorPickerFieldDiv}>
-                  <label style={styles.label}>Colour:</label>
-                  <div 
-                    style={{background: this.state.colors[toolColor.TYPE], ...styles.colorPicker }}
-                    onClick={(event) => (this.onClickColorPicker(event, toolColor.TYPE))} />
-
-                    <Popover
-                      style={styles.toolDropdowns}
-                      open={this.state.colorDropdowns[toolColor.TYPE]}
-                      anchorEl={this.state.popoverColorPickerAnchor}
-                      anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-                      targetOrigin={{horizontal: 'left', vertical: 'top'}}
-                      onRequestClose={() => (this.onCloseColorPicker(toolColor.TYPE)) }
-                      animation={PopoverAnimationVertical}
-                    >
-                      <SketchPicker
-                        color={ this.state.colors[toolColor.TYPE] }
-                        onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.TYPE))}
-                      />
-                    </Popover>
-
-                </div>
-              </Menu>
-            </Popover>
-
-          </div>
-
-          <div style={styles.tool} onClick={this.onClickDrawingMode}>
-            <div style={styles.innerTool}>
-              <FontIcon className="fa fa-pencil" style={this.state.selectedTool === tools.DRAW ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}/>
-              <div style={{width:`23px`, height:`8px`, background: this.state.colors[toolColor.DRAW]}}/>
-            </div>
-            <div style={styles.innerTool}>
-              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.onTouchTapPopover(event, popoverTypes.DRAW))}/>
-            </div>
-
-            <Popover
-              style={styles.toolDropdowns}
-              open={this.state.popovers.DRAW}
-              anchorEl={this.state.popoverAnchor}
-              anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-              targetOrigin={{horizontal: 'left', vertical: 'top'}}
-              onRequestClose={() => (this.onRequestClosePopover(popoverTypes.DRAW))}
-              animation={PopoverAnimationVertical}
-            >
-              <Menu style={styles.menu}>
-                <div>
-                  <h4>Pencil</h4>
-                </div>
-                <div style={styles.fieldDiv}>
-                  <label style={styles.label}>Thickness:</label>
-                  <Slider 
-                    style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.DRAW]}
-                    onChange={(event, newValue) => (this.onChangeSliderThickness(event, toolThickness.DRAW, newValue))}
-                   />
-                </div>
-                <div style={styles.colorPickerFieldDiv}>
-                  <label style={styles.label}>Colour:</label>
-                  <div 
-                    style={{background: this.state.colors[toolColor.DRAW], ...styles.colorPicker }}
-                    onClick={(event) => (this.onClickColorPicker(event, toolColor.DRAW))} />
-                    <Popover
-                      style={styles.toolDropdowns}
-                      open={this.state.colorDropdowns[toolColor.DRAW]}
-                      anchorEl={this.state.popoverColorPickerAnchor}
-                      anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-                      targetOrigin={{horizontal: 'left', vertical: 'top'}}
-                      onRequestClose={() => (this.onCloseColorPicker(toolColor.DRAW)) }
-                      animation={PopoverAnimationVertical}
-                    >
-                      <SketchPicker
-                        color={ this.state.colors[toolColor.DRAW] }
-                        onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.DRAW))}
-                      />
-                    </Popover>
-                </div>
-              </Menu>
-            </Popover>
-          </div>
-
-          <div style={styles.tool} onClick={this.onClickLineMode} >
-            <div style={styles.innerTool}>
-              <div style={lineToolStyle}/>
-              <div style={{width:`23px`, height:`8px`, background: this.state.colors[toolColor.LINE]}}/>
-            </div>
-            <div style={styles.innerTool}>
-              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.onTouchTapPopover(event, popoverTypes.LINE))}/>
-            </div>
-
-            <Popover
-              style={styles.toolDropdowns}
-              open={this.state.popovers.LINE}
-              anchorEl={this.state.popoverAnchor}
-              anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-              targetOrigin={{horizontal: 'left', vertical: 'top'}}
-              onRequestClose={() => (this.onRequestClosePopover(popoverTypes.LINE))}
-              animation={PopoverAnimationVertical}
-            >
-              <Menu style={styles.menu}>
-                <div>
-                  <h4>Line</h4>
-                </div>
-                <div style={styles.fieldDiv}>
-                  <label style={styles.label}>Style:</label>
-                  <div style={styles.chipWrapper}>
-                    { this.renderLineStyleChips(toolLineStyle.LINE) }
-                  </div>
-                </div>
-                <div style={styles.fieldDiv}>
-                  <label style={styles.label}>Thickness:</label>
-                  <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.LINE]}
-                    onChange={(event, newValue) => (this.onChangeSliderThickness(event, toolThickness.LINE, newValue))}
-                  />
-                </div>
-                <div style={styles.colorPickerFieldDiv}>
-                  <label style={styles.label}>Colour:</label>
-                  <div 
-                    style={{background: this.state.colors[toolColor.LINE], ...styles.colorPicker }}
-                    onClick={(event) => (this.onClickColorPicker(event, toolColor.LINE))} />
-                    <Popover
-                      style={styles.toolDropdowns}
-                      open={this.state.colorDropdowns[toolColor.LINE]}
-                      anchorEl={this.state.popoverColorPickerAnchor}
-                      anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-                      targetOrigin={{horizontal: 'left', vertical: 'top'}}
-                      onRequestClose={() => (this.onCloseColorPicker(toolColor.LINE)) }
-                      animation={PopoverAnimationVertical}
-                    >
-                      <SketchPicker
-                        color={ this.state.colors[toolColor.LINE] }
-                        onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.LINE))}
-                        disableAlpha={false}
-                      />
-                    </Popover>
-                </div>
-              </Menu>
-            </Popover>
-          </div>
-
-          <div style={styles.tool} onClick={this.onClickShapeMode} >
-            <div style={styles.innerTool}>
-              <FontIcon
-                className={
-                  this.state.selectedShape === shapes.RECT ? 'fa fa-square-o' : 'fa fa-circle-o'
+          <ToolDropdown
+            toolType={tools.TYPE}
+            currentTool={this.state.selectedTool}
+            onClick={this.onClickTypingMode}
+            onClickIcon={this.addText}
+            colorBar={this.state.colors[toolColor.TYPE]}
+            onTouchTapChevron={(event) => (this.onTouchTapPopover(event, popoverTypes.TYPE))}
+            iconClassname="fa fa-font"
+            popoverComponent={()=>(
+              <TypePopover
+                open={this.state.popovers.TYPE}
+                anchorEl={this.state.popoverAnchor}
+                onRequestClose={() => (this.onRequestClosePopover(popoverTypes.TYPE))}
+                fontFamilyValue={this.state.fontFamily}
+                onChangeFontFamily={this.onChangeFontFamily}
+                fontSizeValue={this.state.fontSize}
+                onChangeFontSize={this.onChangeFontSize}
+                onClickColorPicker={(event) => (this.onClickColorPicker(event, toolColor.TYPE))}
+                colorPickerPopoverOpen={this.state.colorDropdowns[toolColor.TYPE]}
+                colorPickerPopoverAnchorEl={this.state.popoverColorPickerAnchor}
+                onRequestCloseColorPickerPopover={() => (this.onRequestCloseColorPicker(toolColor.TYPE))}
+                colorPickerColor={this.state.colors[toolColor.TYPE]}
+                onChangeCompleteColorPicker={(color) => (this.onChangeCompleteColor(color, toolColor.TYPE))}
+              />)}
+          />
+          <ToolDropdown
+            toolType={tools.DRAW}
+            currentTool={this.state.selectedTool}
+            onClick={this.onClickDrawingMode}
+            colorBar={this.state.colors[toolColor.DRAW]}
+            onTouchTapChevron={(event) => (this.onTouchTapPopover(event, popoverTypes.DRAW))}
+            iconClassname="fa fa-pencil"
+            popoverComponent={()=>(this.renderDrawPopover())}
+          />
+          <ToolDropdown
+            toolType={tools.DRAW}
+            currentTool={this.state.selectedTool}
+            onClick={this.onClickLineMode}
+            colorBar={this.state.colors[toolColor.LINE]}
+            onTouchTapChevron={(event) => (this.onTouchTapPopover(event, popoverTypes.LINE))}
+            iconComponent={()=>(<div style={lineToolStyle}/>)}
+            popoverComponent={()=>(this.renderLinePopover())}
+          />
+          <ToolDropdown
+            toolType={tools.DRAW}
+            currentTool={this.state.selectedTool}
+            onClick={this.onClickShapeMode}
+            colorBarComponent={()=>(
+              <div style={
+                {
+                  width:`23px`,
+                  height:`8px`,
+                  border: `${this.state.colors[toolColor.SHAPE_BORDER]} 2px solid`,
+                  background: this.state.colors[toolColor.SHAPE_FILL]
                 }
-                style={this.state.selectedTool === tools.SHAPE ? {color: `black`} : {color: `rgba(0, 0, 0, 0.4)`}}
-              />
-              <div style={{width:`23px`, height:`8px`,
-                border: `${this.state.colors[toolColor.SHAPE_BORDER]} 2px solid`,
-                background: this.state.colors[toolColor.SHAPE_FILL]}}/>
-            </div>
-            <div style={styles.innerTool}>
-              <FontIcon className="fa fa-chevron-down" style={styles.chevron} onTouchTap={(event) => (this.onTouchTapPopover(event, popoverTypes.SHAPE))}/>
-            </div>
-
-            <Popover
-              style={styles.toolDropdowns}
-              open={this.state.popovers.SHAPE}
-              anchorEl={this.state.popoverAnchor}
-              anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-              targetOrigin={{horizontal: 'left', vertical: 'top'}}
-              onRequestClose={() => (this.onRequestClosePopover(popoverTypes.SHAPE))}
-              animation={PopoverAnimationVertical}
-            >
-              <Menu style={styles.menu}>
-                <div>
-                  <div>
-                    <h4>Shape</h4>
-                  </div>
-                  <div>
-                    <IconButton tooltip="Square" tooltipPosition="top-center">
-                      <FontIcon className="fa fa-square-o" onClick={() => (this.setState({selectedShape: shapes.RECT}))}/>
-                    </IconButton>
-                    <IconButton tooltip="Ellipse" tooltipPosition="top-center">
-                      <FontIcon className="fa fa-circle-o" onClick={() => (this.setState({selectedShape: shapes.ELLIPSE}))}/>
-                    </IconButton>
-                  </div>
-                </div>
-                <Divider />
-                <div>
-                  <div>
-                    <h4>Border</h4>
-                  </div>
-                  <div style={styles.fieldDiv}>
-                    <label style={styles.label}>Style:</label>
-                    <div style={styles.chipWrapper}>
-                      { this.renderLineStyleChips(toolLineStyle.SHAPE_BORDER) }
-                    </div>
-                  </div>
-                  <div style={styles.fieldDiv}>
-                    <label style={styles.label}>Thickness:</label>
-                    <Slider style={styles.slider} min={0} max={5} step={1} value={this.state.thickness[toolThickness.SHAPE_BORDER]}
-                      onChange={(event, newValue) => (this.onChangeSliderThickness(event, toolThickness.SHAPE_BORDER, newValue))}
-                    />
-                  </div>
-                  <div style={styles.colorPickerFieldDiv}>
-                    <label style={styles.label}>Colour:</label>
-                    <div 
-                      style={{background: this.state.colors[toolColor.SHAPE_BORDER], ...styles.colorPicker }}
-                      onClick={(event) => (this.onClickColorPicker(event, toolColor.SHAPE_BORDER))} />
-                      <Popover
-                        style={styles.toolDropdowns}
-                        open={this.state.colorDropdowns[toolColor.SHAPE_BORDER]}
-                        anchorEl={this.state.popoverColorPickerAnchor}
-                        anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-                        targetOrigin={{horizontal: 'left', vertical: 'top'}}
-                        onRequestClose={() => (this.onCloseColorPicker(toolColor.SHAPE_BORDER)) }
-                        animation={PopoverAnimationVertical}
-                      >
-                        <SketchPicker
-                          color={ this.state.colors[toolColor.SHAPE_BORDER] }
-                          onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.SHAPE_BORDER))}
-                        />
-                      </Popover>
-                  </div>
-                </div>
-                <Divider />
-                <div>
-                  <h4>Fill</h4>
-                </div>
-                <div style={styles.colorPickerFieldDiv}>
-                  <label style={styles.label}>Colour:</label>
-                    <div 
-                    style={{
-                      background: this.state.colors[toolColor.SHAPE_FILL], 
-                      ...styles.colorPicker }}
-                    onClick={(event) => (this.onClickColorPicker(event, toolColor.SHAPE_FILL))} />
-                    <Popover
-                      style={styles.toolDropdowns}
-                      open={this.state.colorDropdowns[toolColor.SHAPE_FILL]}
-                      anchorEl={this.state.popoverColorPickerAnchor}
-                      anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
-                      targetOrigin={{horizontal: 'left', vertical: 'top'}}
-                      onRequestClose={() => (this.onCloseColorPicker(toolColor.SHAPE_FILL)) }
-                      animation={PopoverAnimationVertical}
-                    >
-                      <SketchPicker
-                        color={ this.state.colors[toolColor.SHAPE_FILL] }
-                        onChangeComplete={(color) => (this.onChangeCompleteColor(color, toolColor.SHAPE_FILL))}
-                      />
-                    </Popover>
-                </div>
-              </Menu>
-            </Popover>
-          </div>
-
+              }/>
+            )}
+            onTouchTapChevron={(event) => (this.onTouchTapPopover(event, popoverTypes.SHAPE))}
+            iconClassname={this.state.selectedShape === shapes.RECT ? 'fa fa-square-o' : 'fa fa-circle-o'}
+            popoverComponent={()=>(this.renderShapePopover())}
+          />
         </ToolbarGroup>
         <ToolbarGroup>
           <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ? {color: `black`} : {}}
@@ -1091,7 +1026,7 @@ class ScribingAnswerForm extends React.Component {
             label="Layers"
             disabled={this.layers && this.layers.length === 0}
           />
-          { this.renderPopover() }
+          { this.renderLayersPopover() }
         </ToolbarGroup>
         <ToolbarGroup>
           <FontIcon className="fa fa-arrows" style={this.state.selectedTool === tools.PAN ? {color: `black`} : {}}

@@ -94,7 +94,66 @@ class ScribingAnswerForm extends React.Component {
     this.viewportTop = 0;
   }
 
-  // Event handlers
+  componentDidMount() {
+    const initializeAnswer = () =>{
+      // Retrieve answer in async call
+      // var answer = document.getElementById('scribing-answer');
+      // var data = JSON.parse(answer.getAttribute('data'));
+
+      this.props.actions.setUpScribingAnswer(this.props.data);
+    }
+
+    const initializeToolColor = () => {
+      for (var toolType in toolColor) {
+        this.state.colors[toolType] = `#000000`;
+      }
+    }
+
+    const initializeToolThickness = () => {
+      for (var toolType in toolThickness) {
+        this.state.thickness[toolType] = 1;
+      }
+    }
+
+    const initializeLineStyles = () => {
+      for (var toolType in toolLineStyle) {
+        this.state.lineStyles[toolType] = 'solid';
+      }
+    }
+
+    const initializeColorDropdowns = () => {
+      for (var toolType in toolColor) {
+        this.state.colorDropdowns[toolType] = false;
+      }
+    }
+
+    const initializePopovers = () => {
+      for (var popoverType in popoverTypes) {
+        this.state.popovers[popoverType] = false;
+      }
+    }
+
+    initializeAnswer();
+    initializeToolColor();
+    initializeToolThickness();
+    initializeLineStyles();
+    initializeColorDropdowns();
+    initializePopovers();
+  }
+
+  shouldComponentUpdate(nextProps) {
+    // Don't update until canvas is ready
+    if (!this.props.scribingAnswer.is_canvas_loaded && 
+        this.props.scribingAnswer.answer.image_path !==
+        nextProps.scribingAnswer.answer.image_path) {
+        this.initializeCanvas(nextProps.scribingAnswer.answer.image_path);
+      return false;
+    }
+    this.updateScribbles();
+    return nextProps.scribingAnswer.is_canvas_loaded;
+  }
+
+  // Toolbar Event handlers
 
   onChangeCompleteColor = (color, coloringTool) => {
     if (coloringTool === toolColor.DRAW) {
@@ -248,72 +307,233 @@ class ScribingAnswerForm extends React.Component {
    });
   }
 
+  addText = () => {
+    this.canvas.add(new fabric.IText('Text', { 
+      fontFamily: this.state.fontFamily,
+      fontSize: this.state.fontSize,
+      fill: this.state.colors[toolColor.TYPE],
+      left: this.canvas.width / 2, 
+      top: this.canvas.height / 2 ,
+    }));
+    this.saveScribbles();
+  }
+
+  // Canvas Event Handlers
+  
+  onMouseDownCanvas = (options) => {
+    this.mouseDragFlag = false;
+    this.mouseCanvasDragStartPoint = this.getCanvasPoint(options.e);
+
+    // To facilitate panning
+    this.mouseDownFlag = true;
+    this.viewportLeft = this.canvas.viewportTransform[4];
+    this.viewportTop = this.canvas.viewportTransform[5];
+    this.mouseStartPoint = this.getMousePoint(options.e);
+  }
+
+  onMouseMoveCanvas = (options) => {
+    this.mouseDragFlag = true;
+
+    // Do panning action
+    let tryPan = (finalLeft, finalTop) => {
+      // limit panning
+      finalLeft = Math.min(finalLeft, 0);
+      finalLeft = Math.max(finalLeft, (this.canvas.getZoom() - 1) * this.canvas.getWidth() * -1);
+      finalTop = Math.min(finalTop, 0);
+      finalTop = Math.max(finalTop, (this.canvas.getZoom() - 1) * this.canvas.getHeight() * -1);
+      
+      // apply calculated pan transforms
+      this.canvas.viewportTransform[4] = finalLeft;
+      this.canvas.viewportTransform[5] = finalTop;
+      this.canvas.renderAll();
+    };
+
+    if (this.state.selectedTool === tools.PAN && this.mouseDownFlag) {
+      let mouseCurrentPoint = this.getMousePoint(options.e);
+      var deltaLeft = mouseCurrentPoint.x - this.mouseStartPoint.x;
+      var deltaTop = mouseCurrentPoint.y - this.mouseStartPoint.y;
+      var newLeft = this.viewportLeft + deltaLeft;
+      var newTop = this.viewportTop + deltaTop;
+      tryPan(newLeft, newTop);
+    // } else if (options['isForced']) {
+    //   tryPan(this.canvas.viewportTransform[4], this.canvas.viewportTransform[5]);
+    }
+  }
+
+  onMouseUpCanvas = (options) => {
+    this.mouseDownFlag = false;
+    this.mouseCanvasDragEndPoint = this.getCanvasPoint(options.e);
+
+    const getVectorDist = () => (
+      Math.abs((this.mouseCanvasDragStartPoint.x - this.mouseCanvasDragEndPoint.x) << 1)
+        + Math.abs((this.mouseCanvasDragStartPoint.y - this.mouseCanvasDragEndPoint.y) << 1)
+    )
+
+    const getStrokeDashArray = (toolType) => {
+      switch (this.state.lineStyles[toolType]) {
+        case 'dotted': {
+          return [1, 3];
+        }
+        case 'dashed': {
+          return [10, 5];
+        }
+        case 'solid':
+        default: {
+          return [];
+        }
+      }
+    }
+
+    let minDistThreshold = 25;
+    let passedDistThreshold = getVectorDist() > minDistThreshold;
+    let isMouseDrag = this.mouseDragFlag === true && passedDistThreshold;
+
+    if (isMouseDrag) {
+      // This is a drag as the mouse move occurs after mouse down.
+      if (this.state.selectedTool === tools.TYPE ||
+          this.state.selectedTool === tools.DRAW ||
+          this.state.selectedTool === tools.SELECT ) {
+        this.saveScribbles();
+
+      } else if (this.state.selectedTool === tools.LINE) {
+        const strokeDashArray = getStrokeDashArray(toolLineStyle.LINE);
+        let line = new fabric.Line(
+          [this.mouseCanvasDragStartPoint.x, this.mouseCanvasDragStartPoint.y,
+           this.mouseCanvasDragEndPoint.x, this.mouseCanvasDragEndPoint.y],
+          {
+            stroke: `${this.state.colors[toolColor.LINE]}`,
+            strokeWidth: this.state.thickness[toolThickness.LINE],
+            strokeDashArray,
+            selectable: false
+          }
+        );
+        this.canvas.add(line);
+        this.saveScribbles();
+
+      } else if (this.state.selectedTool === tools.SHAPE) {
+        const strokeDashArray = getStrokeDashArray(toolLineStyle.SHAPE_BORDER);
+        switch (this.state.selectedShape) {
+          case shapes.RECT: {
+            let dragProps = this.generateMouseDragProperties(this.mouseCanvasDragStartPoint, this.mouseCanvasDragEndPoint);
+            let rect = new fabric.Rect({
+              left: dragProps.left,
+              top: dragProps.top,
+              stroke: `${this.state.colors[toolColor.SHAPE_BORDER]}`,
+              strokeWidth: this.state.thickness[toolThickness.SHAPE_BORDER],
+              strokeDashArray,
+              fill: `${this.state.colors[toolColor.SHAPE_FILL]}`,
+              width: dragProps.width,
+              height: dragProps.height,
+              selectable: false,
+            });
+            this.canvas.add(rect);
+            this.saveScribbles();
+            break;
+          }
+          case shapes.ELLIPSE: {
+            let dragProps = this.generateMouseDragProperties(this.mouseCanvasDragStartPoint, this.mouseCanvasDragEndPoint);
+            let ellipse = new fabric.Ellipse({
+              left: dragProps.left,
+              top: dragProps.top,
+              stroke: `${this.state.colors[toolColor.SHAPE_BORDER]}`,
+              strokeWidth: this.state.thickness[toolThickness.SHAPE_BORDER],
+              strokeDashArray,
+              fill: `${this.state.colors[toolColor.SHAPE_FILL]}`,
+              rx: dragProps.width / 2,
+              ry: dragProps.height / 2,
+              selectable: false,
+            });
+            this.canvas.add(ellipse);
+            this.saveScribbles();
+            break;
+          }
+        }
+      }
+    }
+  }
+
   // Helpers
 
-  getRgbaHelper(json) {
-    return 'rgba(' + json.r + ',' + json.g + ',' + json.b + ',' + json.a + ')';
+  // Function Helpers
+
+  disableObjectSelection() {
+    this.canvas.forEachObject(function(o) {
+      o.selectable = false;
+    });
   }
 
-  getMousePoint(event) {
-    return {
-      x: event.clientX,
-      y: event.clientY,
+  enableObjectSelection() {
+    // this clears the selection-disabled scribbles
+    // and reloads them to enable selection again
+    this.canvas.clear();
+    this.initializeScribbles();
+  }
+
+  initializeScribbles() {
+    const { scribbles, user_id } = this.props.scribingAnswer.answer;
+    this.layers = [];
+
+    if (scribbles) {
+      scribbles.forEach((scribble) => {
+        const objects = JSON.parse(scribble.content).objects;
+        const fabricObjs = [];
+
+        // Parse JSON to Fabric.js objects
+        for (var i = 0; i < objects.length; i++) {
+          var klass = fabric.util.getKlass(objects[i].type);
+          switch (objects[i].type) {
+            case 'path': {
+              klass.fromObject(objects[i], (obj)=>{
+                this.scaleScribble(obj);
+                fabricObjs.push(obj);
+              });
+              break;
+            }
+            case 'i-text':
+            case 'line':
+            case 'rect':
+            case 'ellipse': {
+              let obj = klass.fromObject(objects[i]);
+              this.scaleScribble(obj);
+              fabricObjs.push(obj);
+              break;
+            }
+          }
+        }
+
+        // Create layer for each user's scribble
+
+        // Layer for other users' scribble
+        // Disables scribble selection
+        if (scribble.creator_id !== user_id) {
+          const showLayer = (isShown) => {
+            const scribbleGroup = new fabric.Group(fabricObjs);
+            scribbleGroup.selectable = false;
+            if (isShown && !this.canvas.contains(scribbleGroup)) {
+              this.canvas.add(scribbleGroup);
+            } else if (!isShown && this.canvas.contains(scribbleGroup)) {
+              this.canvas.remove(scribbleGroup);
+            }
+            this.canvas.renderAll();
+          }
+
+          // Populate layers list
+          const newScribble = {
+            ...scribble,
+            isDisplayed: true,
+            showLayer,
+          }
+          this.layers = [...this.layers, newScribble];
+
+        // Layer for current user's scribble
+        // Enables scribble selection
+        } else {
+          fabricObjs.map((obj) => {
+            this.canvas.add(obj)
+          });
+        }
+      })
     }
-  }
-
-  getCanvasPoint(event) {
-    let pointer = this.canvas.getPointer(event.e);
-    return {
-      x: pointer.x,
-      y: pointer.y,
-    };
-  }
-
-  // Generates the left, top, width and height of the drag
-  generateMouseDragProperties(point1, point2) {
-    return {
-      left: point1.x < point2.x ? point1.x : point2.x,
-      top: point1.y < point2.y ? point1.y : point2.y,
-      width: Math.abs(point1.x - point2.x),
-      height: Math.abs(point1.y - point2.y),
-    }
-  }
-
-  initializeToolColor() {
-    for (var toolType in toolColor) {
-      this.state.colors[toolType] = `#000000`;
-    }
-  }
-
-  initializeColorDropdowns() {
-    for (var toolType in toolColor) {
-      this.state.colorDropdowns[toolType] = false;
-    }
-  }
-
-  initializeLineStyles() {
-    for (var toolType in toolLineStyle) {
-      this.state.lineStyles[toolType] = 'solid';
-    }
-  }
-
-  initializeToolThickness() {
-      for (var toolType in toolThickness) {
-      this.state.thickness[toolType] = 1;
-    }
-  }
-
-  initializePopovers() {
-    for (var popoverType in popoverTypes) {
-      this.state.popovers[popoverType] = false;
-    }
-  }
-
-  initializeAnswer() {
-    // var answer = document.getElementById('scribing-answer');
-    // var data = JSON.parse(answer.getAttribute('data'));
-
-    this.props.actions.setUpScribingAnswer(this.props.data);
   }
 
   initializeCanvas(imagePath) {
@@ -322,8 +542,8 @@ class ScribingAnswerForm extends React.Component {
     const imageUrl = window.location.origin + '\\' + imagePath;
     const image = new Image();
     image.src = imageUrl;
+
     image.onload = () => {
-      
       // Get the calculated width of canvas, 750 is min width for scribing toolbar
       const element = document.getElementById(`canvas-${answerId}`);
       this.CANVAS_MAX_WIDTH = Math.max(element.getBoundingClientRect().width, 750);
@@ -345,125 +565,9 @@ class ScribingAnswerForm extends React.Component {
       canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
 
       _self.canvas = canvas;
-      _self.canvas.on('mouse:down', (options) => {
-        this.mouseDragFlag = false;
-        this.mouseCanvasDragStartPoint = this.getCanvasPoint(options.e);
-
-        // To facilitate panning
-        this.mouseDownFlag = true;
-        this.viewportLeft = this.canvas.viewportTransform[4];
-        this.viewportTop = this.canvas.viewportTransform[5];
-        this.mouseStartPoint = this.getMousePoint(options.e);
-      })
-
-      _self.canvas.on('mouse:move', (options) => {
-        this.mouseDragFlag = true;
-
-        // Do panning action
-        let tryPan = (finalLeft, finalTop) => {
-          // limit panning
-          finalLeft = Math.min(finalLeft, 0);
-          finalLeft = Math.max(finalLeft, (this.canvas.getZoom() - 1) * this.canvas.getWidth() * -1);
-          finalTop = Math.min(finalTop, 0);
-          finalTop = Math.max(finalTop, (this.canvas.getZoom() - 1) * this.canvas.getHeight() * -1);
-          
-          // apply calculated pan transforms
-          this.canvas.viewportTransform[4] = finalLeft;
-          this.canvas.viewportTransform[5] = finalTop;
-          this.canvas.renderAll();
-        };
-
-        if (this.state.selectedTool === tools.PAN && this.mouseDownFlag) {
-          let mouseCurrentPoint = this.getMousePoint(options.e);
-          var deltaLeft = mouseCurrentPoint.x - this.mouseStartPoint.x;
-          var deltaTop = mouseCurrentPoint.y - this.mouseStartPoint.y;
-          var newLeft = this.viewportLeft + deltaLeft;
-          var newTop = this.viewportTop + deltaTop;
-          tryPan(newLeft, newTop);
-        // } else if (options['isForced']) {
-        //   tryPan(this.canvas.viewportTransform[4], this.canvas.viewportTransform[5]);
-        }
-      });
-
-      // REFACTOR!!!
-      _self.canvas.on('mouse:up', (options) => {
-        this.mouseDownFlag = false;
-        this.mouseCanvasDragEndPoint = this.getCanvasPoint(options.e);
-
-        let minDistThreshold = 25;
-        let dist = Math.abs((this.mouseCanvasDragStartPoint.x - this.mouseCanvasDragEndPoint.x) << 1)
-                    + Math.abs((this.mouseCanvasDragStartPoint.y - this.mouseCanvasDragEndPoint.y) << 1);
-        let passedDistThreshold = dist > minDistThreshold;
-        let isMouseDrag = this.mouseDragFlag === true && passedDistThreshold;
-
-        if (isMouseDrag) {
-          // This is a drag as the mouse move occurs after mouse down.
-          if (this.state.selectedTool === tools.LINE) {
-            var strokeDashArray = [];
-            if (this.state.lineStyles[toolLineStyle.LINE] === 'dotted') {
-              strokeDashArray = [1, 3];
-            } else if (this.state.lineStyles[toolLineStyle.LINE] === 'dashed') {
-              strokeDashArray = [10, 5];
-            }
-
-            let line = new fabric.Line(
-              [this.mouseCanvasDragStartPoint.x, this.mouseCanvasDragStartPoint.y,
-               this.mouseCanvasDragEndPoint.x, this.mouseCanvasDragEndPoint.y],
-              {
-                stroke: `${this.state.colors[toolColor.LINE]}`,
-                strokeWidth: this.state.thickness[toolThickness.LINE],
-                strokeDashArray,
-                selectable: false
-              }
-            );
-            this.canvas.add(line);
-          } else if (this.state.selectedTool === tools.SHAPE) {
-
-            var strokeDashArray = [];
-            if (this.state.lineStyles[toolLineStyle.SHAPE_BORDER] === 'dotted') {
-              strokeDashArray = [1, 3];
-            } else if (this.state.lineStyles[toolLineStyle.SHAPE_BORDER] === 'dashed') {
-              strokeDashArray = [10, 5];
-            }
-
-            switch (this.state.selectedShape) {
-              case shapes.RECT: {
-                let dragProps = this.generateMouseDragProperties(this.mouseCanvasDragStartPoint, this.mouseCanvasDragEndPoint);
-                let rect = new fabric.Rect({
-                  left: dragProps.left,
-                  top: dragProps.top,
-                  stroke: `${this.state.colors[toolColor.SHAPE_BORDER]}`,
-                  strokeWidth: this.state.thickness[toolThickness.SHAPE_BORDER],
-                  strokeDashArray,
-                  fill: `${this.state.colors[toolColor.SHAPE_FILL]}`,
-                  width: dragProps.width,
-                  height: dragProps.height,
-                  selectable: false,
-                });
-                this.canvas.add(rect);
-                break;
-              }
-              case shapes.ELLIPSE: {
-                let dragProps = this.generateMouseDragProperties(this.mouseCanvasDragStartPoint, this.mouseCanvasDragEndPoint);
-                let ellipse = new fabric.Ellipse({
-                  left: dragProps.left,
-                  top: dragProps.top,
-                  stroke: `${this.state.colors[toolColor.SHAPE_BORDER]}`,
-                  strokeWidth: this.state.thickness[toolThickness.SHAPE_BORDER],
-                  strokeDashArray,
-                  fill: `${this.state.colors[toolColor.SHAPE_FILL]}`,
-                  rx: dragProps.width / 2,
-                  ry: dragProps.height / 2,
-                  selectable: false,
-                });
-                this.canvas.add(ellipse);
-                break;
-              }
-            }
-          }
-        }
-        _self.saveScribbles();
-      })
+      _self.canvas.on('mouse:down', this.onMouseDownCanvas);
+      _self.canvas.on('mouse:move', this.onMouseMoveCanvas);
+      _self.canvas.on('mouse:up', this.onMouseUpCanvas);
 
       _self.initializeScribbles();
 
@@ -471,121 +575,7 @@ class ScribingAnswerForm extends React.Component {
     }
   }
 
-  initializeScribbles() {
-    const { scribbles, user_id } = this.props.scribingAnswer.answer;
-    this.layers = [];
-    if (scribbles) {
-      scribbles.forEach((scribble) => {
-        const objects = JSON.parse(scribble.content).objects;
-        const fabricObjs = [];
-
-        for (var i = 0; i < objects.length; i++) {
-          var klass = fabric.util.getKlass(objects[i].type);
-
-          switch (objects[i].type) {
-            case 'path': {
-              klass.fromObject(objects[i], (obj)=>{
-                this.scaleScribble(obj);
-                fabricObjs.push(obj);
-              });
-              break;
-            }
-            case 'i-text':
-            case 'line':
-            case 'rect':
-            case 'ellipse': {
-              let obj = klass.fromObject(objects[i]);
-              this.scaleScribble(obj);
-              fabricObjs.push(obj);
-              break;
-            }
-          }
-        }
-
-        if (scribble.creator_id !== user_id) {
-          const scribbleGroup = new fabric.Group(fabricObjs);
-          scribbleGroup.selectable = false;
-
-          const showLayer = (isShown) => {
-            const thisGroup = scribbleGroup;
-            if (isShown && !this.canvas.contains(thisGroup)) {
-              this.canvas.add(thisGroup);
-            } else if (!isShown && this.canvas.contains(thisGroup)) {
-              this.canvas.remove(thisGroup);
-            }
-            this.canvas.renderAll();
-          }
-          // Populate layers list
-          const newScribble = {
-            ...scribble,
-            isDisplayed: true,
-            showLayer,
-          }
-          this.layers = [...this.layers, newScribble];
-        } else {
-          fabricObjs.map((obj) => {
-            this.canvas.add(obj)
-          });
-        }
-      })
-    }
-  }
-
-  updateScribbles() {
-    const { user_id } = this.props.scribingAnswer.answer;
-    const { layers } = this;
-
-    if (layers) {
-      layers.forEach((layer) => {
-        layer.showLayer(layer.isDisplayed);
-      })
-    }
-  }
-
-  componentDidMount() {
-    // Retrieve answer in async call
-    this.initializeAnswer();
-    this.initializeToolColor();
-    this.initializeToolThickness();
-    this.initializeLineStyles();
-    this.initializeColorDropdowns();
-    this.initializePopovers();
-  }
-
-  shouldComponentUpdate(nextProps) {
-    // Don't update until canvas is ready
-    if (!this.props.scribingAnswer.is_canvas_loaded && 
-        this.props.scribingAnswer.answer.image_path !==
-        nextProps.scribingAnswer.answer.image_path) {
-        this.initializeCanvas(nextProps.scribingAnswer.answer.image_path);
-      return false;
-    }
-    this.updateScribbles();
-    return nextProps.scribingAnswer.is_canvas_loaded;
-  }
-
-  disableObjectSelection() {
-    this.canvas.forEachObject(function(o) {
-      o.selectable = false;
-    });
-  }
-
-  enableObjectSelection() {
-    // this clears the selection-disabled scribbles
-    // and reloads them to enable selection again
-    this.canvas.clear();
-    this.initializeScribbles();
-  }
-
-  addText = () => {
-    this.canvas.add(new fabric.IText('Text', { 
-      fontFamily: this.state.fontFamily,
-      fontSize: this.state.fontSize,
-      fill: this.state.colors[toolColor.TYPE],
-      left: this.canvas.width / 2, 
-      top: this.canvas.height / 2 ,
-    }));
-  }
+  // Scribble Helpers
 
   scaleScribble(scribble) {
     scribble.scaleX *= this.scale;
@@ -601,26 +591,15 @@ class ScribingAnswerForm extends React.Component {
     scribble.top /= this.scale;
   }
 
-  getScribbleJSON() {
-    // Remove non-user scribings in canvas
-    this.layers.forEach((layer) => {
-      if (layer.creator_id !== this.props.scribingAnswer.answer.user_id) {
-        layer.showLayer(false)
-      }
-    })
+  updateScribbles() {
+    const { user_id } = this.props.scribingAnswer.answer;
+    const { layers } = this;
 
-    // only save rescaled user scribings
-    const objects = this.canvas._objects;
-    objects.forEach((obj) => (this.rescaleScribble(obj)));
-    const json = JSON.stringify(objects);
-
-    // scale back user scribings
-    objects.forEach((obj) => (this.scaleScribble(obj)));
-
-    // Add back non-user scribings according canvas state
-    this.layers.forEach((layer) => (layer.showLayer(layer.showLayer)));
-
-    return '{"objects":'+ json +'}';
+    if (layers) {
+      layers.forEach((layer) => {
+        layer.showLayer(layer.isDisplayed);
+      })
+    }
   }
 
   saveScribbles() {
@@ -629,6 +608,60 @@ class ScribingAnswerForm extends React.Component {
     this.props.actions.updateScribingAnswerInLocal(json);
     this.props.actions.updateScribingAnswer(answerId, json);
   }
+
+  getScribbleJSON() {
+    // Remove non-user scribings in canvas
+    this.layers.forEach((layer) => {
+      if (layer.creator_id !== this.props.scribingAnswer.answer.user_id) {
+        layer.showLayer(false)
+      }
+    })
+
+    // Only save rescaled user scribings
+    const objects = this.canvas._objects;
+    objects.forEach((obj) => (this.rescaleScribble(obj)));
+    const json = JSON.stringify(objects);
+
+    // Scale back user scribings
+    objects.forEach((obj) => (this.scaleScribble(obj)));
+
+    // Add back non-user scribings according canvas state
+    this.layers.forEach((layer) => (layer.showLayer(layer.showLayer)));
+
+    return '{"objects":'+ json +'}';
+  }
+
+  // Utility Helpers
+
+  getRgbaHelper(json) {
+    return 'rgba(' + json.r + ',' + json.g + ',' + json.b + ',' + json.a + ')';
+  }
+
+  getMousePoint(event) {
+    return {
+      x: event.clientX,
+      y: event.clientY,
+    }
+  }
+
+  // Generates the left, top, width and height of the drag
+  generateMouseDragProperties(point1, point2) {
+    return {
+      left: point1.x < point2.x ? point1.x : point2.x,
+      top: point1.y < point2.y ? point1.y : point2.y,
+      width: Math.abs(point1.x - point2.x),
+      height: Math.abs(point1.y - point2.y),
+    }
+  }
+
+  getCanvasPoint(event) {
+    let pointer = this.canvas.getPointer(event.e);
+    return {
+      x: pointer.x,
+      y: pointer.y,
+    };
+  }
+
 
   renderToolBar() {
     const lineToolStyle = { 

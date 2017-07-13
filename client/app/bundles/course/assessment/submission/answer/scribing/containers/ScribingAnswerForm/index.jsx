@@ -1,20 +1,12 @@
 import React, { PropTypes } from 'react';
 import { Canvas } from 'react-fabricjs';
-import { SketchPicker } from 'react-color';
 
 import FontIcon from 'material-ui/FontIcon';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
-import Divider from 'material-ui/Divider';
 import RaisedButton from 'material-ui/RaisedButton';
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
-import IconMenu from 'material-ui/IconMenu';
-import IconButton from 'material-ui/IconButton';
-import SelectField from 'material-ui/SelectField';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
-import Slider from 'material-ui/Slider';
-import Chip from 'material-ui/Chip';
-import {cyan500, grey50} from 'material-ui/styles/colors';
 
 import { injectIntl, intlShape } from 'react-intl';
 
@@ -81,77 +73,6 @@ const styles = {
     position: `relative`,
     display: `inline-block`,
     paddingRight: `24px`,
-  },
-  toolDropdowns: {
-    padding: `10px`,
-  },
-  menu: {
-    maxHeight: `250px`,
-    overflowY: `auto`,
-  },
-  fieldDiv: {
-    fontSize: `16px`,
-    lineHeight: `24px`,
-    width: `210px`,
-    height: `72px`,
-    display: `block`,
-    position: `relative`,
-    backgroundColor: `transparent`,
-    fontFamily: `Roboto, sans-serif`,
-    transition: `height 200ms cubic-bezier(0.23, 1, 0.32, 1) 0ms`,
-    cursor: `auto`,
-  },
-  label: {
-    position: `absolute`,
-    lineHeight: `22px`,
-    top: `38px`,
-    transition: `all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms`,
-    zIndex: `1`,
-    transform: `scale(0.75) translate(0px, -28px)`,
-    transformOrigin: `left top 0px`,
-    pointerEvents: `none`,
-    userSelect: `none`,
-    color: `rgba(0, 0, 0, 0.3)`,
-  },
-  select: {
-    width: `210px`,
-  },
-  slider: {
-    padding: `30px 0px`,
-  },
-  innerTool: {
-    display: `inline-block`,
-  },
-  chevron: {
-    color: `rgba(0, 0, 0, 0.4)`,
-    fontSize:`12px`,
-    padding: `10px 0px 10px 0px`,
-  },
-  colorPickerFieldDiv: {
-    fontSize: `16px`,
-    lineHeight: `24px`,
-    width: `210px`,
-    display: `block`,
-    position: `relative`,
-    backgroundColor: `transparent`,
-    fontFamily: `Roboto, sans-serif`,
-    transition: `height 200ms cubic-bezier(0.23, 1, 0.32, 1) 0ms`,
-    cursor: `auto`,
-  },
-  colorPicker: {
-    height: `20px`,
-    width: `20px`,
-    display: `inline-block`,
-    margin: `15px 0px 0px 50px`,
-  },
-  chip: {
-    margin: `4px`,
-  },
-  chipWrapper: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    width: `220px`,
-    padding: `40px 0px`,
   },
 }
 
@@ -743,23 +664,6 @@ class ScribingAnswerForm extends React.Component {
         </Menu>
       </Popover>
     ) : null;
-  }
-
-  renderLineStyleChips(toolType) {
-    const lineStyles = ['solid', 'dotted', 'dashed'];
-    const chips = [];
-    lineStyles.forEach((style)=>(chips.push(
-      <Chip
-        backgroundColor={this.state.lineStyles[toolType] === style ? cyan500 : undefined}
-        labelColor={this.state.lineStyles[toolType] === style ? grey50 : undefined}
-        key={toolType + style}
-        style={styles.chip}
-        onTouchTap={(event) => this.onTouchTapLineStyleChip(event, toolType, style)}
-      >
-        {style}
-      </Chip>
-    )));
-    return chips;
   }
 
   renderToolBar() {

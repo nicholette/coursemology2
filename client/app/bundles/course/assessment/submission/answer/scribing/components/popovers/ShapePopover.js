@@ -3,27 +3,38 @@ import { SketchPicker } from 'react-color';
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
+import Divider from 'material-ui/Divider';
 import Slider from 'material-ui/Slider';
 import Chip from 'material-ui/Chip';
 import SelectField from 'material-ui/SelectField';
 import FontIcon from 'material-ui/FontIcon';
+import IconButton from 'material-ui/IconButton';
 import {cyan500, grey50} from 'material-ui/styles/colors';
+
+import { shapes } from '../../constants';
 
 const propTypes = {
   lineToolType: PropTypes.string,
   open: PropTypes.bool,
   anchorEl: PropTypes.object,
   onRequestClose: PropTypes.func,
+  setSelectedShape: PropTypes.func,
   selectedLineStyle: PropTypes.string,
   onTouchTapLineStyleChip: PropTypes.func,
   toolThicknessValue: PropTypes.number,
   onChangeSliderThickness: PropTypes.func,
-  colorPickerColor: PropTypes.string,
-  onClickColorPicker: PropTypes.func,
-  colorPickerPopoverOpen: PropTypes.bool,
-  colorPickerPopoverAnchorEl: PropTypes.object,
-  onRequestCloseColorPickerPopover: PropTypes.func,
-  onChangeCompleteColorPicker: PropTypes.func,
+  borderColorPickerColor: PropTypes.string,
+  onClickBorderColorPicker: PropTypes.func,
+  borderColorPickerPopoverOpen: PropTypes.bool,
+  borderColorPickerPopoverAnchorEl: PropTypes.object,
+  onRequestCloseBorderColorPickerPopover: PropTypes.func,
+  onChangeCompleteBorderColorPicker: PropTypes.func,
+  fillColorPickerColor: PropTypes.string,
+  onClickFillColorPicker: PropTypes.func,
+  fillColorPickerPopoverOpen: PropTypes.bool,
+  fillColorPickerPopoverAnchorEl: PropTypes.object,
+  onRequestCloseFillColorPickerPopover: PropTypes.func,
+  onChangeCompleteFillColorPicker: PropTypes.func,
 }
 
 const styles = {
@@ -99,7 +110,7 @@ const popoverStyles = {
   }
 }
 
-export default class LinePopover extends Component {
+export default class ShapePopover extends Component {
 
   renderLineStyleChips() {
     const { lineToolType, selectedLineStyle, onTouchTapLineStyleChip } = this.props;
@@ -144,31 +155,110 @@ export default class LinePopover extends Component {
     );
   }
 
-  renderColorPickerField() {
-    const { colorPickerColor, onClickColorPicker, colorPickerPopoverOpen,
-            colorPickerPopoverAnchorEl, onRequestCloseColorPickerPopover,
-            onChangeCompleteColorPicker } = this.props;
+  renderBorderColorPickerField() {
+    const { borderColorPickerColor, onClickBorderColorPicker, borderColorPickerPopoverOpen,
+            borderColorPickerPopoverAnchorEl, onRequestCloseBorderColorPickerPopover,
+            onChangeCompleteBorderColorPicker } = this.props;
 
     return (
       <div style={styles.colorPickerFieldDiv}>
         <label style={styles.label}>Colour:</label>
         <div 
-          style={{background: colorPickerColor, ...styles.colorPicker }}
-          onClick={onClickColorPicker} />
+          style={{background: borderColorPickerColor, ...styles.colorPicker }}
+          onClick={onClickBorderColorPicker} />
           <Popover
             style={styles.toolDropdowns}
-            open={colorPickerPopoverOpen}
-            anchorEl={colorPickerPopoverAnchorEl}
+            open={borderColorPickerPopoverOpen}
+            anchorEl={borderColorPickerPopoverAnchorEl}
             anchorOrigin={popoverStyles.anchorOrigin}
             targetOrigin={popoverStyles.targetOrigin}
-            onRequestClose={onRequestCloseColorPickerPopover}
+            onRequestClose={onRequestCloseBorderColorPickerPopover}
             animation={PopoverAnimationVertical}
           >
             <SketchPicker
-              color={colorPickerColor}
-              onChangeComplete={onChangeCompleteColorPicker}
+              color={borderColorPickerColor}
+              onChangeComplete={onChangeCompleteBorderColorPicker}
             />
           </Popover>
+      </div>
+    );
+  }
+
+  renderFillColorPickerField() {
+    const { fillColorPickerColor, onClickFillColorPicker, fillColorPickerPopoverOpen,
+            fillColorPickerPopoverAnchorEl, onRequestCloseFillColorPickerPopover,
+            onChangeCompleteFillColorPicker } = this.props;
+
+    return (
+      <div style={styles.colorPickerFieldDiv}>
+        <label style={styles.label}>Colour:</label>
+        <div 
+          style={{background: fillColorPickerColor, ...styles.colorPicker }}
+          onClick={onClickFillColorPicker} />
+          <Popover
+            style={styles.toolDropdowns}
+            open={fillColorPickerPopoverOpen}
+            anchorEl={fillColorPickerPopoverAnchorEl}
+            anchorOrigin={popoverStyles.anchorOrigin}
+            targetOrigin={popoverStyles.targetOrigin}
+            onRequestClose={onRequestCloseFillColorPickerPopover}
+            animation={PopoverAnimationVertical}
+          >
+            <SketchPicker
+              color={fillColorPickerColor}
+              onChangeComplete={onChangeCompleteFillColorPicker}
+            />
+          </Popover>
+      </div>
+    );
+  }
+
+  renderShapeField() {
+    const { setSelectedShape } = this.props;
+
+    return (
+      <div>
+        <IconButton tooltip="Square" tooltipPosition="top-center">
+          <FontIcon className="fa fa-square-o" onClick={() => (setSelectedShape(shapes.RECT))}/>
+        </IconButton>
+        <IconButton tooltip="Ellipse" tooltipPosition="top-center">
+          <FontIcon className="fa fa-circle-o" onClick={() => (setSelectedShape(shapes.ELLIPSE))}/>
+        </IconButton>
+      </div>
+    );
+  }
+
+  renderShapeComponent() {
+    return (
+      <div>
+        <div>
+          <h4>Shape</h4>
+        </div>
+        { this.renderShapeField() }
+      </div>
+    );
+  }
+
+  renderBorderComponent() {
+    return (
+      <div>
+        <div>
+          <h4>Border</h4>
+        </div>
+        { this.renderLineStyleField() }
+        { this.renderThicknessField() }
+        { this.renderBorderColorPickerField() }
+      </div>
+    );
+  }
+
+  renderFillComponent() {
+    return (
+      <div>
+        <div>
+          <h4>Fill</h4>
+        </div>
+        { this.renderFillColorPickerField() }
       </div>
     );
   }
@@ -187,16 +277,15 @@ export default class LinePopover extends Component {
         animation={PopoverAnimationVertical}
       >
         <Menu style={styles.menu}>
-          <div>
-            <h4>Line</h4>
-          </div>
-          { this.renderLineStyleField() }
-          { this.renderThicknessField() }
-          { this.renderColorPickerField() }
+          { this.renderShapeComponent() }
+          <Divider />
+          { this.renderBorderComponent() }
+          <Divider />
+          { this.renderFillComponent() }
         </Menu>
       </Popover>
     );
   }
 } 
 
-LinePopover.propTypes = propTypes;
+ShapePopover.propTypes = propTypes;

@@ -97,6 +97,10 @@ const styles = {
     width: `220px`,
     padding: `40px 0px`,
   },
+  menu: {
+    maxHeight: `250px`,
+    overflowY: `auto`,
+  },
 }
 
 const popoverStyles = {

@@ -1,42 +1,18 @@
 import React, { Component, PropTypes } from 'react';
 import { SketchPicker } from 'react-color';
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
-import Menu from 'material-ui/Menu';
-import MenuItem from 'material-ui/MenuItem';
-import Slider from 'material-ui/Slider';
-import SelectField from 'material-ui/SelectField';
 import FontIcon from 'material-ui/FontIcon';
 
 const propTypes = {
-  open: PropTypes.bool,
-  anchorEl: PropTypes.object,
-  onRequestClose: PropTypes.func,
-  toolThicknessValue: PropTypes.number,
-  onChangeSliderThickness: PropTypes.func,
-  colorPickerColor: PropTypes.string,
   onClickColorPicker: PropTypes.func,
   colorPickerPopoverOpen: PropTypes.bool,
   colorPickerPopoverAnchorEl: PropTypes.object,
   onRequestCloseColorPickerPopover: PropTypes.func,
+  colorPickerColor: PropTypes.string,
   onChangeCompleteColorPicker: PropTypes.func,
 }
 
 const styles = {
-  select: {
-    width: `210px`,
-  },
-  fieldDiv: {
-    fontSize: `16px`,
-    lineHeight: `24px`,
-    width: `210px`,
-    height: `72px`,
-    display: `block`,
-    position: `relative`,
-    backgroundColor: `transparent`,
-    fontFamily: `Roboto, sans-serif`,
-    transition: `height 200ms cubic-bezier(0.23, 1, 0.32, 1) 0ms`,
-    cursor: `auto`,
-  },
   colorPickerFieldDiv: {
     fontSize: `16px`,
     lineHeight: `24px`,
@@ -69,13 +45,6 @@ const styles = {
   toolDropdowns: {
     padding: `10px`,
   },
-  slider: {
-    padding: `30px 0px`,
-  },
-  menu: {
-    maxHeight: `250px`,
-    overflowY: `auto`,
-  },
 }
 
 const popoverStyles = {
@@ -89,23 +58,8 @@ const popoverStyles = {
   }
 }
 
-export default class DrawPopover extends Component {
-
-  renderThicknessField() {
-    const { toolThicknessValue, onChangeSliderThickness } = this.props;
-
-    return (
-      <div style={styles.fieldDiv}>
-        <label style={styles.label}>Thickness:</label>
-        <Slider 
-          style={styles.slider} min={0} max={5} step={1} value={toolThicknessValue}
-          onChange={onChangeSliderThickness}
-         />
-      </div>
-    );
-  }
-
-  renderColorPickerField() {
+export default class ColorPickerField extends Component {
+  render() {
     const { colorPickerColor, onClickColorPicker, colorPickerPopoverOpen,
             colorPickerPopoverAnchorEl, onRequestCloseColorPickerPopover,
             onChangeCompleteColorPicker } = this.props;
@@ -133,30 +87,6 @@ export default class DrawPopover extends Component {
       </div>
     );
   }
-
-  render() {
-    const { open, anchorEl, onRequestClose } = this.props;
-
-    return (
-      <Popover
-        style={styles.toolDropdowns}
-        open={open}
-        anchorEl={anchorEl}
-        anchorOrigin={popoverStyles.anchorOrigin}
-        targetOrigin={popoverStyles.targetOrigin}
-        onRequestClose={onRequestClose}
-        animation={PopoverAnimationVertical}
-      >
-        <Menu style={styles.menu}>
-          <div>
-            <h4>Pencil</h4>
-          </div>
-          { this.renderThicknessField() }
-          { this.renderColorPickerField() }
-        </Menu>
-      </Popover>
-    );
-  }
 } 
 
-DrawPopover.propTypes = propTypes;
+ColorPickerField.propTypes = propTypes;

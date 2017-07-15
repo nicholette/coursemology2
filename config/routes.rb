@@ -158,20 +158,10 @@ Rails.application.routes.draw do
 
       resources :announcements, concerns: :paginatable
       scope module: :achievement do
-        resources :achievements do
+        resources :achievements, except: [:new] do
           concerns :conditional
           resources :course_users, only: [:index]
           post 'reorder', on: :collection
-        end
-      end
-
-      collection do
-        namespace :assessment do
-          resources :programming_evaluations, only: [:index, :show], defaults: { format: 'json' } do
-            post 'allocate' => 'programming_evaluations#allocate', on: :collection
-            get 'package' => 'programming_evaluations#package'
-            put 'result' => 'programming_evaluations#update_result'
-          end
         end
       end
 

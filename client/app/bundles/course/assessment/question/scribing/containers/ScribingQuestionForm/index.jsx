@@ -1,11 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
-import { reduxForm, Field, Form } from 'redux-form';
+import { reduxForm, Form } from 'redux-form';
 
 import RaisedButton from 'material-ui/RaisedButton';
 import Snackbar from 'material-ui/Snackbar';
-import FlatButton from 'lib/components/redux-form/FlatButton';
 
 import LoadingIndicator from '../../components/LoadingIndicator';
 import InputField from '../../components/InputField';
@@ -16,29 +15,29 @@ import FileUploadField from '../../components/FileUploadField';
 import styles from './ScribingQuestionForm.scss';
 import translations from './ScribingQuestionForm.intl';
 
-import { fetchScribingQuestion, createScribingQuestion, updateScribingQuestion } from '../../actions/scribingQuestionActionCreators';
-
 import { formNames } from '../../constants';
 import { dataShape, questionShape } from '../../propTypes';
 
 const propTypes = {
   actions: React.PropTypes.shape({
     submitForm: PropTypes.func.isRequired,
+    fetchScribingQuestion: PropTypes.func.isRequired,
     createScribingQuestion: PropTypes.func.isRequired,
     updateScribingQuestion: PropTypes.func.isRequired,
+    clearSubmitError: PropTypes.func.isRequired,
   }),
   data: dataShape.isRequired,
   scribingId: PropTypes.string,
   intl: intlShape.isRequired,
   // Redux-form proptypes
   formValues: PropTypes.shape({
-    scribing_question: PropTypes.shape(questionShape),
+    question_scribing: PropTypes.shape(questionShape),
   }),
-  initialValues: PropTypes.shape({
-    scribing_question: PropTypes.shape(questionShape),
-  }),
+  invalid: PropTypes.bool.isRequired,
   handleSubmit: PropTypes.func.isRequired,
   submitting: PropTypes.bool.isRequired,
+  submitFailed: PropTypes.bool.isRequired,
+  submit: PropTypes.func.isRequired,
 };
 
 class ScribingQuestionForm extends React.Component {
@@ -75,7 +74,7 @@ class ScribingQuestionForm extends React.Component {
   submitButtonText() {
     const { is_submitting } = this.props.data;
     const { formatMessage } = this.props.intl;
-    return (is_submitting) ? 
+    return (is_submitting) ?
            formatMessage(translations.submittingMessage) :
            formatMessage(translations.submitButton);
   }
@@ -84,17 +83,17 @@ class ScribingQuestionForm extends React.Component {
     const errors = this.props.data.save_errors;
     return errors ?
       <div className="alert alert-danger">
-        { errors.map((errorMessage, index) => <div key={index}>{errorMessage}</div>)}
+        {errors.map(errorMessage => (<div key={errorMessage}>{errorMessage}</div>))}
       </div> : null
     ;
   }
 
   renderExistingAttachmentLabel() {
     return (
-      this.props.data.question.attachment_reference.name ? 
-      <div className={styles.row}>
-        <label>File uploaded: {this.props.data.question.attachment_reference.name}</label>
-      </div> : []
+      this.props.data.question.attachment_reference.name ?
+        <div className={styles.row}>
+          <label>File uploaded: {this.props.data.question.attachment_reference.name}</label>
+        </div> : []
     );
   }
 
@@ -130,7 +129,7 @@ class ScribingQuestionForm extends React.Component {
     const skillsOptions = question.skills;
     const skillsValues = question.skill_ids;
 
-    const fileName = this.props.formValues 
+    const fileName = this.props.formValues
                     && this.props.formValues.question_scribing.attachment
                     && this.props.formValues.question_scribing.attachment[0].name;
 
@@ -162,7 +161,10 @@ class ScribingQuestionForm extends React.Component {
                 type={'text'}
                 placeholder={this.props.data.question.error && this.props.data.question.error.title}
                 is_loading={this.props.data.is_loading}
-                value={this.props.formValues && this.props.formValues.question_scribing && this.props.formValues.question_scribing.title}
+                value={this.props.formValues
+                  && this.props.formValues.question_scribing
+                  && this.props.formValues.question_scribing.title
+                }
               />
             </div>
             <div className={styles.descriptionInput}>
@@ -176,7 +178,10 @@ class ScribingQuestionForm extends React.Component {
               <SummernoteField
                 label={this.props.intl.formatMessage(translations.staffOnlyCommentsFieldLabel)}
                 field={'staff_only_comments'}
-                value={this.props.formValues && this.props.formValues.question_scribing && this.props.formValues.question_scribing.staff_only_comments}
+                value={this.props.formValues
+                  && this.props.formValues.question_scribing
+                  && this.props.formValues.question_scribing.staff_only_comments
+                }
                 is_loading={this.props.data.is_loading}
               />
             </div>
@@ -193,15 +198,19 @@ class ScribingQuestionForm extends React.Component {
               <InputField
                 label={this.props.intl.formatMessage(translations.maximumGradeFieldLabel)}
                 field={'maximum_grade'}
-                required={true}
+                required
                 validate={[required, lessThan1000, nonNegative]}
                 type={'number'}
                 is_loading={this.props.data.is_loading}
-                value={ScribingQuestionForm.convertNull(this.props.formValues && this.props.formValues.question_scribing && this.props.formValues.question_scribing.maximum_grade)}
+                value={ScribingQuestionForm.convertNull(
+                  this.props.formValues
+                  && this.props.formValues.question_scribing
+                  && this.props.formValues.question_scribing.maximum_grade
+                )}
               />
             </div>
             <div className={styles.fileInputDiv}>
-              { 
+              {
                 this.props.data.question.attachment_reference.name ?
                 this.renderExistingAttachmentLabel() :
                 <div className={styles.row} >
@@ -225,7 +234,7 @@ class ScribingQuestionForm extends React.Component {
             labelPosition="before"
             primary
             type="submit"
-            onTouchTap={()=>(this.props.submit())}
+            onTouchTap={() => (this.props.submit())}
             disabled={this.props.data.is_loading || submitting}
             icon={this.props.data.is_submitting ? <i className="fa fa-spinner fa-lg fa-spin" /> : null}
           />
@@ -238,7 +247,7 @@ class ScribingQuestionForm extends React.Component {
 ScribingQuestionForm.propTypes = propTypes;
 
 export default reduxForm({
-  form: formNames.SCRIBING_QUESTION,
+  form: formNames.QUESTION_SCRIBING,
   enableReinitialize: true,
 })(injectIntl(ScribingQuestionForm));
 

@@ -8,17 +8,16 @@ const propTypes = {
   label: PropTypes.string.isRequired,
   field: PropTypes.string.isRequired,
   validate: PropTypes.array,
-  is_loading: PropTypes.bool,
-}
+};
 
 export default class SummernoteField extends Component {
   render() {
     const { label, field, validate } = this.props;
     return (
-       <Field
-        name={ questionNamePrefix + field }
-        id={ questionIdPrefix + field}
-        label={ label }
+      <Field
+        name={questionNamePrefix + field}
+        id={questionIdPrefix + field}
+        label={label}
         validate={validate}
         component={MaterialSummernote}
       />

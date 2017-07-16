@@ -37,19 +37,19 @@ export default class ScribingsAPI extends BaseScribingAPI {
    * error response: { errors: [{ attribute: string }] }
    */
   create(scribingFields) {
-    const config = { 
-      headers: { 
+    const config = {
+      headers: {
         'Content-Type': 'multipart/form-data',
-        'Accept': 'file_types',
-      }
+        Accept: 'file_types',
+      },
     };
-    let innerFormData = new FormData();
+    const innerFormData = new FormData();
 
-    for (var key in scribingFields.question_scribing) {
-      if (scribingFields.question_scribing.hasOwnProperty(key)) {
+    Object.keys(scribingFields.question_scribing).forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(scribingFields.question_scribing, key)) {
         innerFormData.append(`question_scribing[${key}]`, scribingFields.question_scribing[key]);
       }
-    }
+    });
 
     return this.getClient().post(this._getUrlPrefix(), innerFormData, config);
   }
@@ -65,19 +65,19 @@ export default class ScribingsAPI extends BaseScribingAPI {
    * error response: { errors: [{ attribute: string }] }
    */
   update(scribingId, scribingFields) {
-    const config = { 
-      headers: { 
+    const config = {
+      headers: {
         'Content-Type': 'multipart/form-data',
-        'Accept': 'file_types'
-      }
+        Accept: 'file_types',
+      },
     };
-    let innerFormData = new FormData();
+    const innerFormData = new FormData();
 
-    for (var key in scribingFields.question_scribing) {
-      if (scribingFields.question_scribing.hasOwnProperty(key)) {
+    Object.keys(scribingFields.question_scribing).forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(scribingFields.question_scribing, key)) {
         innerFormData.append(`question_scribing[${key}]`, scribingFields.question_scribing[key]);
       }
-    }
+    });
 
     return this.getClient().patch(`${this._getUrlPrefix()}/${scribingId}`, innerFormData, config);
   }

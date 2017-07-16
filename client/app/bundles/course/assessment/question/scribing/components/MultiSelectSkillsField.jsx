@@ -12,16 +12,16 @@ const propTypes = {
   options: PropTypes.arrayOf(skillShape),
   error: PropTypes.string,
   is_loading: PropTypes.bool,
-}
+};
 
 const styles = {
-  menuStyle: { 
+  menuStyle: {
     maxHeight: '80vh',
     overflowY: 'scroll',
   },
   skillChip: {
     display: 'none',
-  }
+  },
 };
 
 export default class MultiSelectSkillsField extends Component {
@@ -31,19 +31,19 @@ export default class MultiSelectSkillsField extends Component {
     return (
       <div>
         <Field
-          name={ questionNamePrefix + field }
-          id={ questionIdPrefix + field }
+          name={questionNamePrefix + field}
+          id={questionIdPrefix + field}
           component={props => (
             <ChipInput
               id={questionIdPrefix + field}
               value={props.input.value || []}
               dataSource={options}
               dataSourceConfig={{ value: 'id', text: 'title' }}
-              onRequestAdd={(addedChip) => (
-                props.input.onChange([...props.input.value, addedChip])
-              )}
+              onRequestAdd={(addedChip) => {
+                props.input.onChange([...props.input.value, addedChip]);
+              }}
               onRequestDelete={(deletedChip) => {
-                let values = (props.input.value || []).filter(v => v.id !== deletedChip);
+                const values = (props.input.value || []).filter(v => v.id !== deletedChip);
                 props.input.onChange(values);
               }}
               floatingLabelText={label}
@@ -70,6 +70,6 @@ export default class MultiSelectSkillsField extends Component {
       </div>
     );
   }
-} 
+}
 
 MultiSelectSkillsField.propTypes = propTypes;

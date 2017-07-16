@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Field } from 'redux-form';
 import TextField from 'lib/components/redux-form/TextField';
 import { questionNamePrefix, questionIdPrefix } from '../constants';
-import { questionShape } from '../propTypes';
 
 const propTypes = {
   placeholder: PropTypes.string,
@@ -13,7 +12,7 @@ const propTypes = {
   required: PropTypes.bool,
   type: PropTypes.string,
   is_loading: PropTypes.bool,
-}
+};
 
 export default class InputField extends Component {
   render() {
@@ -23,8 +22,8 @@ export default class InputField extends Component {
     return (
       <div title={placeholder}>
         <Field
-          name={ questionNamePrefix + field }
-          id={ questionIdPrefix + field}
+          name={questionNamePrefix + field}
+          id={questionIdPrefix + field}
           validate={validate}
           floatingLabelText={(required ? '* ' : '') + label}
           floatingLabelFixed
@@ -36,6 +35,6 @@ export default class InputField extends Component {
       </div>
     );
   }
-} 
+}
 
 InputField.propTypes = propTypes;

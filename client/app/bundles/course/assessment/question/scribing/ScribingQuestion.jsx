@@ -43,11 +43,9 @@ const propTypes = {
     is_loading: PropTypes.bool,
   }).isRequired,
   formValues: PropTypes.shape({
-    scribing_question: PropTypes.shape(questionShape),
+    question_scribing: PropTypes.shape(questionShape),
   }),
-  initialValues: PropTypes.shape({
-    scribing_question: PropTypes.shape(questionShape),
-  }),
+  initialValues: PropTypes.object,
   scribingId: PropTypes.string,
 };
 
@@ -58,11 +56,11 @@ const ScribingQuestion = (props) => {
 
   return (
     <ScribingQuestionForm
-        actions={actions}
-        data={scribingQuestion}
-        formValues={formValues}
-        initialValues={initialValues}
-        scribingId={scribingId}
+      actions={actions}
+      data={scribingQuestion}
+      formValues={formValues}
+      initialValues={initialValues}
+      scribingId={scribingId}
     />
   );
 };

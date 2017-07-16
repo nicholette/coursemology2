@@ -40,7 +40,7 @@ function getSkillIdsFromSkills(skills) {
 // Helper function to process form fields before create/update
 function processFields(fields) {
   const parsedFields = _.cloneDeep(fields);
-  parsedFields.question_scribing.skill_ids = 
+  parsedFields.question_scribing.skill_ids =
     getSkillIdsFromSkills(fields.question_scribing.skill_ids);
 
   if (fields.question_scribing.attachment) {
@@ -48,7 +48,7 @@ function processFields(fields) {
   } else {
     delete parsedFields.question_scribing.file;
   }
-  
+
   delete parsedFields.question_scribing.attachment;
 
   return parsedFields;
@@ -79,7 +79,7 @@ export function createScribingQuestion(fields) {
       .catch((error) => {
         dispatch({
           type: actionTypes.CREATE_SCRIBING_QUESTION_FAILURE,
-          save_errors: error.response && error.response.data && error.response.data.errors
+          save_errors: error.response && error.response.data && error.response.data.errors,
         });
       });
   };
@@ -102,7 +102,7 @@ export function updateScribingQuestion(questionId, fields) {
     .catch((error) => {
       dispatch({
         type: actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE,
-        save_errors: error.response && error.response.data && error.response.data.errors
+        save_errors: error.response && error.response.data && error.response.data.errors,
       });
     });
   };

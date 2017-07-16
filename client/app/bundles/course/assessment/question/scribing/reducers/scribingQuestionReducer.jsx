@@ -16,7 +16,7 @@ export const initialState = {
       name: '',
       path: '',
       updater_name: '',
-    }
+    },
   },
   is_loading: false,
   is_submitting: false,
@@ -41,7 +41,7 @@ export default function scribingQuestionReducer(state = initialState, action) {
         save_errors: undefined,
         error: false,
       };
-    case actionTypes.CREATE_SCRIBING_QUESTION_REQUEST: 
+    case actionTypes.CREATE_SCRIBING_QUESTION_REQUEST:
     case actionTypes.UPDATE_SCRIBING_QUESTION_REQUEST: {
       return {
         ...state,
@@ -98,7 +98,7 @@ export default function scribingQuestionReducer(state = initialState, action) {
       return {
         ...state,
         error: false,
-      }
+      };
     }
     default: {
       return state;

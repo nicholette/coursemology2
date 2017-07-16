@@ -54,6 +54,14 @@ function processFields(fields) {
   return parsedFields;
 }
 
+export function clearSubmitError() {
+  return (dispatch) => {
+    dispatch({
+      type: actionTypes.CLEAR_SUBMIT_ERROR,
+    });
+  };
+}
+
 export function createScribingQuestion(fields) {
   return (dispatch) => {
     dispatch({ type: actionTypes.CREATE_SCRIBING_QUESTION_REQUEST });

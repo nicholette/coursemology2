@@ -48,7 +48,6 @@ class FileUploadField extends Component {
         disabled={is_loading}
         validate={validate}
         component={props => {
-          console.log('props', props);
           return (
             <div>
               <RaisedButton

@@ -17,7 +17,7 @@ function buildInitialValues(scribingQuestion) {
       title: scribingQuestion.question.title,
       description: scribingQuestion.question.description,
       staff_only_comments: scribingQuestion.question.staff_only_comments,
-      maximum_grade: scribingQuestion.question.maximum_grade,
+      maximum_grade: scribingQuestion.question.maximum_grade || undefined,
       skill_ids: scribingQuestion.question.skill_ids,
       published_assessment: scribingQuestion.published_assessment,
       attempt_limit: scribingQuestion.question.attempt_limit,

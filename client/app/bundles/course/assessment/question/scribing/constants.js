@@ -34,6 +34,7 @@ const actionTypes = mirrorCreator([
   'UPDATE_SCRIBING_QUESTION_FAILURE',
   'DELETE_SCRIBING_QUESTION_REQUEST',
   'DELETE_SCRIBING_QUESTION_FAILURE',
+  'CLEAR_SUBMIT_ERROR',
 ]);
 
 export default actionTypes;

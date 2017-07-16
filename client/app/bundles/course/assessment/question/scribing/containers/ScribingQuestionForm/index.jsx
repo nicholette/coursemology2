@@ -3,6 +3,7 @@ import { injectIntl, intlShape } from 'react-intl';
 import { reduxForm, Field, Form } from 'redux-form';
 
 import RaisedButton from 'material-ui/RaisedButton';
+import Snackbar from 'material-ui/Snackbar';
 import FlatButton from 'lib/components/redux-form/FlatButton';
 
 import LoadingIndicator from '../../components/LoadingIndicator';
@@ -96,6 +97,29 @@ class ScribingQuestionForm extends React.Component {
     );
   }
 
+  renderSnackbars() {
+    return (
+      <div>
+        <Snackbar
+          open={this.props.invalid && this.props.submitFailed}
+          message={this.props.intl.formatMessage(translations.resolveErrorsMessage)}
+          autoHideDuration={5000}
+        />
+        <Snackbar
+          open={this.props.data.error}
+          message={this.props.intl.formatMessage(translations.submitFailureMessage)}
+          autoHideDuration={5000}
+          onRequestClose={() => { this.props.actions.clearSubmitError(); }}
+        />
+        <Snackbar
+          open={this.props.submitting}
+          message={this.props.intl.formatMessage(translations.submittingMessage)}
+          autoHideDuration={2000}
+        />
+      </div>
+    );
+  }
+
   render() {
     const { handleSubmit, submitting,
             intl, scribingId } = this.props;
@@ -122,7 +146,6 @@ class ScribingQuestionForm extends React.Component {
       intl.formatMessage(translations.positiveNumberValidationError) : undefined
     );
 
-    // TODO: Display submit fail response
     return (
       (this.props.data.is_loading) ? <LoadingIndicator /> :
 
@@ -193,13 +216,15 @@ class ScribingQuestionForm extends React.Component {
             </div>
           </div>
 
+          { this.renderSnackbars() }
+
           <RaisedButton
             className={styles.submitButton}
             label={this.submitButtonText()}
             labelPosition="before"
             primary
             type="submit"
-            onTouchTap={()=>this.props.submit()}
+            onTouchTap={()=>(this.props.submit())}
             disabled={this.props.data.is_loading || submitting}
             icon={this.props.data.is_submitting ? <i className="fa fa-spinner fa-lg fa-spin" /> : null}
           />

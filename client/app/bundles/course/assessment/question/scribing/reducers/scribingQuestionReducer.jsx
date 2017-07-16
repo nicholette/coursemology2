@@ -21,6 +21,7 @@ export const initialState = {
   is_loading: false,
   is_submitting: false,
   save_errors: undefined,
+  error: false,
 };
 
 // Helper function to redirect to assessment main page
@@ -38,6 +39,7 @@ export default function scribingQuestionReducer(state = initialState, action) {
         is_loading: true,
         is_submitting: false,
         save_errors: undefined,
+        error: false,
       };
     case actionTypes.CREATE_SCRIBING_QUESTION_REQUEST: 
     case actionTypes.UPDATE_SCRIBING_QUESTION_REQUEST: {
@@ -46,6 +48,7 @@ export default function scribingQuestionReducer(state = initialState, action) {
         is_loading: false,
         is_submitting: true,
         save_errors: undefined,
+        error: false,
       };
     }
     case actionTypes.FETCH_SCRIBING_QUESTION_SUCCESS: {
@@ -58,6 +61,7 @@ export default function scribingQuestionReducer(state = initialState, action) {
         is_loading: false,
         is_submitting: false,
         save_errors: undefined,
+        error: false,
       };
     }
     case actionTypes.CREATE_SCRIBING_QUESTION_SUCCESS:
@@ -69,9 +73,17 @@ export default function scribingQuestionReducer(state = initialState, action) {
         is_loading: false,
         is_submitting: true, // to provide transition to assessment page
         save_errors: undefined,
+        error: false,
       };
     }
-    case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE:
+    case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE: {
+      return {
+        ...state,
+        is_loading: false,
+        is_submitting: false,
+        error: true,
+      };
+    }
     case actionTypes.CREATE_SCRIBING_QUESTION_FAILURE:
     case actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE: {
       return {
@@ -79,7 +91,14 @@ export default function scribingQuestionReducer(state = initialState, action) {
         is_loading: false,
         is_submitting: false,
         save_errors: action.save_errors,
+        error: true,
       };
+    }
+    case actionTypes.CLEAR_SUBMIT_ERROR: {
+      return {
+        ...state,
+        error: false,
+      }
     }
     default: {
       return state;

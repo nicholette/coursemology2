@@ -1,4 +1,5 @@
 import AssessmentsAPI from './Assessments';
+import AchievementsAPI from './Achievements';
 import VirtualClassroomsAPI from './VirtualClassrooms';
 import MaterialsAPI from './Materials';
 import MaterialFoldersAPI from './MaterialFolders';
@@ -7,6 +8,7 @@ import SurveyAPI from './Survey';
 import ScribingQuestionAPI from './assessment/question/scribing';
 
 const CourseAPI = {
+  achievements: new AchievementsAPI(),
   assessments: new AssessmentsAPI(),
   virtualClassrooms: new VirtualClassroomsAPI(),
   materials: new MaterialsAPI(),

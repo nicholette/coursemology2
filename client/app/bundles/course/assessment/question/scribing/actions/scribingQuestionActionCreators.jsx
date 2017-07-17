@@ -10,6 +10,25 @@ export function submitForm() {
   };
 }
 
+export function newScribingQuestion() {
+  return (dispatch) => {
+    dispatch({ type: actionTypes.NEW_SCRIBING_QUESTION_REQUEST });
+    return CourseAPI.question.scribing.scribings.new()
+      .then((response) => {
+        dispatch({
+          type: actionTypes.NEW_SCRIBING_QUESTION_SUCCESS,
+          skills: response.data.question.skills,
+        });
+      })
+      .catch((error) => {
+        dispatch({ type: actionTypes.NEW_SCRIBING_QUESTION_FAILURE });
+        if (error.response && error.response.data) {
+          throw new SubmissionError(error.response.data.errors);
+        }
+      });
+  };
+}
+
 export function fetchScribingQuestion(scribingId) {
   return (dispatch) => {
     dispatch({ type: actionTypes.FETCH_SCRIBING_QUESTION_REQUEST });

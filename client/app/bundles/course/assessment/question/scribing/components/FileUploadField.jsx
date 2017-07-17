@@ -15,7 +15,6 @@ const mapProps = props => ({ ...mapError(props) });
 const propTypes = {
   field: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  fileName: PropTypes.string,
   validate: PropTypes.array,
   isLoading: PropTypes.bool,
 };
@@ -27,9 +26,12 @@ const style = {
 };
 
 class FileUploadField extends Component {
-  renderFileNameLabel(props) {
-    if (this.props.fileName) {
-      return (<div className={styles.fileLabel}>{ this.props.fileName }</div>);
+  static renderFileNameLabel(props) {
+    const fileName = props.input.value
+      && props.input.value[0]
+      && props.input.value[0].name;
+    if (fileName) {
+      return (<div className={styles.fileLabel}>{fileName}</div>);
     } else if (props.meta.touched && props.meta.invalid && props.meta.error) {
       return (
         <div className={styles.fileLabelError}>
@@ -73,7 +75,7 @@ class FileUploadField extends Component {
                 }
               />
             </RaisedButton>
-            { this.renderFileNameLabel(props) }
+            { FileUploadField.renderFileNameLabel(props) }
           </div>)
         }
       />

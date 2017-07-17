@@ -31,6 +31,7 @@ export default function scribingQuestionReducer(state = initialState, action) {
   const { type } = action;
 
   switch (type) {
+    case actionTypes.NEW_SCRIBING_QUESTION_REQUEST:
     case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST:
       return {
         ...state,
@@ -45,6 +46,16 @@ export default function scribingQuestionReducer(state = initialState, action) {
         ...state,
         isLoading: false,
         isSubmitting: true,
+        saveErrors: undefined,
+        error: false,
+      };
+    }
+    case actionTypes.NEW_SCRIBING_QUESTION_SUCCESS: {
+      return {
+        ...state,
+        question: { ...state.question, skills: action.skills },
+        isLoading: false,
+        isSubmitting: false,
         saveErrors: undefined,
         error: false,
       };
@@ -74,6 +85,7 @@ export default function scribingQuestionReducer(state = initialState, action) {
         error: false,
       };
     }
+    case actionTypes.NEW_SCRIBING_QUESTION_FAILURE:
     case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE: {
       return {
         ...state,

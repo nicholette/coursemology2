@@ -21,6 +21,7 @@ import { dataShape, questionShape } from '../../propTypes';
 const propTypes = {
   actions: React.PropTypes.shape({
     submitForm: PropTypes.func.isRequired,
+    newScribingQuestion: PropTypes.func.isRequired,
     fetchScribingQuestion: PropTypes.func.isRequired,
     createScribingQuestion: PropTypes.func.isRequired,
     updateScribingQuestion: PropTypes.func.isRequired,
@@ -37,7 +38,6 @@ const propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   submitting: PropTypes.bool.isRequired,
   submitFailed: PropTypes.bool.isRequired,
-  submit: PropTypes.func.isRequired,
 };
 
 class ScribingQuestionForm extends React.Component {
@@ -47,10 +47,12 @@ class ScribingQuestionForm extends React.Component {
 
   componentDidMount() {
     const { scribingId } = this.props;
-    const { fetchScribingQuestion } = this.props.actions;
+    const { fetchScribingQuestion, newScribingQuestion } = this.props.actions;
 
     if (scribingId) {
       fetchScribingQuestion(scribingId);
+    } else {
+      newScribingQuestion();
     }
     this.summernoteEditors = $('#scribing-question-form .note-editor .note-editable');
   }
@@ -130,10 +132,6 @@ class ScribingQuestionForm extends React.Component {
 
     const skillsOptions = question.skills;
     const skillsValues = question.skill_ids;
-
-    const fileName = this.props.formValues
-                    && this.props.formValues.question_scribing.attachment
-                    && this.props.formValues.question_scribing.attachment[0].name;
 
     // Field level validations
     const required = value => (
@@ -222,7 +220,6 @@ class ScribingQuestionForm extends React.Component {
                     label={this.props.intl.formatMessage(translations.chooseFileButton)}
                     isLoading={this.props.data.isLoading}
                     validate={[required]}
-                    fileName={fileName}
                   />
                 </div>
               }
@@ -237,7 +234,6 @@ class ScribingQuestionForm extends React.Component {
             labelPosition="before"
             primary
             type="submit"
-            onTouchTap={() => (this.props.submit())}
             disabled={this.props.data.isLoading || submitting}
             icon={this.props.data.isSubmitting ? <i className="fa fa-spinner fa-lg fa-spin" /> : null}
           />

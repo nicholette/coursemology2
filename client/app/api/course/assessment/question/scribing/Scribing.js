@@ -17,6 +17,16 @@ export default class ScribingsAPI extends BaseScribingAPI {
    */
 
   /**
+   * Fetches a Scribing question with initial attributes
+   *
+   * @return {Promise}
+   * success response: scribing_question
+   */
+  new() {
+    return this.getClient().get(`${this._getUrlPrefix()}/new`);
+  }
+
+  /**
    * Fetches a Scribing question
    *
    * @param {number} scribingId

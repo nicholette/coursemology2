@@ -56,7 +56,7 @@ class ScribingQuestionForm extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.summernoteEditors.attr('contenteditable', !nextProps.data.is_loading);
+    this.summernoteEditors.attr('contenteditable', !nextProps.data.isLoading);
   }
 
   handleCreateQuestion = (data) => {
@@ -72,9 +72,9 @@ class ScribingQuestionForm extends React.Component {
   }
 
   submitButtonText() {
-    const { is_submitting } = this.props.data;
+    const { isSubmitting } = this.props.data;
     const { formatMessage } = this.props.intl;
-    return (is_submitting) ?
+    return (isSubmitting) ?
            formatMessage(translations.submittingMessage) :
            formatMessage(translations.submitButton);
   }
@@ -92,7 +92,9 @@ class ScribingQuestionForm extends React.Component {
     return (
       this.props.data.question.attachment_reference.name ?
         <div className={styles.row}>
-          <label>File uploaded: {this.props.data.question.attachment_reference.name}</label>
+          <label htmlFor="question_scribing_attachment">
+            File uploaded: {this.props.data.question.attachment_reference.name}
+          </label>
         </div> : []
     );
   }
@@ -147,7 +149,7 @@ class ScribingQuestionForm extends React.Component {
     );
 
     return (
-      (this.props.data.is_loading) ? <LoadingIndicator /> :
+      (this.props.data.isLoading) ? <LoadingIndicator /> :
 
       <div>
         { this.renderErrorMessage() }
@@ -160,7 +162,7 @@ class ScribingQuestionForm extends React.Component {
                 required={false}
                 type={'text'}
                 placeholder={this.props.data.question.error && this.props.data.question.error.title}
-                is_loading={this.props.data.is_loading}
+                isLoading={this.props.data.isLoading}
                 value={this.props.formValues
                   && this.props.formValues.question_scribing
                   && this.props.formValues.question_scribing.title
@@ -171,7 +173,7 @@ class ScribingQuestionForm extends React.Component {
               <SummernoteField
                 label={this.props.intl.formatMessage(translations.descriptionFieldLabel)}
                 field={'description'}
-                is_loading={this.props.data.is_loading}
+                isLoading={this.props.data.isLoading}
               />
             </div>
             <div className={styles.staffCommentsInput}>
@@ -182,7 +184,7 @@ class ScribingQuestionForm extends React.Component {
                   && this.props.formValues.question_scribing
                   && this.props.formValues.question_scribing.staff_only_comments
                 }
-                is_loading={this.props.data.is_loading}
+                isLoading={this.props.data.isLoading}
               />
             </div>
             <div className={styles.skillsInput}>
@@ -191,7 +193,8 @@ class ScribingQuestionForm extends React.Component {
                 field={'skill_ids'}
                 value={skillsValues}
                 options={skillsOptions}
-                is_loading={this.props.data.is_loading}
+                isLoading={this.props.data.isLoading}
+                onSelectSkills={this.onSelectSkills}
               />
             </div>
             <div className={styles.maximumGradeInput}>
@@ -201,7 +204,7 @@ class ScribingQuestionForm extends React.Component {
                 required
                 validate={[required, lessThan1000, nonNegative]}
                 type={'number'}
-                is_loading={this.props.data.is_loading}
+                isLoading={this.props.data.isLoading}
                 value={ScribingQuestionForm.convertNull(
                   this.props.formValues
                   && this.props.formValues.question_scribing
@@ -217,7 +220,7 @@ class ScribingQuestionForm extends React.Component {
                   <FileUploadField
                     field={'attachment'}
                     label={this.props.intl.formatMessage(translations.chooseFileButton)}
-                    is_loading={this.props.data.is_loading}
+                    isLoading={this.props.data.isLoading}
                     validate={[required]}
                     fileName={fileName}
                   />
@@ -235,8 +238,8 @@ class ScribingQuestionForm extends React.Component {
             primary
             type="submit"
             onTouchTap={() => (this.props.submit())}
-            disabled={this.props.data.is_loading || submitting}
-            icon={this.props.data.is_submitting ? <i className="fa fa-spinner fa-lg fa-spin" /> : null}
+            disabled={this.props.data.isLoading || submitting}
+            icon={this.props.data.isSubmitting ? <i className="fa fa-spinner fa-lg fa-spin" /> : null}
           />
         </Form>
       </div>

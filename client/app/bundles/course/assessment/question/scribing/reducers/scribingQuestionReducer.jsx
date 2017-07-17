@@ -10,17 +10,15 @@ export const initialState = {
     weight: 0,
     skill_ids: [],
     skills: [],
-    published_assessment: false,
-    attempt_limit: null,
     attachment_reference: {
       name: '',
       path: '',
       updater_name: '',
     },
   },
-  is_loading: false,
-  is_submitting: false,
-  save_errors: undefined,
+  isLoading: false,
+  isSubmitting: false,
+  saveErrors: undefined,
   error: false,
 };
 
@@ -36,18 +34,18 @@ export default function scribingQuestionReducer(state = initialState, action) {
     case actionTypes.FETCH_SCRIBING_QUESTION_REQUEST:
       return {
         ...state,
-        is_loading: true,
-        is_submitting: false,
-        save_errors: undefined,
+        isLoading: true,
+        isSubmitting: false,
+        saveErrors: undefined,
         error: false,
       };
     case actionTypes.CREATE_SCRIBING_QUESTION_REQUEST:
     case actionTypes.UPDATE_SCRIBING_QUESTION_REQUEST: {
       return {
         ...state,
-        is_loading: false,
-        is_submitting: true,
-        save_errors: undefined,
+        isLoading: false,
+        isSubmitting: true,
+        saveErrors: undefined,
         error: false,
       };
     }
@@ -58,9 +56,9 @@ export default function scribingQuestionReducer(state = initialState, action) {
       return {
         ...state,
         question,
-        is_loading: false,
-        is_submitting: false,
-        save_errors: undefined,
+        isLoading: false,
+        isSubmitting: false,
+        saveErrors: undefined,
         error: false,
       };
     }
@@ -70,17 +68,17 @@ export default function scribingQuestionReducer(state = initialState, action) {
       redirectToAssessment(courseId, assessmentId);
       return {
         ...state,
-        is_loading: false,
-        is_submitting: true, // to provide transition to assessment page
-        save_errors: undefined,
+        isLoading: false,
+        isSubmitting: true, // to provide transition to assessment page
+        saveErrors: undefined,
         error: false,
       };
     }
     case actionTypes.FETCH_SCRIBING_QUESTION_FAILURE: {
       return {
         ...state,
-        is_loading: false,
-        is_submitting: false,
+        isLoading: false,
+        isSubmitting: false,
         error: true,
       };
     }
@@ -88,9 +86,9 @@ export default function scribingQuestionReducer(state = initialState, action) {
     case actionTypes.UPDATE_SCRIBING_QUESTION_FAILURE: {
       return {
         ...state,
-        is_loading: false,
-        is_submitting: false,
-        save_errors: action.save_errors,
+        isLoading: false,
+        isSubmitting: false,
+        saveErrors: action.saveErrors,
         error: true,
       };
     }

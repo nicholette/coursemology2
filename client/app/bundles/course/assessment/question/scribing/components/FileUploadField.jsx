@@ -17,7 +17,7 @@ const propTypes = {
   label: PropTypes.string.isRequired,
   fileName: PropTypes.string,
   validate: PropTypes.array,
-  is_loading: PropTypes.bool,
+  isLoading: PropTypes.bool,
 };
 
 const style = {
@@ -41,13 +41,13 @@ class FileUploadField extends Component {
   }
 
   render() {
-    const { field, label, validate, is_loading } = this.props;
+    const { field, label, validate, isLoading } = this.props;
 
     return (
       <Field
         name={questionNamePrefix + field}
         id={questionIdPrefix + field}
-        disabled={is_loading}
+        disabled={isLoading}
         validate={validate}
         component={props => (
           <div>
@@ -57,14 +57,14 @@ class FileUploadField extends Component {
               labelPosition="before"
               containerElement="label"
               primary
-              disabled={is_loading}
+              disabled={isLoading}
             >
               <input
                 id={questionIdPrefix + field}
                 type="file"
                 accept="image/gif, image/png, image/jpeg, image/pjpeg, application/pdf"
                 style={style.fileInputField}
-                disabled={is_loading}
+                disabled={isLoading}
                 onChange={
                   (e) => {
                     e.preventDefault();

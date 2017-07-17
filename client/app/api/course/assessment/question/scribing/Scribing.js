@@ -28,6 +28,31 @@ export default class ScribingsAPI extends BaseScribingAPI {
   }
 
   /**
+   * Helper method to generate FormData
+   *
+   * @param {object} question object to be converted
+   * @return {FormData}
+   */
+  static generateInnerFormData(question) {
+    const innerFormData = new FormData();
+
+    Object.keys(question).forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(question, key)) {
+        const value = question[key];
+        if (Array.isArray(value)) {
+          value.forEach((val) => {
+            innerFormData.append(`question_scribing[${key}][]`, val);
+          });
+        } else {
+          innerFormData.append(`question_scribing[${key}]`, value);
+        }
+      }
+    });
+
+    return innerFormData;
+  }
+
+  /**
    * Creates a Scribing question
    *
    * @param {object} scribingFields - params in the format of
@@ -43,13 +68,7 @@ export default class ScribingsAPI extends BaseScribingAPI {
         Accept: 'file_types',
       },
     };
-    const innerFormData = new FormData();
-
-    Object.keys(scribingFields.question_scribing).forEach((key) => {
-      if (Object.prototype.hasOwnProperty.call(scribingFields.question_scribing, key)) {
-        innerFormData.append(`question_scribing[${key}]`, scribingFields.question_scribing[key]);
-      }
-    });
+    const innerFormData = ScribingsAPI.generateInnerFormData(scribingFields.question_scribing);
 
     return this.getClient().post(this._getUrlPrefix(), innerFormData, config);
   }
@@ -71,13 +90,7 @@ export default class ScribingsAPI extends BaseScribingAPI {
         Accept: 'file_types',
       },
     };
-    const innerFormData = new FormData();
-
-    Object.keys(scribingFields.question_scribing).forEach((key) => {
-      if (Object.prototype.hasOwnProperty.call(scribingFields.question_scribing, key)) {
-        innerFormData.append(`question_scribing[${key}]`, scribingFields.question_scribing[key]);
-      }
-    });
+    const innerFormData = ScribingsAPI.generateInnerFormData(scribingFields.question_scribing);
 
     return this.getClient().patch(`${this._getUrlPrefix()}/${scribingId}`, innerFormData, config);
   }

@@ -79,4 +79,9 @@
   display: block;
   width: 100%;
   min-width: 100% !important;
+
+  label {
+    font-family: Roboto, sans-serif;
+    font-size: inherit;
+  }
 }

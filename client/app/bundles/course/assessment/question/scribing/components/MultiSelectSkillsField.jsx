@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Field } from 'redux-form';
 import ChipInput from 'lib/components/ChipInput';
@@ -8,10 +8,10 @@ import { skillShape } from '../propTypes';
 const propTypes = {
   label: PropTypes.string.isRequired,
   field: PropTypes.string.isRequired,
-  value: PropTypes.array,             //TODO: what is the shape of this?
+  value: PropTypes.arrayOf(skillShape),
   options: PropTypes.arrayOf(skillShape),
   error: PropTypes.string,
-  is_loading: PropTypes.bool,
+  isLoading: PropTypes.bool,
 };
 
 const styles = {
@@ -24,52 +24,51 @@ const styles = {
   },
 };
 
-export default class MultiSelectSkillsField extends Component {
-  render() {
-    const { label, field, value, options, error, is_loading } = this.props;
+const MultiSelectSkillsField = (props) => {
+  const { label, field, value, options, error, isLoading } = props;
+  return (
+    <div>
+      <Field
+        name={questionNamePrefix + field}
+        id={questionIdPrefix + field}
+        component={cpProps => (
+          <ChipInput
+            id={questionIdPrefix + field}
+            value={cpProps.input.value || []}
+            dataSource={options}
+            dataSourceConfig={{ value: 'id', text: 'title' }}
+            onRequestAdd={(addedChip) => {
+              cpProps.input.onChange([...cpProps.input.value, addedChip]);
+            }}
+            onRequestDelete={(deletedChip) => {
+              const values = (cpProps.input.value || []).filter(v => v.id !== deletedChip);
+              cpProps.input.onChange(values);
+            }}
+            floatingLabelText={label}
+            floatingLabelFixed
+            openOnFocus
+            fullWidth
+            disabled={isLoading}
+            errorText={error}
+            menuStyle={styles.menuStyle}
+          />
+        )}
+      />
 
-    return (
-      <div>
-        <Field
-          name={questionNamePrefix + field}
-          id={questionIdPrefix + field}
-          component={props => (
-            <ChipInput
-              id={questionIdPrefix + field}
-              value={props.input.value || []}
-              dataSource={options}
-              dataSourceConfig={{ value: 'id', text: 'title' }}
-              onRequestAdd={(addedChip) => {
-                props.input.onChange([...props.input.value, addedChip]);
-              }}
-              onRequestDelete={(deletedChip) => {
-                const values = (props.input.value || []).filter(v => v.id !== deletedChip);
-                props.input.onChange(values);
-              }}
-              floatingLabelText={label}
-              floatingLabelFixed
-              openOnFocus
-              fullWidth
-              disabled={is_loading}
-              errorText={error}
-              menuStyle={styles.menuStyle}
-            />
-          )}
-        />
-
-        <select
-          name={`${questionNamePrefix + field}[]`}
-          multiple
-          value={value.map(opt => opt.id)}
-          style={styles.skillChip}
-          disabled={is_loading}
-          onChange={(e) => { this.onSelectSkills(parseInt(e.target.value, 10) || e.target.value); }}
-        >
-          { options.map(opt => <option value={opt.id} key={opt.id}>{opt.title}</option>) }
-        </select>
-      </div>
-    );
-  }
-}
+      <select
+        name={`${questionNamePrefix + field}[]`}
+        multiple
+        value={value.map(opt => opt.id)}
+        style={styles.skillChip}
+        disabled={isLoading}
+        onChange={_ => _}
+      >
+        { options.map(opt => <option value={opt.id} key={opt.id}>{opt.title}</option>) }
+      </select>
+    </div>
+  );
+};
 
 MultiSelectSkillsField.propTypes = propTypes;
+
+export default MultiSelectSkillsField;

@@ -92,12 +92,11 @@ class ScribingQuestionForm extends React.Component {
 
   renderExistingAttachmentLabel() {
     return (
-      this.props.data.question.attachment_reference.name ?
-        <div className={styles.row}>
-          <label htmlFor="question_scribing_attachment">
-            File uploaded: {this.props.data.question.attachment_reference.name}
-          </label>
-        </div> : []
+      <div className={styles.row}>
+        <label htmlFor="question_scribing_attachment">
+          File uploaded: {this.props.data.question.attachment_reference.name}
+        </label>
+      </div> : []
     );
   }
 
@@ -178,10 +177,6 @@ class ScribingQuestionForm extends React.Component {
               <SummernoteField
                 label={this.props.intl.formatMessage(translations.staffOnlyCommentsFieldLabel)}
                 field={'staff_only_comments'}
-                value={this.props.formValues
-                  && this.props.formValues.question_scribing
-                  && this.props.formValues.question_scribing.staff_only_comments
-                }
                 isLoading={this.props.data.isLoading}
               />
             </div>
@@ -212,7 +207,8 @@ class ScribingQuestionForm extends React.Component {
             </div>
             <div className={styles.fileInputDiv}>
               {
-                this.props.data.question.attachment_reference.name ?
+                this.props.data.question.attachment_reference
+                  && this.props.data.question.attachment_reference.name ?
                 this.renderExistingAttachmentLabel() :
                 <div className={styles.row} >
                   <FileUploadField

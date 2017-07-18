@@ -1,6 +1,7 @@
-import BaseScribingAPI from './Base';
+import BaseAPI from '../../../../Base';
+import { getCourseId, getAssessmentId, getScribingId } from 'lib/helpers/url-helpers';
 
-export default class ScribingsAPI extends BaseScribingAPI {
+export default class ScribingsAPI extends BaseAPI {
   /**
    * scribing_question = {
   *   id: number,
@@ -43,23 +44,23 @@ export default class ScribingsAPI extends BaseScribingAPI {
    * @param {object} question object to be converted
    * @return {FormData}
    */
-  static generateInnerFormData(question) {
-    const innerFormData = new FormData();
+  static generateFormData(question) {
+    const formData = new FormData();
 
     Object.keys(question).forEach((key) => {
       if (Object.prototype.hasOwnProperty.call(question, key)) {
         const value = question[key];
         if (Array.isArray(value)) {
           value.forEach((val) => {
-            innerFormData.append(`question_scribing[${key}][]`, val);
+            formData.append(`question_scribing[${key}][]`, val);
           });
         } else {
-          innerFormData.append(`question_scribing[${key}]`, value);
+          formData.append(`question_scribing[${key}]`, value);
         }
       }
     });
 
-    return innerFormData;
+    return formData;
   }
 
   /**
@@ -78,9 +79,9 @@ export default class ScribingsAPI extends BaseScribingAPI {
         Accept: 'file_types',
       },
     };
-    const innerFormData = ScribingsAPI.generateInnerFormData(scribingFields.question_scribing);
+    const formData = ScribingsAPI.generateFormData(scribingFields.question_scribing);
 
-    return this.getClient().post(this._getUrlPrefix(), innerFormData, config);
+    return this.getClient().post(this._getUrlPrefix(), formData, config);
   }
 
   /**
@@ -100,9 +101,9 @@ export default class ScribingsAPI extends BaseScribingAPI {
         Accept: 'file_types',
       },
     };
-    const innerFormData = ScribingsAPI.generateInnerFormData(scribingFields.question_scribing);
+    const formData = ScribingsAPI.generateFormData(scribingFields.question_scribing);
 
-    return this.getClient().patch(`${this._getUrlPrefix()}/${scribingId}`, innerFormData, config);
+    return this.getClient().patch(`${this._getUrlPrefix()}/${scribingId}`, formData, config);
   }
 
   /**
@@ -118,6 +119,6 @@ export default class ScribingsAPI extends BaseScribingAPI {
   }
 
   _getUrlPrefix() {
-    return `/courses/${this.getCourseId()}/assessments/${this.getAssessmentId()}/question/scribing`;
+    return `/courses/${getCourseId()}/assessments/${getAssessmentId()}/question/scribing`;
   }
 }

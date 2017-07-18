@@ -1,3 +1,5 @@
+$color-red: #f44336;
+
 .inputContainer {
   display: flex;
   flex-flow: row wrap;
@@ -17,8 +19,8 @@
 }
 
 .fileLabelError {
+  color: $color-red;
   display: inline-block;
-  color: #f44336;
 }
 
 .fileInputField {
@@ -26,8 +28,8 @@
 }
 
 .skillMenu {
-  maxHeight: 80vh;
-  overflowY: scroll;
+  max-height: 80vh;
+  overflow-y: scroll;
 }
 
 .skillOption {
@@ -52,8 +54,8 @@
 }
 
 .fileInputButton {
-  display: none;
   cursor: pointer;
+  display: none;
   margin-right: 1em;
   margin-top: 0.5em;
 }
@@ -65,10 +67,10 @@
 
 .fileInputDiv {
   display: block;
-  width: 100%;
-  min-width: 100% !important;
   margin-bottom: 1em;
   margin-top: 1em;
+  min-width: 100%;
+  width: 100%;
 }
 
 .fileInput {
@@ -77,8 +79,8 @@
 
 .row {
   display: block;
+  min-width: 100%;
   width: 100%;
-  min-width: 100% !important;
 
   label {
     font-family: Roboto, sans-serif;

@@ -4,6 +4,11 @@ import { getCourseId, getAssessmentId, getScribingId } from 'lib/helpers/url-hel
 import { submit, SubmissionError } from 'redux-form';
 import actionTypes, { formNames } from '../constants';
 
+// Helper function to redirect to assessment main page
+function redirectToAssessment() {
+  window.location.href = `/courses/${getCourseId()}/assessments/${getAssessmentId()}`;
+}
+
 export function submitForm() {
   return (dispatch) => {
     dispatch(submit(formNames.SCRIBING_QUESTION));
@@ -35,7 +40,7 @@ export function fetchScribingQuestion(scribingId) {
     return CourseAPI.question.scribing.scribings.fetch(scribingId)
       .then((response) => {
         dispatch({
-          scribingId: CourseAPI.question.scribing.scribings.getScribingId(),
+          scribingId: getScribingId(),
           type: actionTypes.FETCH_SCRIBING_QUESTION_SUCCESS,
           data: response.data,
         });
@@ -92,8 +97,8 @@ export function createScribingQuestion(fields) {
           type: actionTypes.CREATE_SCRIBING_QUESTION_SUCCESS,
           question: response.data,
           courseId: getCourseId(),
-          assessmentId: getAssessmentId(),
         });
+        redirectToAssessment();
       })
       .catch((error) => {
         dispatch({
@@ -114,9 +119,8 @@ export function updateScribingQuestion(questionId, fields) {
         scribingId: getScribingId(),
         type: actionTypes.UPDATE_SCRIBING_QUESTION_SUCCESS,
         question: response.data,
-        courseId: getCourseId(),
-        assessmentId: getAssessmentId(),
       });
+      redirectToAssessment();
     })
     .catch((error) => {
       dispatch({
@@ -133,7 +137,7 @@ export function deleteScribingQuestion(question) {
     return CourseAPI.question.scribing.scribings.delete(question.id)
       .then(() => {
         dispatch({
-          scribingId: CourseAPI.question.scribing.scribings.getScribingId(),
+          scribingId: getScribingId(),
           questionId: question.id,
           type: actionTypes.DELETE_SCRIBING_QUESTION_SUCCESS,
         });

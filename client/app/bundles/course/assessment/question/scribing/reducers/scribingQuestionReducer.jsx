@@ -10,22 +10,13 @@ export const initialState = {
     weight: 0,
     skill_ids: [],
     skills: [],
-    attachment_reference: {
-      name: '',
-      path: '',
-      updater_name: '',
-    },
+    attachment_reference: {},
   },
   isLoading: false,
   isSubmitting: false,
   saveErrors: undefined,
   error: false,
 };
-
-// Helper function to redirect to assessment main page
-function redirectToAssessment(courseId, assessmentId) {
-  window.location.href = `/courses/${courseId}/assessments/${assessmentId}`;
-}
 
 export default function scribingQuestionReducer(state = initialState, action) {
   const { type } = action;
@@ -75,8 +66,6 @@ export default function scribingQuestionReducer(state = initialState, action) {
     }
     case actionTypes.CREATE_SCRIBING_QUESTION_SUCCESS:
     case actionTypes.UPDATE_SCRIBING_QUESTION_SUCCESS: {
-      const { courseId, assessmentId } = action;
-      redirectToAssessment(courseId, assessmentId);
       return {
         ...state,
         isLoading: false,

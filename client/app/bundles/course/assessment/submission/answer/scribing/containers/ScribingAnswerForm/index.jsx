@@ -5,6 +5,7 @@ import translations from './ScribingAnswerForm.intl';
 
 import FontIcon from 'material-ui/FontIcon';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
+import LoadingIndicator from 'lib/components/LoadingIndicator';
 
 import SavingIndicator from '../../components/SavingIndicator';
 import ToolDropdown from '../../components/ToolDropdown';
@@ -143,14 +144,17 @@ class ScribingAnswerForm extends React.Component {
 
   shouldComponentUpdate(nextProps) {
     // Don't update until canvas is ready
-    if (!this.props.scribingAnswer.is_canvas_loaded && 
-        this.props.scribingAnswer.answer.image_path !==
-        nextProps.scribingAnswer.answer.image_path) {
-        this.initializeCanvas(nextProps.scribingAnswer.answer.image_path);
-      return false;
+    if (!this.props.scribingAnswer.is_canvas_loaded
+        && nextProps.scribingAnswer.answer.answer_id
+        && nextProps.scribingAnswer.answer.image_path 
+      ) {
+        this.initializeCanvas(
+          nextProps.scribingAnswer.answer.answer_id,
+          nextProps.scribingAnswer.answer.image_path);
+    } else if (this.props.scribingAnswer.is_canvas_loaded) {
+      this.updateScribbles();
     }
-    this.updateScribbles();
-    return nextProps.scribingAnswer.is_canvas_loaded;
+    return true;
   }
 
   // Toolbar Event handlers
@@ -536,9 +540,8 @@ class ScribingAnswerForm extends React.Component {
     }
   }
 
-  initializeCanvas(imagePath) {
+  initializeCanvas(answerId, imagePath) {
     const _self = this;
-    const answerId = this.props.scribingAnswer.answer.answer_id;
     const imageUrl = window.location.origin + '\\' + imagePath;
     const image = new Image();
     image.src = imageUrl;
@@ -835,11 +838,13 @@ class ScribingAnswerForm extends React.Component {
 
   render() {
     const answerId = this.props.scribingAnswer.answer.answer_id;
-    return (
+    const isCanvasLoaded = this.props.scribingAnswer.is_canvas_loaded;
+    return (answerId ? 
       <div style={styles.canvas_div}>
         { this.renderToolBar() }
+        { !isCanvasLoaded ? <LoadingIndicator /> : null }
         <canvas style={styles.canvas} id={`canvas-${answerId}`} ref="canvas" />
-      </div>
+      </div> : null
     );
   }
 }

@@ -293,6 +293,7 @@ class ScribingAnswerForm extends React.Component {
       x: this.canvas.height / 2,
       y: this.canvas.width / 2,
     }, newZoom);
+    this.canvas.trigger('mouse:move', {'isForced': true});
   }
 
   onClickDelete = () => {
@@ -367,8 +368,9 @@ class ScribingAnswerForm extends React.Component {
       var newLeft = this.viewportLeft + deltaLeft;
       var newTop = this.viewportTop + deltaTop;
       tryPan(newLeft, newTop);
-    // } else if (options['isForced']) {
-    //   tryPan(this.canvas.viewportTransform[4], this.canvas.viewportTransform[5]);
+    } else if (options['isForced']) {
+      // Facilitates zooming out
+      tryPan(this.canvas.viewportTransform[4], this.canvas.viewportTransform[5]);
     }
   }
 

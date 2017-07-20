@@ -464,6 +464,27 @@ class ScribingAnswerForm extends React.Component {
     }
   }
 
+  // Limit moving of objects to within the canvas
+  onObjectMovingCanvas = (options) => {
+    var obj = options.target;
+     // if object is too big ignore
+    if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
+        return;
+    }        
+    obj.setCoords();
+    // top-left  corner
+    if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
+        obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
+        obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
+    }
+    // bot-right corner
+    if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
+        obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
+        obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
+    }
+  }
+
+
   // Helpers
 
   // Function Helpers
@@ -607,6 +628,7 @@ class ScribingAnswerForm extends React.Component {
       _self.canvas.on('mouse:down', this.onMouseDownCanvas);
       _self.canvas.on('mouse:move', this.onMouseMoveCanvas);
       _self.canvas.on('mouse:up', this.onMouseUpCanvas);
+      _self.canvas.observe('object:moving', this.onObjectMovingCanvas);
 
       _self.initializeScribbles();
 

@@ -151,6 +151,8 @@ class ScribingAnswerForm extends React.Component {
   shouldComponentUpdate(nextProps) {
     // Don't update until canvas is ready
     if (!this.props.scribingAnswer.is_canvas_loaded
+        // Don't allow the canvas to initialize twice
+        && !nextProps.scribingAnswer.is_canvas_loaded
         && nextProps.scribingAnswer.answer.answer_id
         && nextProps.scribingAnswer.answer.image_path 
       ) {

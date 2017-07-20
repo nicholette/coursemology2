@@ -18,6 +18,12 @@ import ShapePopover from '../../components/popovers/ShapePopover';
 import { answerShape } from '../../propTypes';
 import { tools, shapes, toolColor, toolThickness, toolLineStyle, popoverTypes } from '../../constants';
 
+/* NOTE: Denormalizing and normalizing scribble code are brought over
+  * from Coursemology v1. They are not needed for the scribing
+  * question to work but it is required to support scribing questions
+  * that were migrated over.
+*/
+
 const propTypes = {
   actions: React.PropTypes.shape({
     setCanvasLoaded: PropTypes.func.isRequired,
@@ -473,6 +479,32 @@ class ScribingAnswerForm extends React.Component {
     this.initializeScribbles();
   }
 
+  // Legacy code needed to support migrated v1 scribing questions.
+  // This code scales/unscales the scribbles by a standard number.
+  normaliseScribble(scribble, isDenormalise) {
+    const STANDARD = 1000;
+    let factor;
+
+    if (isDenormalise) {
+      factor = this.canvas.getWidth() / STANDARD;
+    } else {
+      factor = STANDARD / this.canvas.getWidth();
+    }
+
+    scribble.set({
+      scaleX: scribble.scaleX * factor,
+      scaleY: scribble.scaleY * factor,
+      left: scribble.left  * factor,
+      top: scribble.top  * factor
+    }); 
+
+    return scribble;
+  }
+
+  denormaliseScribble(scribble) {
+    return this.normaliseScribble(scribble, true);
+  }
+
   initializeScribbles() {
     const { scribbles, user_id } = this.props.scribingAnswer.answer;
     this.layers = [];
@@ -488,6 +520,7 @@ class ScribingAnswerForm extends React.Component {
           switch (objects[i].type) {
             case 'path': {
               klass.fromObject(objects[i], (obj)=>{
+                this.denormaliseScribble(obj);
                 this.scaleScribble(obj);
                 fabricObjs.push(obj);
               });
@@ -498,6 +531,7 @@ class ScribingAnswerForm extends React.Component {
             case 'rect':
             case 'ellipse': {
               let obj = klass.fromObject(objects[i]);
+              this.denormaliseScribble(obj);
               this.scaleScribble(obj);
               fabricObjs.push(obj);
               break;
@@ -622,11 +656,17 @@ class ScribingAnswerForm extends React.Component {
 
     // Only save rescaled user scribings
     const objects = this.canvas._objects;
-    objects.forEach((obj) => (this.rescaleScribble(obj)));
+    objects.forEach((obj) => {
+      this.normaliseScribble(obj);
+      this.rescaleScribble(obj);
+    });
     const json = JSON.stringify(objects);
 
     // Scale back user scribings
-    objects.forEach((obj) => (this.scaleScribble(obj)));
+    objects.forEach((obj) => {
+      this.denormaliseScribble(obj);
+      this.scaleScribble(obj);
+    });
 
     // Add back non-user scribings according canvas state
     this.layers.forEach((layer) => (layer.showLayer(layer.showLayer)));

@@ -18,7 +18,7 @@ import ShapePopover from '../../components/popovers/ShapePopover';
 import { answerShape } from '../../propTypes';
 import { tools, shapes, toolColor, toolThickness, toolLineStyle, popoverTypes } from '../../constants';
 
-/* NOTE: Denormalizing and normalizing scribble code are brought over
+/* NOTE: Denormalizing and normalizing scribble code is brought over
   * from Coursemology v1. They are not needed for the scribing
   * question to work but it is required to support scribing questions
   * that were migrated over.
@@ -533,6 +533,7 @@ class ScribingAnswerForm extends React.Component {
   initializeScribbles() {
     const { scribbles, user_id } = this.props.scribingAnswer.answer;
     this.layers = [];
+    let userScribble = [];
 
     if (scribbles) {
       scribbles.forEach((scribble) => {
@@ -569,17 +570,20 @@ class ScribingAnswerForm extends React.Component {
         // Layer for other users' scribble
         // Disables scribble selection
         if (scribble.creator_id !== user_id) {
-          const showLayer = (isShown) => {
-            const scribbleGroup = new fabric.Group(fabricObjs);
-            scribbleGroup.selectable = false;
-            if (isShown && !this.canvas.contains(scribbleGroup)) {
-              this.canvas.add(scribbleGroup);
-            } else if (!isShown && this.canvas.contains(scribbleGroup)) {
-              this.canvas.remove(scribbleGroup);
-            }
-            this.canvas.renderAll();
-          }
+          const scribbleGroup = new fabric.Group(fabricObjs);
+          scribbleGroup.selectable = false;
+          console.log(scribbleGroup);
 
+          const showLayer = (isShown) => {
+            // if (isShown && !this.canvas.contains(scribbleGroup)) {
+            //   this.canvas.add(scribbleGroup);
+            // } else if (!isShown && this.canvas.contains(scribbleGroup)) {
+            //   this.canvas.remove(scribbleGroup);
+            // }
+            scribbleGroup._objects.forEach((obj) => (obj.visible = isShown));
+            this.canvas.renderAll();
+            // scribbleGroup.visible = isShown;
+          }
           // Populate layers list
           const newScribble = {
             ...scribble,
@@ -587,15 +591,23 @@ class ScribingAnswerForm extends React.Component {
             showLayer,
           }
           this.layers = [...this.layers, newScribble];
+          this.canvas.add(scribbleGroup);
 
-        // Layer for current user's scribble
-        // Enables scribble selection
         } else {
-          fabricObjs.map((obj) => {
-            this.canvas.add(obj)
-          });
+          // Hold user's scribble until all the other 
+          // user's scribble layers have been added
+          // so that they won't block the interaction with 
+          // the user's scribbles
+          console.log('is own user');
+          userScribble = fabricObjs;
         }
       })
+
+      // Layer for current user's scribble
+      // Enables scribble selection
+      userScribble.map((obj) => {
+        this.canvas.add(obj)
+      });
     }
   }
 
@@ -618,7 +630,11 @@ class ScribingAnswerForm extends React.Component {
       _self.refs.canvas.height = height;
 
       // Takes in canvas's id for initialization
-      const canvas = new fabric.Canvas(`canvas-${answerId}`, { width, height });
+      const canvas = new fabric.Canvas(`canvas-${answerId}`, {
+        width,
+        height,
+        preserveObjectStacking: true
+      });
 
       const fabricImage = new fabric.Image(
         image,
@@ -695,7 +711,7 @@ class ScribingAnswerForm extends React.Component {
     });
 
     // Add back non-user scribings according canvas state
-    this.layers.forEach((layer) => (layer.showLayer(layer.showLayer)));
+    this.layers.forEach((layer) => (layer.showLayer(layer.isDisplayed)));
 
     return '{"objects":'+ json +'}';
   }
@@ -869,10 +885,8 @@ class ScribingAnswerForm extends React.Component {
             onRequestClose={() => (this.onRequestClosePopover(popoverTypes.LAYER))}
             layers={this.layers}
             onTouchTapLayer={(layer) => {
-              const layersClone = _.cloneDeep(this.layers);
-              const temp = _.find(layersClone, {creator_id: layer.creator_id});
+              const temp = _.find(this.layers, {creator_id: layer.creator_id});
               temp.isDisplayed = !temp.isDisplayed;
-              this.layers = layersClone;
               this.updateScribbles();
               this.forceUpdate();
             }}

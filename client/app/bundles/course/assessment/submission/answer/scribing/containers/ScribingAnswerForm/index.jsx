@@ -887,7 +887,8 @@ class ScribingAnswerForm extends React.Component {
           />
         </ToolbarGroup>
         <ToolbarGroup>
-          <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ? {color: `black`} : {}}
+          <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ?
+              {color: `black`, ...styles.tool} : styles.tool}
             onClick={this.onClickSelectionMode}/>
           <LayersComponent
             onTouchTap={(event) => (this.onTouchTapPopover(event, popoverTypes.LAYER))}

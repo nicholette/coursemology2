@@ -68,7 +68,6 @@ export default class ToolDropdown extends Component {
         <div style={style.innerTool} onClick={onClickIcon}>
           { this.renderIcon() }
           { this.renderColorBar() }
-          <div style={style.colorBar}/>
         </div>
         <div style={style.innerTool}>
           <FontIcon className="fa fa-chevron-down" style={style.chevron} onTouchTap={onTouchTapChevron}/>

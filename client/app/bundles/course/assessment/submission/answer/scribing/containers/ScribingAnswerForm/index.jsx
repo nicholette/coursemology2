@@ -245,7 +245,7 @@ class ScribingAnswerForm extends React.Component {
   onClickTypingMode = () => {
     this.canvas.isDrawingMode = false;
     this.canvas.defaultCursor = 'pointer';
-    this.disableObjectSelection();
+    this.enableTextSelection();
     this.setState({selectedTool: tools.TYPE});
   }
 
@@ -497,16 +497,23 @@ class ScribingAnswerForm extends React.Component {
   // Function Helpers
 
   disableObjectSelection() {
-    this.canvas.selection = false;
-    this.canvas.forEachObject(function(o) {
-      o.selectable = false;
+    this.canvas.forEachObject(function(object) {
+      object.selectable = false;
     });
   }
 
+  // This method only enable selection for interactive texts
+  enableTextSelection() {
+    this.canvas.clear();
+    this.initializeScribbles();
+    this.canvas.forEachObject(function(object) {
+      object.selectable = (object.type === 'i-text');
+    });
+  }
+
+  // This method clears the selection-disabled scribbles
+  // and reloads them to enable selection again
   enableObjectSelection() {
-    // this clears the selection-disabled scribbles
-    // and reloads them to enable selection again
-    this.canvas.selection = true;
     this.canvas.clear();
     this.initializeScribbles();
   }

@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import CourseAPI from 'api/course';
+import { SubmissionError } from 'redux-form';
 import { getCourseId, getAssessmentId, getScribingId } from 'lib/helpers/url-helpers';
 import { actionTypes } from '../constants';
 

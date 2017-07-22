@@ -41,6 +41,7 @@ const styles = {
     width: `20px`,
     display: `inline-block`,
     margin: `15px 0px 0px 50px`,
+    border: 'black 1px solid',
   },
   toolDropdowns: {
     padding: `10px`,

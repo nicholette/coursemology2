@@ -244,6 +244,7 @@ class ScribingAnswerForm extends React.Component {
 
   onClickTypingMode = () => {
     this.canvas.isDrawingMode = false;
+    this.canvas.defaultCursor = 'pointer';
     this.disableObjectSelection();
     this.setState({selectedTool: tools.TYPE});
   }
@@ -257,24 +258,28 @@ class ScribingAnswerForm extends React.Component {
 
   onClickLineMode = () => {
     this.canvas.isDrawingMode = false;
+    this.canvas.defaultCursor = 'crosshair';
     this.disableObjectSelection();
     this.setState({selectedTool: tools.LINE})
   }
 
   onClickShapeMode = () => {
     this.canvas.isDrawingMode = false;
+    this.canvas.defaultCursor = 'crosshair';
     this.disableObjectSelection();
     this.setState({selectedTool: tools.SHAPE});
   }
 
   onClickSelectionMode = () => {
     this.canvas.isDrawingMode = false;
+    this.canvas.defaultCursor = 'pointer';
     this.enableObjectSelection();
     this.setState({selectedTool: tools.SELECT})
   }
 
   onClickPanMode = () => {
     this.canvas.isDrawingMode = false;
+    this.canvas.defaultCursor = 'move';
     this.disableObjectSelection();
     this.setState({selectedTool: tools.PAN})
   }
@@ -492,6 +497,7 @@ class ScribingAnswerForm extends React.Component {
   // Function Helpers
 
   disableObjectSelection() {
+    this.canvas.selection = false;
     this.canvas.forEachObject(function(o) {
       o.selectable = false;
     });
@@ -500,6 +506,7 @@ class ScribingAnswerForm extends React.Component {
   enableObjectSelection() {
     // this clears the selection-disabled scribbles
     // and reloads them to enable selection again
+    this.canvas.selection = true;
     this.canvas.clear();
     this.initializeScribbles();
   }
@@ -572,7 +579,6 @@ class ScribingAnswerForm extends React.Component {
         if (scribble.creator_id !== user_id) {
           const scribbleGroup = new fabric.Group(fabricObjs);
           scribbleGroup.selectable = false;
-          console.log(scribbleGroup);
 
           const showLayer = (isShown) => {
             // if (isShown && !this.canvas.contains(scribbleGroup)) {
@@ -598,7 +604,6 @@ class ScribingAnswerForm extends React.Component {
           // user's scribble layers have been added
           // so that they won't block the interaction with 
           // the user's scribbles
-          console.log('is own user');
           userScribble = fabricObjs;
         }
       })
@@ -613,7 +618,7 @@ class ScribingAnswerForm extends React.Component {
 
   initializeCanvas(answerId, imagePath) {
     const _self = this;
-    const imageUrl = window.location.origin + '\\' + imagePath;
+    const imageUrl = 'https://coursemology.org/' + '\\' + imagePath;
     const image = new Image();
     image.src = imageUrl;
 

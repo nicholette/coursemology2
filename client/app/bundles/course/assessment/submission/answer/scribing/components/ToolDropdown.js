@@ -1,8 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import FontIcon from 'material-ui/FontIcon';
+import MaterialTooltip from 'material-ui/internal/Tooltip'
 
 const propTypes = {
   toolType: PropTypes.string.isRequired,
+  tooltip: PropTypes.string,
+  showTooltip: PropTypes.bool,
   currentTool: PropTypes.string.isRequired,
   onClick: PropTypes.func,
   onClickIcon: PropTypes.func,
@@ -35,7 +38,6 @@ const style = {
 }
 
 export default class ToolDropdown extends Component {
-
   renderIcon() {
     const { iconClassname, currentTool, toolType, iconComponent } = this.props;
 
@@ -61,20 +63,35 @@ export default class ToolDropdown extends Component {
 
   render() {
     const { onClick, onClickIcon, onTouchTapChevron, 
-            colorBar, iconComponent, popoverComponent } = this.props;
+            colorBar, iconComponent, popoverComponent,
+            tooltip, showTooltip, onMouseEnter, onMouseLeave } = this.props;
 
     return (
-      <div style={style.tool} onClick={onClick}>
+      <div
+        style={style.tool}
+        onClick={onClick}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      >
         <div style={style.innerTool} onClick={onClickIcon}>
           { this.renderIcon() }
+          <MaterialTooltip
+            horizontalPosition={'center'}
+            label={tooltip}
+            show={showTooltip}
+            verticalPosition={'top'}
+          />
           { this.renderColorBar() }
         </div>
         <div style={style.innerTool}>
-          <FontIcon className="fa fa-chevron-down" style={style.chevron} onTouchTap={onTouchTapChevron}/>
+          <FontIcon 
+            className="fa fa-chevron-down"
+            style={style.chevron}
+            onTouchTap={onTouchTapChevron}
+          />
         </div>
 
         { popoverComponent() }
-
       </div>
     );
   }

@@ -5,6 +5,7 @@ import translations from './ScribingAnswerForm.intl';
 
 import FontIcon from 'material-ui/FontIcon';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
+import MaterialTooltip from 'material-ui/internal/Tooltip'
 import LoadingIndicator from 'lib/components/LoadingIndicator';
 
 import SavingIndicator from '../../components/SavingIndicator';
@@ -84,6 +85,7 @@ class ScribingAnswerForm extends React.Component {
     this.state = {
       selectedTool: tools.SELECT,
       selectedShape: shapes.RECT,
+      hoveredToolTip: '',
       imageWidth: 0,
       imageHeight: 0,
       fontFamily: 'Arial',
@@ -771,12 +773,16 @@ class ScribingAnswerForm extends React.Component {
         <ToolbarGroup>
           <ToolDropdown
             toolType={tools.TYPE}
+            tooltip="Text"
+            showTooltip={this.state.hoveredToolTip === tools.TYPE}
             currentTool={this.state.selectedTool}
             onClick={this.onClickTypingMode}
             onClickIcon={this.addText}
             colorBar={this.state.colors[toolColor.TYPE]}
             onTouchTapChevron={(event) => (this.onTouchTapPopover(event, popoverTypes.TYPE))}
             iconClassname="fa fa-font"
+            onMouseEnter={()=>(this.setState({hoveredToolTip: tools.TYPE}))}
+            onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
             popoverComponent={()=>(
               <TypePopover
                 open={this.state.popovers.TYPE}
@@ -796,11 +802,15 @@ class ScribingAnswerForm extends React.Component {
           />
           <ToolDropdown
             toolType={tools.DRAW}
+            tooltip="Pencil"
+            showTooltip={this.state.hoveredToolTip === tools.DRAW}
             currentTool={this.state.selectedTool}
             onClick={this.onClickDrawingMode}
             colorBar={this.state.colors[toolColor.DRAW]}
             onTouchTapChevron={(event) => (this.onTouchTapPopover(event, popoverTypes.DRAW))}
             iconClassname="fa fa-pencil"
+            onMouseEnter={()=>(this.setState({hoveredToolTip: tools.DRAW}))}
+            onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
             popoverComponent={()=>(
               <DrawPopover
                 open={this.state.popovers.DRAW}
@@ -819,11 +829,15 @@ class ScribingAnswerForm extends React.Component {
           />
           <ToolDropdown
             toolType={tools.LINE}
+            tooltip="Line"
+            showTooltip={this.state.hoveredToolTip === tools.LINE}
             currentTool={this.state.selectedTool}
             onClick={this.onClickLineMode}
             colorBar={this.state.colors[toolColor.LINE]}
             onTouchTapChevron={(event) => (this.onTouchTapPopover(event, popoverTypes.LINE))}
             iconComponent={()=>(<div style={lineToolStyle}/>)}
+            onMouseEnter={()=>(this.setState({hoveredToolTip: tools.LINE}))}
+            onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
             popoverComponent={()=>(
               <LinePopover
                 lineToolType={toolThickness.LINE}
@@ -845,8 +859,12 @@ class ScribingAnswerForm extends React.Component {
           />
           <ToolDropdown
             toolType={tools.SHAPE}
+            tooltip="Shape"
+            showTooltip={this.state.hoveredToolTip === tools.SHAPE}
             currentTool={this.state.selectedTool}
             onClick={this.onClickShapeMode}
+            onMouseEnter={()=>(this.setState({hoveredToolTip: tools.SHAPE}))}
+            onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
             colorBarComponent={()=>(
               <div style={
                 {
@@ -887,9 +905,20 @@ class ScribingAnswerForm extends React.Component {
           />
         </ToolbarGroup>
         <ToolbarGroup>
-          <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ?
-              {color: `black`, ...styles.tool} : styles.tool}
-            onClick={this.onClickSelectionMode}/>
+          <div
+            onMouseEnter={()=>(this.setState({hoveredToolTip: tools.SELECT}))}
+            onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
+          > 
+            <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ?
+                {color: `black`, ...styles.tool} : styles.tool}
+              onClick={this.onClickSelectionMode}/>
+            <MaterialTooltip
+              horizontalPosition={'center'}
+              label="Select"
+              show={this.state.hoveredToolTip === tools.SELECT}
+              verticalPosition={'top'}
+            />
+          </div>
           <LayersComponent
             onTouchTap={(event) => (this.onTouchTapPopover(event, popoverTypes.LAYER))}
             disabled={this.layers && this.layers.length === 0}
@@ -906,16 +935,72 @@ class ScribingAnswerForm extends React.Component {
           />
         </ToolbarGroup>
         <ToolbarGroup>
-          <FontIcon className="fa fa-arrows" style={this.state.selectedTool === tools.PAN ? {color: `black`} : {}}
-            onClick={this.onClickPanMode} />
-          <FontIcon className="fa fa-search-plus" style={this.state.selectedTool === tools.ZOOM_IN ? {color: `black`} : {}}
-            onClick={this.onClickZoomIn} />
-          <FontIcon className="fa fa-search-minus" style={this.state.selectedTool === tools.ZOOM_OUT ? {color: `black`} : {}}
-            onClick={this.onClickZoomOut} />
+          <div style={styles.tool}>
+            <FontIcon 
+              className="fa fa-arrows"
+              style={this.state.selectedTool === tools.PAN ?
+                {color: `black`} :
+                {color: `rgba(0, 0, 0, 0.4)`}}
+              onClick={this.onClickPanMode}
+              onMouseEnter={()=>(this.setState({hoveredToolTip: tools.PAN}))}
+              onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
+            />
+            <MaterialTooltip
+              horizontalPosition={'center'}
+              label="Pan"
+              show={this.state.hoveredToolTip === tools.PAN}
+              verticalPosition={'top'}
+            />
+          </div>
+
+          <div style={styles.tool}>
+            <FontIcon 
+              className="fa fa-search-plus"
+              style={{color: `rgba(0, 0, 0, 0.4)`}}
+              onClick={this.onClickZoomIn}
+              onMouseEnter={()=>(this.setState({hoveredToolTip: tools.ZOOM_IN}))}
+              onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
+            />
+            <MaterialTooltip
+              horizontalPosition={'center'}
+              label="Zoom in"
+              show={this.state.hoveredToolTip === tools.ZOOM_IN}
+              verticalPosition={'top'}
+            />
+          </div>
+
+          <div style={styles.tool}>
+            <FontIcon
+              className="fa fa-search-minus"
+              style={{color: `rgba(0, 0, 0, 0.4)`}}
+              onClick={this.onClickZoomOut}
+              onMouseEnter={()=>(this.setState({hoveredToolTip: tools.ZOOM_OUT}))}
+              onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
+            />
+            <MaterialTooltip
+              horizontalPosition={'center'}
+              label="Zoom out"
+              show={this.state.hoveredToolTip === tools.ZOOM_OUT}
+              verticalPosition={'top'}
+            />
+          </div>
         </ToolbarGroup>
         <ToolbarGroup>
-          <FontIcon className="fa fa-trash-o" style={this.state.selectedTool === tools.DELETE ? {color: `black`} : {}}
-            onClick={this.onClickDelete}/>
+          <div style={styles.tool}>
+            <FontIcon
+              className="fa fa-trash-o"
+              style={{color: `rgba(0, 0, 0, 0.4)`}}
+              onClick={this.onClickDelete}
+              onMouseEnter={()=>(this.setState({hoveredToolTip: tools.DELETE}))}
+              onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
+            />
+            <MaterialTooltip
+              horizontalPosition={'center'}
+              label="Delete"
+              show={this.state.hoveredToolTip === tools.DELETE}
+              verticalPosition={'top'}
+            />
+          </div>
         </ToolbarGroup>
         <ToolbarGroup>
           <SavingIndicator 

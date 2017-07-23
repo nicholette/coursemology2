@@ -1,6 +1,9 @@
 import React, { Component, PropTypes } from 'react';
+import { injectIntl, intlShape } from 'react-intl';
+import translations from '../translations';
 
 const propTypes = {
+  intl: intlShape.isRequired,
   clearSavingStatus: PropTypes.func.isRequired,
   is_saving: PropTypes.bool,
   is_saved: PropTypes.bool,
@@ -21,16 +24,16 @@ const style = {
   },
 }
 
-export default class SavingIndicator extends Component {
+class SavingIndicator extends Component {
   render() {
-    const { clearSavingStatus, is_saving, is_saved, save_errors } = this.props;
+    const { intl, clearSavingStatus, is_saving, is_saved, save_errors } = this.props;
 
     var status = '';
 
     if (is_saving) {
-      status = 'Saving..';
+      status = intl.formatMessage(translations.saving);
     } else if (is_saved) {
-      status = 'Saved';
+      status = intl.formatMessage(translations.saved);
       // TODO: make fading animation
       setTimeout(clearSavingStatus, 3000);
     } else if (save_errors) {
@@ -47,3 +50,4 @@ export default class SavingIndicator extends Component {
 } 
 
 SavingIndicator.propTypes = propTypes;
+export default injectIntl(SavingIndicator);

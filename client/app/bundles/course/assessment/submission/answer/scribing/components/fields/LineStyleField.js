@@ -1,8 +1,11 @@
 import React, { Component, PropTypes } from 'react';
+import { injectIntl, intlShape } from 'react-intl';
 import Chip from 'material-ui/Chip';
 import {cyan500, grey50} from 'material-ui/styles/colors';
+import translations from '../../translations';
 
 const propTypes = {
+  intl: intlShape.isRequired,
   lineToolType: PropTypes.string,
   selectedLineStyle: PropTypes.string,
   onTouchTapLineStyleChip: PropTypes.func,
@@ -44,29 +47,44 @@ const styles = {
   },
 }
 
-export default class LineStyleField extends Component {
+class LineStyleField extends Component {
   renderLineStyleChips() {
-    const { lineToolType, selectedLineStyle, onTouchTapLineStyleChip } = this.props;
-    const lineStyles = ['solid', 'dotted', 'dashed'];
+    const { lineToolType, selectedLineStyle, onTouchTapLineStyleChip, intl } = this.props;
+    const lineStyles = [
+      {
+        key: intl.formatMessage(translations.solid),
+        value: 'solid',
+      },
+      {
+        key: intl.formatMessage(translations.dotted),
+        value: 'dotted',
+      },
+      {
+        key: intl.formatMessage(translations.dashed),
+        value: 'dashed',
+      }
+    ];
     const chips = [];
     lineStyles.forEach((style)=>(chips.push(
       <Chip
-        backgroundColor={selectedLineStyle === style ? cyan500 : undefined}
-        labelColor={selectedLineStyle === style ? grey50 : undefined}
-        key={lineToolType + style}
+        backgroundColor={selectedLineStyle === style.value ? cyan500 : undefined}
+        labelColor={selectedLineStyle === style.value ? grey50 : undefined}
+        key={lineToolType + style.value}
         style={styles.chip}
-        onTouchTap={(event) => onTouchTapLineStyleChip(event, lineToolType, style)}
+        onTouchTap={(event) => onTouchTapLineStyleChip(event, lineToolType, style.value)}
       >
-        {style}
+        {style.key}
       </Chip>
     )));
     return chips;
   }
 
   render() {
+    const { intl } = this.props;
+    
     return (
       <div style={styles.fieldDiv}>
-        <label style={styles.label}>Style:</label>
+        <label style={styles.label}>{intl.formatMessage(translations.style)}</label>
         <div style={styles.chipWrapper}>
           { this.renderLineStyleChips() }
         </div>
@@ -76,3 +94,4 @@ export default class LineStyleField extends Component {
 } 
 
 LineStyleField.propTypes = propTypes;
+export default injectIntl(LineStyleField);

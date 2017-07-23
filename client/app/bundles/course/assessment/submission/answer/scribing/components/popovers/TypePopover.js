@@ -1,12 +1,15 @@
 import React, { Component, PropTypes } from 'react';
+import { injectIntl, intlShape } from 'react-intl';
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 
 import FontFamilyField from '../fields/FontFamilyField';
 import FontSizeField from '../fields/FontSizeField';
 import ColorPickerField from '../fields/ColorPickerField';
+import translations from '../../translations';
 
 const propTypes = {
+  intl: intlShape.isRequired,
   open: PropTypes.bool,
   anchorEl: PropTypes.object,
   onRequestClose: PropTypes.func,
@@ -43,11 +46,11 @@ const popoverStyles = {
   }
 }
 
-export default class TypePopover extends Component {
+class TypePopover extends Component {
   render() {
     const { open, anchorEl, onRequestClose, fontFamilyValue, onChangeFontFamily, fontSizeValue,
             onChangeFontSize, onClickColorPicker, colorPickerPopoverOpen, colorPickerPopoverAnchorEl,
-            onRequestCloseColorPickerPopover, colorPickerColor, onChangeCompleteColorPicker
+            onRequestCloseColorPickerPopover, colorPickerColor, onChangeCompleteColorPicker, intl
           } = this.props;
 
     return (
@@ -62,7 +65,7 @@ export default class TypePopover extends Component {
       >
         <Menu style={styles.menu}>
           <div>
-            <h4>Font</h4>
+            <h4>{intl.formatMessage(translations.text)}</h4>
           </div>
           <FontFamilyField
             fontFamilyValue={fontFamilyValue}
@@ -87,3 +90,4 @@ export default class TypePopover extends Component {
 } 
 
 TypePopover.propTypes = propTypes;
+export default injectIntl(TypePopover);

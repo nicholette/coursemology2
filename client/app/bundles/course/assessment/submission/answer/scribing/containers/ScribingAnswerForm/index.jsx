@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import { Canvas } from 'react-fabricjs';
 import { injectIntl, intlShape } from 'react-intl';
-import translations from './ScribingAnswerForm.intl';
+import translations from '../../translations';
 
 import FontIcon from 'material-ui/FontIcon';
 import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui/Toolbar';
@@ -26,6 +26,7 @@ import { tools, shapes, toolColor, toolThickness, toolLineStyle, popoverTypes } 
 */
 
 const propTypes = {
+  intl: intlShape.isRequired,
   actions: React.PropTypes.shape({
     setCanvasLoaded: PropTypes.func.isRequired,
     // fetchScribingAnswer: PropTypes.func.isRequired,
@@ -763,6 +764,7 @@ class ScribingAnswerForm extends React.Component {
 
 
   renderToolBar() {
+    const { intl } = this.props;
     const lineToolStyle = { 
       ...styles.custom_line,
       background: this.state.selectedTool === tools.LINE ? `black` : `rgba(0, 0, 0, 0.4)`,
@@ -773,7 +775,7 @@ class ScribingAnswerForm extends React.Component {
         <ToolbarGroup>
           <ToolDropdown
             toolType={tools.TYPE}
-            tooltip="Text"
+            tooltip={intl.formatMessage(translations.text)}
             showTooltip={this.state.hoveredToolTip === tools.TYPE}
             currentTool={this.state.selectedTool}
             onClick={this.onClickTypingMode}
@@ -802,7 +804,7 @@ class ScribingAnswerForm extends React.Component {
           />
           <ToolDropdown
             toolType={tools.DRAW}
-            tooltip="Pencil"
+            tooltip={intl.formatMessage(translations.pencil)}
             showTooltip={this.state.hoveredToolTip === tools.DRAW}
             currentTool={this.state.selectedTool}
             onClick={this.onClickDrawingMode}
@@ -829,7 +831,7 @@ class ScribingAnswerForm extends React.Component {
           />
           <ToolDropdown
             toolType={tools.LINE}
-            tooltip="Line"
+            tooltip={intl.formatMessage(translations.line)}
             showTooltip={this.state.hoveredToolTip === tools.LINE}
             currentTool={this.state.selectedTool}
             onClick={this.onClickLineMode}
@@ -859,7 +861,7 @@ class ScribingAnswerForm extends React.Component {
           />
           <ToolDropdown
             toolType={tools.SHAPE}
-            tooltip="Shape"
+            tooltip={intl.formatMessage(translations.shape)}
             showTooltip={this.state.hoveredToolTip === tools.SHAPE}
             currentTool={this.state.selectedTool}
             onClick={this.onClickShapeMode}
@@ -914,7 +916,7 @@ class ScribingAnswerForm extends React.Component {
               onClick={this.onClickSelectionMode}/>
             <MaterialTooltip
               horizontalPosition={'center'}
-              label="Select"
+              label={intl.formatMessage(translations.select)}
               show={this.state.hoveredToolTip === tools.SELECT}
               verticalPosition={'top'}
             />
@@ -947,7 +949,7 @@ class ScribingAnswerForm extends React.Component {
             />
             <MaterialTooltip
               horizontalPosition={'center'}
-              label="Pan"
+              label={intl.formatMessage(translations.pan)}
               show={this.state.hoveredToolTip === tools.PAN}
               verticalPosition={'top'}
             />
@@ -963,7 +965,7 @@ class ScribingAnswerForm extends React.Component {
             />
             <MaterialTooltip
               horizontalPosition={'center'}
-              label="Zoom in"
+              label={intl.formatMessage(translations.zoomIn)}
               show={this.state.hoveredToolTip === tools.ZOOM_IN}
               verticalPosition={'top'}
             />
@@ -979,7 +981,7 @@ class ScribingAnswerForm extends React.Component {
             />
             <MaterialTooltip
               horizontalPosition={'center'}
-              label="Zoom out"
+              label={intl.formatMessage(translations.zoomOut)}
               show={this.state.hoveredToolTip === tools.ZOOM_OUT}
               verticalPosition={'top'}
             />
@@ -996,7 +998,7 @@ class ScribingAnswerForm extends React.Component {
             />
             <MaterialTooltip
               horizontalPosition={'center'}
-              label="Delete"
+              label={intl.formatMessage(translations.delete)}
               show={this.state.hoveredToolTip === tools.DELETE}
               verticalPosition={'top'}
             />
@@ -1028,5 +1030,4 @@ class ScribingAnswerForm extends React.Component {
 }
 
 ScribingAnswerForm.propTypes = propTypes;
-
 export default injectIntl(ScribingAnswerForm);

@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import { injectIntl, intlShape } from 'react-intl';
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 import Divider from 'material-ui/Divider';
@@ -7,8 +8,10 @@ import LineStyleField from '../fields/LineStyleField';
 import LineThicknessField from '../fields/LineThicknessField';
 import ColorPickerField from '../fields/ColorPickerField';
 import ShapeField from '../fields/ShapeField';
+import translations from '../../translations';
 
 const propTypes = {
+  intl: intlShape.isRequired,
   lineToolType: PropTypes.string,
   open: PropTypes.bool,
   anchorEl: PropTypes.object,
@@ -53,14 +56,14 @@ const popoverStyles = {
   }
 }
 
-export default class ShapePopover extends Component {
+class ShapePopover extends Component {
   renderShapeComponent() {
-    const { setSelectedShape } = this.props;
+    const { setSelectedShape, intl } = this.props;
 
     return (
       <div>
         <div>
-          <h4>Shape</h4>
+          <h4>{intl.formatMessage(translations.shape)} </h4>
         </div>
         <ShapeField setSelectedShape={setSelectedShape} />
       </div>
@@ -73,13 +76,13 @@ export default class ShapePopover extends Component {
       toolThicknessValue, onChangeSliderThickness, onClickBorderColorPicker,
       borderColorPickerPopoverOpen, borderColorPickerPopoverAnchorEl,
       onRequestCloseBorderColorPickerPopover, borderColorPickerColor,
-      onChangeCompleteBorderColorPicker
+      onChangeCompleteBorderColorPicker, intl
     } = this.props;
 
     return (
       <div>
         <div>
-          <h4>Border</h4>
+          <h4>{intl.formatMessage(translations.border)}</h4>
         </div>
           <LineStyleField
             lineToolType={lineToolType}
@@ -106,13 +109,13 @@ export default class ShapePopover extends Component {
     const { 
       onClickFillColorPicker, fillColorPickerPopoverOpen,
       fillColorPickerPopoverAnchorEl, onRequestCloseFillColorPickerPopover,
-      fillColorPickerColor, onChangeCompleteFillColorPicker
+      fillColorPickerColor, onChangeCompleteFillColorPicker, intl
     } = this.props;
 
     return (
       <div>
         <div>
-          <h4>Fill</h4>
+          <h4>{intl.formatMessage(translations.fill)}</h4>
         </div>
         <ColorPickerField 
           onClickColorPicker={onClickFillColorPicker}
@@ -152,3 +155,4 @@ export default class ShapePopover extends Component {
 } 
 
 ShapePopover.propTypes = propTypes;
+export default injectIntl(ShapePopover);

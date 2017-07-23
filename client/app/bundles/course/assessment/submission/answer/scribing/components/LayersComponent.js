@@ -1,10 +1,13 @@
 import React, { Component, PropTypes } from 'react';
+import { injectIntl, intlShape } from 'react-intl';
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
 import RaisedButton from 'material-ui/RaisedButton';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
+import translations from '../translations';
 
 const propTypes = {
+  intl: intlShape.isRequired,
   onTouchTap: PropTypes.func,
   disabled: PropTypes.bool,
   open: PropTypes.bool,
@@ -25,9 +28,9 @@ const popoverStyles = {
   }
 }
 
-export default class LayersComponent extends Component {
+class LayersComponent extends Component {
   renderLayersPopover() {
-    const { layers, open, anchorEl,
+    const { intl, layers, open, anchorEl,
             onRequestClose, onTouchTapLayer } = this.props;
 
     return layers && layers.length !== 0 ? (
@@ -54,12 +57,12 @@ export default class LayersComponent extends Component {
   }
 
   render() {
-    const { onTouchTap, disabled } = this.props;
+    const { intl, onTouchTap, disabled } = this.props;
     return (
       <div>
         <RaisedButton
           onTouchTap={onTouchTap}
-          label="Layers"
+          label={intl.formatMessage(translations.layers)}
           disabled={disabled}
         />
         { this.renderLayersPopover() }
@@ -69,3 +72,4 @@ export default class LayersComponent extends Component {
 }
 
 LayersComponent.propTypes = propTypes;
+export default injectIntl(LayersComponent);

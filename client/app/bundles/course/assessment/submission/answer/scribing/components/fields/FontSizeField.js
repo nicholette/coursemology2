@@ -1,8 +1,11 @@
 import React, { Component, PropTypes } from 'react';
+import { injectIntl, intlShape } from 'react-intl';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
+import translations from '../../translations';
 
 const propTypes = {
+  intl: intlShape.isRequired,
   fontSizeValue: PropTypes.number,
   onChangeFontSize: PropTypes.func,
 }
@@ -13,9 +16,9 @@ const styles = {
   },
 }
 
-export default class FontSizeField extends Component {
+class FontSizeField extends Component {
   render() {
-    const { fontSizeValue, onChangeFontSize } = this.props;
+    const { fontSizeValue, onChangeFontSize, intl } = this.props;
     const menuItems = [];
 
     for (var i=1; i<=60; i++) {
@@ -25,7 +28,7 @@ export default class FontSizeField extends Component {
     return (
       <div>
         <SelectField
-          floatingLabelText="Font Size:"
+          floatingLabelText={intl.formatMessage(translations.fontSize)}
           value={fontSizeValue}
           onChange={onChangeFontSize}
           maxHeight={150}
@@ -39,3 +42,4 @@ export default class FontSizeField extends Component {
 } 
 
 FontSizeField.propTypes = propTypes;
+export default injectIntl(FontSizeField);

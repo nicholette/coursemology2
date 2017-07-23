@@ -1,9 +1,12 @@
 import React, { Component, PropTypes } from 'react';
+import { injectIntl, intlShape } from 'react-intl';
 import { SketchPicker } from 'react-color';
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
 import FontIcon from 'material-ui/FontIcon';
+import translations from '../../translations';
 
 const propTypes = {
+  intl: intlShape.isRequired,
   onClickColorPicker: PropTypes.func,
   colorPickerPopoverOpen: PropTypes.bool,
   colorPickerPopoverAnchorEl: PropTypes.object,
@@ -59,15 +62,15 @@ const popoverStyles = {
   }
 }
 
-export default class ColorPickerField extends Component {
+class ColorPickerField extends Component {
   render() {
     const { colorPickerColor, onClickColorPicker, colorPickerPopoverOpen,
             colorPickerPopoverAnchorEl, onRequestCloseColorPickerPopover,
-            onChangeCompleteColorPicker } = this.props;
+            onChangeCompleteColorPicker, intl } = this.props;
 
     return (
       <div style={styles.colorPickerFieldDiv}>
-        <label style={styles.label}>Colour:</label>
+        <label style={styles.label}>{intl.formatMessage(translations.colour)}</label>
         <div 
           style={{background: colorPickerColor, ...styles.colorPicker }}
           onClick={onClickColorPicker} />
@@ -89,5 +92,5 @@ export default class ColorPickerField extends Component {
     );
   }
 } 
-
 ColorPickerField.propTypes = propTypes;
+export default injectIntl(ColorPickerField);

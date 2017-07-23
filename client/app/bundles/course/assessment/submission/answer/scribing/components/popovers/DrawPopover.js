@@ -1,12 +1,15 @@
 import React, { Component, PropTypes } from 'react';
+import { injectIntl, intlShape } from 'react-intl';
 import { SketchPicker } from 'react-color';
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 
 import LineThicknessField from '../fields/LineThicknessField';
 import ColorPickerField from '../fields/ColorPickerField';
+import translations from '../../translations';
 
 const propTypes = {
+  intl: intlShape.isRequired,
   open: PropTypes.bool,
   anchorEl: PropTypes.object,
   onRequestClose: PropTypes.func,
@@ -41,13 +44,13 @@ const popoverStyles = {
   }
 }
 
-export default class DrawPopover extends Component {
+class DrawPopover extends Component {
   render() {
     const { open, anchorEl, onRequestClose,
             toolThicknessValue, onChangeSliderThickness,
             colorPickerColor, onClickColorPicker, colorPickerPopoverOpen,
             colorPickerPopoverAnchorEl, onRequestCloseColorPickerPopover,
-            onChangeCompleteColorPicker } = this.props;
+            onChangeCompleteColorPicker, intl } = this.props;
 
     return (
       <Popover
@@ -61,7 +64,7 @@ export default class DrawPopover extends Component {
       >
         <Menu style={styles.menu}>
           <div>
-            <h4>Pencil</h4>
+            <h4>{intl.formatMessage(translations.pencil)} </h4>
           </div>
           <LineThicknessField
             toolThicknessValue={toolThicknessValue}
@@ -82,3 +85,4 @@ export default class DrawPopover extends Component {
 } 
 
 DrawPopover.propTypes = propTypes;
+export default injectIntl(DrawPopover);

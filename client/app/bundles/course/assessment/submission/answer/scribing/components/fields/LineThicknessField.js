@@ -1,7 +1,10 @@
 import React, { Component, PropTypes } from 'react';
+import { injectIntl, intlShape } from 'react-intl';
 import Slider from 'material-ui/Slider';
+import translations from '../../translations';
 
 const propTypes = {
+  intl: intlShape.isRequired,
   toolThicknessValue: PropTypes.number,
   onChangeSliderThickness: PropTypes.func,
 }
@@ -36,13 +39,13 @@ const styles = {
   },
 }
 
-export default class LineThicknessField extends Component {
+class LineThicknessField extends Component {
   render() {
-    const { toolThicknessValue, onChangeSliderThickness } = this.props;
+    const { toolThicknessValue, onChangeSliderThickness, intl } = this.props;
 
     return (
       <div style={styles.fieldDiv}>
-        <label style={styles.label}>Thickness:</label>
+        <label style={styles.label}>{intl.formatMessage(translations.thickness)}</label>
         <Slider 
           style={styles.slider} min={0} max={5} step={1} value={toolThicknessValue}
           onChange={onChangeSliderThickness}
@@ -53,3 +56,4 @@ export default class LineThicknessField extends Component {
 } 
 
 LineThicknessField.propTypes = propTypes;
+export default injectIntl(LineThicknessField);

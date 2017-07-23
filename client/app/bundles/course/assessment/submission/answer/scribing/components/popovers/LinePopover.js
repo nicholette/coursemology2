@@ -1,12 +1,15 @@
 import React, { Component, PropTypes } from 'react';
+import { injectIntl, intlShape } from 'react-intl';
 import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 
 import LineStyleField from '../fields/LineStyleField';
 import LineThicknessField from '../fields/LineThicknessField';
 import ColorPickerField from '../fields/ColorPickerField';
+import translations from '../../translations';
 
 const propTypes = {
+  intl: intlShape.isRequired,
   lineToolType: PropTypes.string,
   open: PropTypes.bool,
   anchorEl: PropTypes.object,
@@ -44,14 +47,14 @@ const popoverStyles = {
   }
 }
 
-export default class LinePopover extends Component {
+class LinePopover extends Component {
   render() {
     const { lineToolType, open, anchorEl, onRequestClose,
             selectedLineStyle, onTouchTapLineStyleChip,
             toolThicknessValue, onChangeSliderThickness,
             colorPickerColor, onClickColorPicker, colorPickerPopoverOpen,
             colorPickerPopoverAnchorEl, onRequestCloseColorPickerPopover,
-            onChangeCompleteColorPicker } = this.props;
+            onChangeCompleteColorPicker, intl } = this.props;
 
     return (
       <Popover
@@ -65,7 +68,7 @@ export default class LinePopover extends Component {
       >
         <Menu style={styles.menu}>
           <div>
-            <h4>Line</h4>
+            <h4>{intl.formatMessage(translations.line)} </h4>
           </div>
           <LineStyleField
             lineToolType={lineToolType}
@@ -91,3 +94,4 @@ export default class LinePopover extends Component {
 } 
 
 LinePopover.propTypes = propTypes;
+export default injectIntl(LinePopover);

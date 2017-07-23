@@ -77,6 +77,7 @@ const styles = {
     position: `relative`,
     display: `inline-block`,
     paddingRight: `24px`,
+    color: `rgba(0, 0, 0, 0.4)`,
   },
 }
 
@@ -912,7 +913,7 @@ class ScribingAnswerForm extends React.Component {
             onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
           > 
             <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ?
-                {color: `black`, ...styles.tool} : styles.tool}
+                {...styles.tool, color: `black`} : styles.tool}
               onClick={this.onClickSelectionMode}/>
             <MaterialTooltip
               horizontalPosition={'center'}

@@ -11,37 +11,37 @@ const propTypes = {
 
 const styles = {
   fieldDiv: {
-    fontSize: `16px`,
-    lineHeight: `24px`,
-    width: `210px`,
-    height: `72px`,
-    display: `block`,
-    position: `relative`,
-    backgroundColor: `transparent`,
-    fontFamily: `Roboto, sans-serif`,
-    transition: `height 200ms cubic-bezier(0.23, 1, 0.32, 1) 0ms`,
-    cursor: `auto`,
+    fontSize: '16px',
+    lineHeight: '24px',
+    width: '210px',
+    height: '72px',
+    display: 'block',
+    position: 'relative',
+    backgroundColor: 'transparent',
+    fontFamily: 'Roboto, sans-serif',
+    transition: 'height 200ms cubic-bezier(0.23, 1, 0.32, 1) 0ms',
+    cursor: 'auto',
   },
   label: {
-    position: `absolute`,
-    lineHeight: `22px`,
-    top: `38px`,
-    transition: `all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms`,
-    zIndex: `1`,
-    transform: `scale(0.75) translate(0px, -28px)`,
-    transformOrigin: `left top 0px`,
-    pointerEvents: `none`,
-    userSelect: `none`,
-    color: `rgba(0, 0, 0, 0.3)`,
+    position: 'absolute',
+    lineHeight: '22px',
+    top: '38px',
+    transition: 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms',
+    zIndex: '1',
+    transform: 'scale(0.75) translate(0px, -28px)',
+    transformOrigin: 'left top 0px',
+    pointerEvents: 'none',
+    userSelect: 'none',
+    color: 'rgba(0, 0, 0, 0.3)',
   },
   slider: {
-    padding: `30px 0px`,
+    padding: '30px 0px',
   },
 }
 
 class LineThicknessField extends Component {
   render() {
-    const { toolThicknessValue, onChangeSliderThickness, intl } = this.props;
+    const { intl, toolThicknessValue, onChangeSliderThickness } = this.props;
 
     return (
       <div style={styles.fieldDiv}>

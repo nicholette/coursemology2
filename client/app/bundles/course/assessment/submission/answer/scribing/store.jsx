@@ -1,10 +1,8 @@
 import { compose, createStore, applyMiddleware } from 'redux';
 import thunkMiddleware from 'redux-thunk';
-import _ from 'lodash';
-import rootReducer, { initialStates as defaultInitialStates } from './reducers';
+import rootReducer, { initialStates } from './reducers';
 
-export default ({ scribingAnswer }) => {
-  const initialStates = _.merge(defaultInitialStates, scribingAnswer);
+export default () => {
   const storeCreator = compose(
     applyMiddleware(thunkMiddleware)
   )(createStore);

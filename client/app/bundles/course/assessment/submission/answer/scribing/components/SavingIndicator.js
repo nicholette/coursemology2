@@ -12,15 +12,15 @@ const propTypes = {
 
 const style = {
   savingStatus: {
-    width: `50px`,
+    width: '50px',
   },
   saving_status_label: {
     color: '#bdc3c7',
-    fontSize: `14px`,
-    fontWeight: `500`,
-    letterSpacing: `0px`,
-    textTransform: `uppercase`,
-    fontFamily: `Roboto, sans-serif`,
+    fontSize: '14px',
+    fontWeight: '500',
+    letterSpacing: '0px',
+    textTransform: 'uppercase',
+    fontFamily: 'Roboto, sans-serif',
   },
 }
 

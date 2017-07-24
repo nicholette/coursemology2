@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import FontIcon from 'material-ui/FontIcon';
-import MaterialTooltip from 'material-ui/internal/Tooltip'
+import MaterialTooltip from 'material-ui/internal/Tooltip';
 
 const propTypes = {
   toolType: PropTypes.string.isRequired,
@@ -14,28 +14,30 @@ const propTypes = {
   iconClassname: PropTypes.string,
   colorBarComponent: PropTypes.func,
   iconComponent: PropTypes.func,
+  onMouseEnter: PropTypes.func,
+  onMouseLeave: PropTypes.func,
   popoverComponent: PropTypes.func,
-}
+};
 
 const style = {
   tool: {
-    position: `relative`,
-    display: `inline-block`,
-    paddingRight: `24px`,
+    position: 'relative',
+    display: 'inline-block',
+    paddingRight: '24px',
   },
   innerTool: {
-    display: `inline-block`,
+    display: 'inline-block',
   },
   colorBar: {
-    width:`23px`,
-    height:`8px`,
+    width: '23px',
+    height: '8px',
   },
   chevron: {
-    color: `rgba(0, 0, 0, 0.4)`,
-    fontSize:`12px`,
-    padding: `10px 0px 10px 0px`,
+    color: 'rgba(0, 0, 0, 0.4)',
+    fontSize: '12px',
+    padding: '10px 0px 10px 0px',
   },
-}
+};
 
 export default class ToolDropdown extends Component {
   renderIcon() {
@@ -47,8 +49,8 @@ export default class ToolDropdown extends Component {
         className={iconClassname}
         style={
           currentTool === toolType ?
-            {color: `black`} :
-            {color: `rgba(0, 0, 0, 0.4)`}
+            { color: 'black' } :
+            { color: 'rgba(0, 0, 0, 0.4)' }
         }
       />;
   }
@@ -57,14 +59,14 @@ export default class ToolDropdown extends Component {
     const { colorBar, colorBarComponent } = this.props;
 
     return colorBarComponent ?
-      colorBarComponent() : 
-      <div style={{ ...style.colorBar, background: colorBar }}/>;
+      colorBarComponent() :
+      <div style={{ ...style.colorBar, background: colorBar }} />;
   }
 
   render() {
-    const { onClick, onClickIcon, onTouchTapChevron, 
-            colorBar, iconComponent, popoverComponent,
-            tooltip, showTooltip, onMouseEnter, onMouseLeave } = this.props;
+    const { onClick, onClickIcon, onTouchTapChevron,
+            popoverComponent, tooltip, showTooltip,
+            onMouseEnter, onMouseLeave } = this.props;
 
     return (
       <div
@@ -84,7 +86,7 @@ export default class ToolDropdown extends Component {
           { this.renderColorBar() }
         </div>
         <div style={style.innerTool}>
-          <FontIcon 
+          <FontIcon
             className="fa fa-chevron-down"
             style={style.chevron}
             onTouchTap={onTouchTapChevron}
@@ -95,6 +97,6 @@ export default class ToolDropdown extends Component {
       </div>
     );
   }
-} 
+}
 
 ToolDropdown.propTypes = propTypes;

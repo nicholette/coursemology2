@@ -25,11 +25,11 @@ const propTypes = {
 
 const styles = {
   toolDropdowns: {
-    padding: `10px`,
+    padding: '10px',
   },
   menu: {
-    maxHeight: `250px`,
-    overflowY: `auto`,
+    maxHeight: '250px',
+    overflowY: 'auto',
   },
 }
 
@@ -46,11 +46,12 @@ const popoverStyles = {
 
 class DrawPopover extends Component {
   render() {
-    const { open, anchorEl, onRequestClose,
+    const { intl, open, anchorEl, onRequestClose,
             toolThicknessValue, onChangeSliderThickness,
             colorPickerColor, onClickColorPicker, colorPickerPopoverOpen,
             colorPickerPopoverAnchorEl, onRequestCloseColorPickerPopover,
-            onChangeCompleteColorPicker, intl } = this.props;
+            onChangeCompleteColorPicker,
+          } = this.props;
 
     return (
       <Popover

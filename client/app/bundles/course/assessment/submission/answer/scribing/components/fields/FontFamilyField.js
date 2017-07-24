@@ -12,13 +12,13 @@ const propTypes = {
 
 const styles = {
   select: {
-    width: `210px`,
+    width: '210px',
   }
 }
 
 class FontFamilyField extends Component {
   render() {
-    const { fontFamilyValue, onChangeFontFamily, intl } = this.props;
+    const { intl, fontFamilyValue, onChangeFontFamily } = this.props;
     const fontFamilies = [
       {
         key: intl.formatMessage(translations.arial),

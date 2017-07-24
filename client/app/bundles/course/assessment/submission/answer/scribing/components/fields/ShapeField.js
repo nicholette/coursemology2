@@ -14,7 +14,7 @@ const propTypes = {
 
 class ShapeField extends Component {
   render() {
-    const { setSelectedShape, intl } = this.props;
+    const { intl, setSelectedShape } = this.props;
 
     return (
       <div>

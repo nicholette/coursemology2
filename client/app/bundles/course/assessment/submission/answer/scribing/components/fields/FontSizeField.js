@@ -12,13 +12,13 @@ const propTypes = {
 
 const styles = {
   select: {
-    width: `210px`,
+    width: '210px',
   },
 }
 
 class FontSizeField extends Component {
   render() {
-    const { fontSizeValue, onChangeFontSize, intl } = this.props;
+    const { intl, fontSizeValue, onChangeFontSize } = this.props;
     const menuItems = [];
 
     for (var i=1; i<=60; i++) {

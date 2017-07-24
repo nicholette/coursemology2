@@ -320,7 +320,6 @@ class ScribingAnswerForm extends React.Component {
         canvas.remove(object);
       });
     }
-    this.saveScribbles();
   }
 
   setSelectedShape = (shape) => {
@@ -337,7 +336,6 @@ class ScribingAnswerForm extends React.Component {
       left: this.canvas.width / 2, 
       top: this.canvas.height / 2 ,
     }));
-    this.saveScribbles();
   }
 
   // Canvas Event Handlers
@@ -412,13 +410,7 @@ class ScribingAnswerForm extends React.Component {
     let isMouseDrag = this.mouseDragFlag === true && passedDistThreshold;
 
     if (isMouseDrag) {
-      // This is a drag as the mouse move occurs after mouse down.
-      if (this.state.selectedTool === tools.TYPE ||
-          this.state.selectedTool === tools.DRAW ||
-          this.state.selectedTool === tools.SELECT ) {
-        this.saveScribbles();
-
-      } else if (this.state.selectedTool === tools.LINE) {
+       if (this.state.selectedTool === tools.LINE) {
         const strokeDashArray = getStrokeDashArray(toolLineStyle.LINE);
         let line = new fabric.Line(
           [this.mouseCanvasDragStartPoint.x, this.mouseCanvasDragStartPoint.y,
@@ -431,7 +423,6 @@ class ScribingAnswerForm extends React.Component {
           }
         );
         this.canvas.add(line);
-        this.saveScribbles();
 
       } else if (this.state.selectedTool === tools.SHAPE) {
         const strokeDashArray = getStrokeDashArray(toolLineStyle.SHAPE_BORDER);
@@ -450,7 +441,6 @@ class ScribingAnswerForm extends React.Component {
               selectable: false,
             });
             this.canvas.add(rect);
-            this.saveScribbles();
             break;
           }
           case shapes.ELLIPSE: {
@@ -467,7 +457,6 @@ class ScribingAnswerForm extends React.Component {
               selectable: false,
             });
             this.canvas.add(ellipse);
-            this.saveScribbles();
             break;
           }
         }
@@ -549,6 +538,7 @@ class ScribingAnswerForm extends React.Component {
 
   initializeScribbles() {
     const { scribbles, user_id } = this.props.scribingAnswer.answer;
+    this.isScribblesLoaded = false;
     this.layers = [];
     let userScribble = [];
 
@@ -622,6 +612,7 @@ class ScribingAnswerForm extends React.Component {
         this.canvas.add(obj)
       });
     }
+    this.isScribblesLoaded = true;
   }
 
   initializeCanvas(answerId, imagePath) {
@@ -660,6 +651,10 @@ class ScribingAnswerForm extends React.Component {
       _self.canvas.on('mouse:move', this.onMouseMoveCanvas);
       _self.canvas.on('mouse:up', this.onMouseUpCanvas);
       _self.canvas.observe('object:moving', this.onObjectMovingCanvas);
+      _self.canvas.observe('object:modified', this.saveScribbles);
+      _self.canvas.observe('object:added', this.saveScribbles);
+      _self.canvas.observe('object:removed', this.saveScribbles);
+      _self.canvas.observe('text:changed', this.saveScribbles);
 
       _self.initializeScribbles();
       _self.scaleCanvas();
@@ -689,11 +684,13 @@ class ScribingAnswerForm extends React.Component {
     }
   }
 
-  saveScribbles() {
-    const answerId = this.props.scribingAnswer.answer.answer_id;
-    const json = this.getScribbleJSON();
-    this.props.actions.updateScribingAnswerInLocal(json);
-    this.props.actions.updateScribingAnswer(answerId, json);
+  saveScribbles = () => {
+    if (this.isScribblesLoaded) {
+      const answerId = this.props.scribingAnswer.answer.answer_id;
+      const json = this.getScribbleJSON();
+      this.props.actions.updateScribingAnswerInLocal(json);
+      this.props.actions.updateScribingAnswer(answerId, json);
+    }
   }
 
   getScribbleJSON() {

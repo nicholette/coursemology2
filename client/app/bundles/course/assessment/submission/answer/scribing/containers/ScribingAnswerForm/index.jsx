@@ -1,10 +1,11 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { Canvas } from 'react-fabricjs';
 import { injectIntl, intlShape } from 'react-intl';
 
 import FontIcon from 'material-ui/FontIcon';
 import { Toolbar, ToolbarGroup } from 'material-ui/Toolbar';
-import MaterialTooltip from 'material-ui/internal/Tooltip'
+import MaterialTooltip from 'material-ui/internal/Tooltip';
 import LoadingIndicator from 'lib/components/LoadingIndicator';
 
 import SavingIndicator from '../../components/SavingIndicator';
@@ -114,31 +115,31 @@ class ScribingAnswerForm extends React.Component {
     };
 
     const initializeToolColor = () => {
-      for (var toolType in toolColor) {
+      for (let toolType in toolColor) {
         this.state.colors[toolType] = '#000000';
       }
     };
 
     const initializeToolThickness = () => {
-      for (var toolType in toolThickness) {
+      for (let toolType in toolThickness) {
         this.state.thickness[toolType] = 1;
       }
     };
 
     const initializeLineStyles = () => {
-      for (var toolType in toolLineStyle) {
+      for (let toolType in toolLineStyle) {
         this.state.lineStyles[toolType] = 'solid';
       }
     };
 
     const initializeColorDropdowns = () => {
-      for (var toolType in toolColor) {
+      for (let toolType in toolColor) {
         this.state.colorDropdowns[toolType] = false;
       }
     };
 
     const initializePopovers = () => {
-      for (var popoverType in popoverTypes) {
+      for (let popoverType in popoverTypes) {
         this.state.popovers[popoverType] = false;
       }
     };

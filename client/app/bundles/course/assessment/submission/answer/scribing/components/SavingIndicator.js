@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 import translations from '../translations';
 
@@ -8,7 +9,7 @@ const propTypes = {
   is_saving: PropTypes.bool,
   is_saved: PropTypes.bool,
   save_errors: PropTypes.array,
-}
+};
 
 const style = {
   savingStatus: {
@@ -22,32 +23,30 @@ const style = {
     textTransform: 'uppercase',
     fontFamily: 'Roboto, sans-serif',
   },
-}
+};
 
-class SavingIndicator extends Component {
-  render() {
-    const { intl, clearSavingStatus, is_saving, is_saved, save_errors } = this.props;
+const SavingIndicator = (props) => {
+  const { intl, clearSavingStatus, is_saving, is_saved, save_errors } = props;
 
-    var status = '';
+  let status = '';
 
-    if (is_saving) {
-      status = intl.formatMessage(translations.saving);
-    } else if (is_saved) {
-      status = intl.formatMessage(translations.saved);
-      // TODO: make fading animation
-      setTimeout(clearSavingStatus, 3000);
-    } else if (save_errors) {
-      // TODO: add warning color
-      status = 'Save errors.'
-    }
-
-    return (
-      <div style={style.savingStatus}>
-        <label style={style.saving_status_label}>{status}</label>
-      </div>
-    );
+  if (is_saving) {
+    status = intl.formatMessage(translations.saving);
+  } else if (is_saved) {
+    status = intl.formatMessage(translations.saved);
+    // TODO: make fading animation
+    setTimeout(clearSavingStatus, 3000);
+  } else if (save_errors) {
+    // TODO: add warning color
+    status = 'Save errors.';
   }
-} 
+
+  return (
+    <div style={style.savingStatus}>
+      <label htmlFor="saving" style={style.saving_status_label}>{status}</label>
+    </div>
+  );
+};
 
 SavingIndicator.propTypes = propTypes;
 export default injectIntl(SavingIndicator);

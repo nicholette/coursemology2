@@ -1,6 +1,7 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
-import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
+import Popover, { PopoverAnimationVertical } from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 import Divider from 'material-ui/Divider';
 
@@ -33,7 +34,7 @@ const propTypes = {
   fillColorPickerPopoverAnchorEl: PropTypes.object,
   onRequestCloseFillColorPickerPopover: PropTypes.func,
   onChangeCompleteFillColorPicker: PropTypes.func,
-}
+};
 
 const styles = {
   toolDropdowns: {
@@ -43,7 +44,7 @@ const styles = {
     maxHeight: '250px',
     overflowY: 'auto',
   },
-}
+};
 
 const popoverStyles = {
   anchorOrigin: {
@@ -53,8 +54,8 @@ const popoverStyles = {
   targetOrigin: {
     horizontal: 'left',
     vertical: 'top',
-  }
-}
+  },
+};
 
 class ShapePopover extends Component {
   renderShapeComponent() {
@@ -84,32 +85,32 @@ class ShapePopover extends Component {
         <div>
           <h4>{intl.formatMessage(translations.border)}</h4>
         </div>
-          <LineStyleField
-            lineToolType={lineToolType}
-            selectedLineStyle={selectedLineStyle}
-            onTouchTapLineStyleChip={onTouchTapLineStyleChip}
-          />
-          <LineThicknessField
-            toolThicknessValue={toolThicknessValue}
-            onChangeSliderThickness={onChangeSliderThickness}
-          />
-          <ColorPickerField 
-            onClickColorPicker={onClickBorderColorPicker}
-            colorPickerPopoverOpen={borderColorPickerPopoverOpen}
-            colorPickerPopoverAnchorEl={borderColorPickerPopoverAnchorEl}
-            onRequestCloseColorPickerPopover={onRequestCloseBorderColorPickerPopover}
-            colorPickerColor={borderColorPickerColor}
-            onChangeCompleteColorPicker={onChangeCompleteBorderColorPicker}
-          />
+        <LineStyleField
+          lineToolType={lineToolType}
+          selectedLineStyle={selectedLineStyle}
+          onTouchTapLineStyleChip={onTouchTapLineStyleChip}
+        />
+        <LineThicknessField
+          toolThicknessValue={toolThicknessValue}
+          onChangeSliderThickness={onChangeSliderThickness}
+        />
+        <ColorPickerField
+          onClickColorPicker={onClickBorderColorPicker}
+          colorPickerPopoverOpen={borderColorPickerPopoverOpen}
+          colorPickerPopoverAnchorEl={borderColorPickerPopoverAnchorEl}
+          onRequestCloseColorPickerPopover={onRequestCloseBorderColorPickerPopover}
+          colorPickerColor={borderColorPickerColor}
+          onChangeCompleteColorPicker={onChangeCompleteBorderColorPicker}
+        />
       </div>
     );
   }
 
   renderFillComponent() {
-    const { 
-      onClickFillColorPicker, fillColorPickerPopoverOpen,
+    const {
+      intl, onClickFillColorPicker, fillColorPickerPopoverOpen,
       fillColorPickerPopoverAnchorEl, onRequestCloseFillColorPickerPopover,
-      fillColorPickerColor, onChangeCompleteFillColorPicker, intl
+      fillColorPickerColor, onChangeCompleteFillColorPicker,
     } = this.props;
 
     return (
@@ -117,7 +118,7 @@ class ShapePopover extends Component {
         <div>
           <h4>{intl.formatMessage(translations.fill)}</h4>
         </div>
-        <ColorPickerField 
+        <ColorPickerField
           onClickColorPicker={onClickFillColorPicker}
           colorPickerPopoverOpen={fillColorPickerPopoverOpen}
           colorPickerPopoverAnchorEl={fillColorPickerPopoverAnchorEl}
@@ -152,7 +153,7 @@ class ShapePopover extends Component {
       </Popover>
     );
   }
-} 
+}
 
 ShapePopover.propTypes = propTypes;
 export default injectIntl(ShapePopover);

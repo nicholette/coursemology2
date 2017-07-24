@@ -21,7 +21,7 @@ const CourseAPI = {
   },
   answer: {
     scribing: ScribingAnswerAPI,
-  }
+  },
 };
 
 Object.freeze(CourseAPI);

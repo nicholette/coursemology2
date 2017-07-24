@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import FontIcon from 'material-ui/FontIcon';
 import MaterialTooltip from 'material-ui/internal/Tooltip';
 
@@ -64,9 +65,11 @@ export default class ToolDropdown extends Component {
   }
 
   render() {
-    const { onClick, onClickIcon, onTouchTapChevron,
-            popoverComponent, tooltip, showTooltip,
-            onMouseEnter, onMouseLeave } = this.props;
+    const {
+      onClick, onClickIcon, onTouchTapChevron,
+      popoverComponent, tooltip, showTooltip,
+      onMouseEnter, onMouseLeave,
+    } = this.props;
 
     return (
       <div

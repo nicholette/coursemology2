@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 import { SketchPicker } from 'react-color';
 import Popover, { PopoverAnimationVertical } from 'material-ui/Popover';
@@ -48,7 +49,7 @@ const styles = {
   toolDropdowns: {
     padding: '10px',
   },
-}
+};
 
 const popoverStyles = {
   anchorOrigin: {
@@ -61,37 +62,38 @@ const popoverStyles = {
   },
 };
 
-class ColorPickerField extends Component {
-  render() {
-    const { intl, colorPickerColor, onClickColorPicker,
-            colorPickerPopoverOpen, colorPickerPopoverAnchorEl,
-            onRequestCloseColorPickerPopover,
-            onChangeCompleteColorPicker,
-          } = this.props;
+const ColorPickerField = (props) => {
+  const {
+    intl, colorPickerColor, onClickColorPicker,
+    colorPickerPopoverOpen, colorPickerPopoverAnchorEl,
+    onRequestCloseColorPickerPopover,
+    onChangeCompleteColorPicker,
+  } = props;
 
-    return (
-      <div style={styles.colorPickerFieldDiv}>
-        <label style={styles.label}>{intl.formatMessage(translations.colour)}</label>
-        <div 
-          style={{background: colorPickerColor, ...styles.colorPicker }}
-          onClick={onClickColorPicker} />
-          <Popover
-            style={styles.toolDropdowns}
-            open={colorPickerPopoverOpen}
-            anchorEl={colorPickerPopoverAnchorEl}
-            anchorOrigin={popoverStyles.anchorOrigin}
-            targetOrigin={popoverStyles.targetOrigin}
-            onRequestClose={onRequestCloseColorPickerPopover}
-            animation={PopoverAnimationVertical}
-          >
-            <SketchPicker
-              color={colorPickerColor}
-              onChangeComplete={onChangeCompleteColorPicker}
-            />
-          </Popover>
-      </div>
-    );
-  }
-} 
+  return (
+    <div style={styles.colorPickerFieldDiv}>
+      <label style={styles.label}>{intl.formatMessage(translations.colour)}</label>
+      <div
+        style={{ background: colorPickerColor, ...styles.colorPicker }}
+        onClick={onClickColorPicker}
+      />
+      <Popover
+        style={styles.toolDropdowns}
+        open={colorPickerPopoverOpen}
+        anchorEl={colorPickerPopoverAnchorEl}
+        anchorOrigin={popoverStyles.anchorOrigin}
+        targetOrigin={popoverStyles.targetOrigin}
+        onRequestClose={onRequestCloseColorPickerPopover}
+        animation={PopoverAnimationVertical}
+      >
+        <SketchPicker
+          color={colorPickerColor}
+          onChangeComplete={onChangeCompleteColorPicker}
+        />
+      </Popover>
+    </div>
+  );
+};
+
 ColorPickerField.propTypes = propTypes;
 export default injectIntl(ColorPickerField);

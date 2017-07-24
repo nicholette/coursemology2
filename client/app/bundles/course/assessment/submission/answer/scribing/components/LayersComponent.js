@@ -1,6 +1,7 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
-import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
+import Popover from 'material-ui/Popover';
 import RaisedButton from 'material-ui/RaisedButton';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
@@ -15,7 +16,7 @@ const propTypes = {
   onRequestClose: PropTypes.func,
   layers: PropTypes.array,
   onTouchTapLayer: PropTypes.func,
-}
+};
 
 const popoverStyles = {
   anchorOrigin: {
@@ -25,13 +26,15 @@ const popoverStyles = {
   targetOrigin: {
     horizontal: 'left',
     vertical: 'top',
-  }
-}
+  },
+};
 
 class LayersComponent extends Component {
   renderLayersPopover() {
-    const { intl, layers, open, anchorEl,
-            onRequestClose, onTouchTapLayer } = this.props;
+    const {
+      layers, open, anchorEl,
+      onRequestClose, onTouchTapLayer,
+    } = this.props;
 
     return layers && layers.length !== 0 ? (
       <Popover
@@ -42,14 +45,13 @@ class LayersComponent extends Component {
         onRequestClose={onRequestClose}
       >
         <Menu>
-          { layers.map((layer) => (
-              <MenuItem 
-                key={layer.creator_id}
-                primaryText={layer.creator_name}
-                checked={layer.isDisplayed}
-                onTouchTap={() => (onTouchTapLayer(layer))}
-              />
-            ))
+          { layers.map(layer => (
+            <MenuItem
+              key={layer.creator_id}
+              primaryText={layer.creator_name}
+              checked={layer.isDisplayed}
+              onTouchTap={() => (onTouchTapLayer(layer))}
+            />))
           }
         </Menu>
       </Popover>

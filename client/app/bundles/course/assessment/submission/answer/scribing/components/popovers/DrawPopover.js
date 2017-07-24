@@ -1,7 +1,7 @@
-import React, { Component, PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
-import { SketchPicker } from 'react-color';
-import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
+import Popover, { PopoverAnimationVertical } from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 
 import LineThicknessField from '../fields/LineThicknessField';
@@ -21,7 +21,7 @@ const propTypes = {
   colorPickerPopoverAnchorEl: PropTypes.object,
   onRequestCloseColorPickerPopover: PropTypes.func,
   onChangeCompleteColorPicker: PropTypes.func,
-}
+};
 
 const styles = {
   toolDropdowns: {
@@ -31,7 +31,7 @@ const styles = {
     maxHeight: '250px',
     overflowY: 'auto',
   },
-}
+};
 
 const popoverStyles = {
   anchorOrigin: {
@@ -41,49 +41,48 @@ const popoverStyles = {
   targetOrigin: {
     horizontal: 'left',
     vertical: 'top',
-  }
-}
+  },
+};
 
-class DrawPopover extends Component {
-  render() {
-    const { intl, open, anchorEl, onRequestClose,
-            toolThicknessValue, onChangeSliderThickness,
-            colorPickerColor, onClickColorPicker, colorPickerPopoverOpen,
-            colorPickerPopoverAnchorEl, onRequestCloseColorPickerPopover,
-            onChangeCompleteColorPicker,
-          } = this.props;
+const DrawPopover = (props) => {
+  const {
+    intl, open, anchorEl, onRequestClose,
+    toolThicknessValue, onChangeSliderThickness,
+    colorPickerColor, onClickColorPicker, colorPickerPopoverOpen,
+    colorPickerPopoverAnchorEl, onRequestCloseColorPickerPopover,
+    onChangeCompleteColorPicker,
+  } = props;
 
-    return (
-      <Popover
-        style={styles.toolDropdowns}
-        open={open}
-        anchorEl={anchorEl}
-        anchorOrigin={popoverStyles.anchorOrigin}
-        targetOrigin={popoverStyles.targetOrigin}
-        onRequestClose={onRequestClose}
-        animation={PopoverAnimationVertical}
-      >
-        <Menu style={styles.menu}>
-          <div>
-            <h4>{intl.formatMessage(translations.pencil)} </h4>
-          </div>
-          <LineThicknessField
-            toolThicknessValue={toolThicknessValue}
-            onChangeSliderThickness={onChangeSliderThickness}
-          />
-          <ColorPickerField 
-            onClickColorPicker={onClickColorPicker}
-            colorPickerPopoverOpen={colorPickerPopoverOpen}
-            colorPickerPopoverAnchorEl={colorPickerPopoverAnchorEl}
-            onRequestCloseColorPickerPopover={onRequestCloseColorPickerPopover}
-            colorPickerColor={colorPickerColor}
-            onChangeCompleteColorPicker={onChangeCompleteColorPicker}
-          />
-        </Menu>
-      </Popover>
-    );
-  }
-} 
+  return (
+    <Popover
+      style={styles.toolDropdowns}
+      open={open}
+      anchorEl={anchorEl}
+      anchorOrigin={popoverStyles.anchorOrigin}
+      targetOrigin={popoverStyles.targetOrigin}
+      onRequestClose={onRequestClose}
+      animation={PopoverAnimationVertical}
+    >
+      <Menu style={styles.menu}>
+        <div>
+          <h4>{intl.formatMessage(translations.pencil)} </h4>
+        </div>
+        <LineThicknessField
+          toolThicknessValue={toolThicknessValue}
+          onChangeSliderThickness={onChangeSliderThickness}
+        />
+        <ColorPickerField
+          onClickColorPicker={onClickColorPicker}
+          colorPickerPopoverOpen={colorPickerPopoverOpen}
+          colorPickerPopoverAnchorEl={colorPickerPopoverAnchorEl}
+          onRequestCloseColorPickerPopover={onRequestCloseColorPickerPopover}
+          colorPickerColor={colorPickerColor}
+          onChangeCompleteColorPicker={onChangeCompleteColorPicker}
+        />
+      </Menu>
+    </Popover>
+  );
+};
 
 DrawPopover.propTypes = propTypes;
 export default injectIntl(DrawPopover);

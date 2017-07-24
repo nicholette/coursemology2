@@ -8,7 +8,7 @@ $(document).ready(() => {
   const mountNodeElems = document.getElementsByClassName('scribing-answer');
 
   if (mountNodeElems) {
-    for (var i=0; i<mountNodeElems.length; i++) {
+    for (let i = 0; i < mountNodeElems.length; i++) {
       const mountNode = mountNodeElems[i];
       const store = storeCreator({ scribingAnswer: {} });
       const data = JSON.parse(mountNode.getAttribute('data'));

@@ -1,24 +1,7 @@
-import BaseSubmissionAPI from '../../Base';
+import { getCourseId, getAssessmentId, getScribingId } from 'lib/helpers/url-helpers';
+import BaseAPI from '../../../../../Base';
 
-export default class ScribingsAPI extends BaseSubmissionAPI {
-  /**
-   * scribing_answer = {
-   *   scribbles: [string],
-   * }
-   */
-
-  /**
-   * Fetches a Scribing answer
-   *
-   * @param {number} scribingId
-   * @return {Promise}
-   * success response: scribing_answer
-   */
-  // TODO:
-  fetch(answerId) {
-    return this.getClient().get(`${this._getUrlPrefix()}/${answerId}/scribing/${answerId}`);
-  }
-
+export default class ScribingsAPI extends BaseAPI {
   /**
    * Updates a Scribble
    */
@@ -27,6 +10,7 @@ export default class ScribingsAPI extends BaseSubmissionAPI {
   }
 
   _getUrlPrefix() {
-    return `/courses/${this.getCourseId()}/assessments/${this.getAssessmentId()}/submissions/${this.getSubmissionId()}/answers`;
+    return `/courses/${this.getCourseId()}/assessments/${this.getAssessmentId()}
+            /submissions/${this.getSubmissionId()}/answers`;
   }
 }

@@ -1,6 +1,7 @@
-import React, { Component, PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
-import Popover, {PopoverAnimationVertical} from 'material-ui/Popover';
+import Popover, { PopoverAnimationVertical } from 'material-ui/Popover';
 import Menu from 'material-ui/Menu';
 
 import LineStyleField from '../fields/LineStyleField';
@@ -24,7 +25,7 @@ const propTypes = {
   colorPickerPopoverAnchorEl: PropTypes.object,
   onRequestCloseColorPickerPopover: PropTypes.func,
   onChangeCompleteColorPicker: PropTypes.func,
-}
+};
 
 const styles = {
   toolDropdowns: {
@@ -34,7 +35,7 @@ const styles = {
     maxHeight: '250px',
     overflowY: 'auto',
   },
-}
+};
 
 const popoverStyles = {
   anchorOrigin: {
@@ -44,55 +45,54 @@ const popoverStyles = {
   targetOrigin: {
     horizontal: 'left',
     vertical: 'top',
-  }
-}
+  },
+};
 
-class LinePopover extends Component {
-  render() {
-    const { intl, lineToolType, open, anchorEl, onRequestClose,
-            selectedLineStyle, onTouchTapLineStyleChip,
-            toolThicknessValue, onChangeSliderThickness,
-            colorPickerColor, onClickColorPicker, colorPickerPopoverOpen,
-            colorPickerPopoverAnchorEl, onRequestCloseColorPickerPopover,
-            onChangeCompleteColorPicker,
-          } = this.props;
+const LinePopover = (props) => {
+  const {
+    intl, lineToolType, open, anchorEl, onRequestClose,
+    selectedLineStyle, onTouchTapLineStyleChip,
+    toolThicknessValue, onChangeSliderThickness,
+    colorPickerColor, onClickColorPicker, colorPickerPopoverOpen,
+    colorPickerPopoverAnchorEl, onRequestCloseColorPickerPopover,
+    onChangeCompleteColorPicker,
+  } = props;
 
-    return (
-      <Popover
-        style={styles.toolDropdowns}
-        open={open}
-        anchorEl={anchorEl}
-        anchorOrigin={popoverStyles.anchorOrigin}
-        targetOrigin={popoverStyles.targetOrigin}
-        onRequestClose={onRequestClose}
-        animation={PopoverAnimationVertical}
-      >
-        <Menu style={styles.menu}>
-          <div>
-            <h4>{intl.formatMessage(translations.line)} </h4>
-          </div>
-          <LineStyleField
-            lineToolType={lineToolType}
-            selectedLineStyle={selectedLineStyle}
-            onTouchTapLineStyleChip={onTouchTapLineStyleChip}
-          />
-          <LineThicknessField
-            toolThicknessValue={toolThicknessValue}
-            onChangeSliderThickness={onChangeSliderThickness}
-          />
-          <ColorPickerField 
-            onClickColorPicker={onClickColorPicker}
-            colorPickerPopoverOpen={colorPickerPopoverOpen}
-            colorPickerPopoverAnchorEl={colorPickerPopoverAnchorEl}
-            onRequestCloseColorPickerPopover={onRequestCloseColorPickerPopover}
-            colorPickerColor={colorPickerColor}
-            onChangeCompleteColorPicker={onChangeCompleteColorPicker}
-          />
-        </Menu>
-      </Popover>
-    );
-  }
-} 
+  return (
+    <Popover
+      style={styles.toolDropdowns}
+      open={open}
+      anchorEl={anchorEl}
+      anchorOrigin={popoverStyles.anchorOrigin}
+      targetOrigin={popoverStyles.targetOrigin}
+      onRequestClose={onRequestClose}
+      animation={PopoverAnimationVertical}
+    >
+      <Menu style={styles.menu}>
+        <div>
+          <h4>{intl.formatMessage(translations.line)} </h4>
+        </div>
+        <LineStyleField
+          lineToolType={lineToolType}
+          selectedLineStyle={selectedLineStyle}
+          onTouchTapLineStyleChip={onTouchTapLineStyleChip}
+        />
+        <LineThicknessField
+          toolThicknessValue={toolThicknessValue}
+          onChangeSliderThickness={onChangeSliderThickness}
+        />
+        <ColorPickerField
+          onClickColorPicker={onClickColorPicker}
+          colorPickerPopoverOpen={colorPickerPopoverOpen}
+          colorPickerPopoverAnchorEl={colorPickerPopoverAnchorEl}
+          onRequestCloseColorPickerPopover={onRequestCloseColorPickerPopover}
+          colorPickerColor={colorPickerColor}
+          onChangeCompleteColorPicker={onChangeCompleteColorPicker}
+        />
+      </Menu>
+    </Popover>
+  );
+};
 
 LinePopover.propTypes = propTypes;
 export default injectIntl(LinePopover);

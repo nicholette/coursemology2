@@ -25,7 +25,6 @@ export default function scribingAnswerReducer(state = initialState, action) {
       };
     }
     case actionTypes.FETCH_SCRIBING_ANSWER_REQUEST: {
-      const { isLoading } = action;
       return {
         ...state,
         is_loading: true,
@@ -33,7 +32,6 @@ export default function scribingAnswerReducer(state = initialState, action) {
       };
     }
     case actionTypes.UPDATE_SCRIBING_ANSWER_REQUEST: {
-      const { isLoading } = action;
       return {
         ...state,
         is_loading: true,
@@ -68,12 +66,19 @@ export default function scribingAnswerReducer(state = initialState, action) {
       };
     }
     case actionTypes.UPDATE_SCRIBING_ANSWER_IN_LOCAL: {
+      const scribbles = [];
       state.answer.scribbles.forEach((scribble) => {
-        if (scribble.creator_id === state.answer.user_id) {
-          scribble.content = action.data;
-        }
+        scribbles.push({
+          ...scribble,
+          content: scribble.creator_id === state.answer.user_id ?
+            action.data : scribble.content,
+        });
       });
-      return state;
+
+      return {
+        ...state,
+        scribbles,
+      };
     }
     default: {
       return state;

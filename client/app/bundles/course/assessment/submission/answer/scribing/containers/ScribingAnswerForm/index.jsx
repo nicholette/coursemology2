@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Canvas } from 'react-fabricjs';
+import { fabric } from 'react-fabricjs';
 import { injectIntl, intlShape } from 'react-intl';
 
 import FontIcon from 'material-ui/FontIcon';
@@ -115,33 +115,33 @@ class ScribingAnswerForm extends React.Component {
     };
 
     const initializeToolColor = () => {
-      for (let toolType in toolColor) {
-        this.state.colors[toolType] = '#000000';
-      }
+      Object.values(toolColor).forEach(toolType =>
+       (this.state.colors[toolType] = '#000000')
+      );
     };
 
     const initializeToolThickness = () => {
-      for (let toolType in toolThickness) {
-        this.state.thickness[toolType] = 1;
-      }
+      Object.values(toolThickness).forEach(toolType =>
+       (this.state.thickness[toolType] = 1)
+      );
     };
 
     const initializeLineStyles = () => {
-      for (let toolType in toolLineStyle) {
-        this.state.lineStyles[toolType] = 'solid';
-      }
+      Object.values(toolLineStyle).forEach(toolType =>
+       (this.state.lineStyles[toolType] = 'solid')
+      );
     };
 
     const initializeColorDropdowns = () => {
-      for (let toolType in toolColor) {
-        this.state.colorDropdowns[toolType] = false;
-      }
+      Object.values(toolColor).forEach(toolType =>
+       (this.state.colorDropdowns[toolType] = false)
+      );
     };
 
     const initializePopovers = () => {
-      for (let popoverType in popoverTypes) {
-        this.state.popovers[popoverType] = false;
-      }
+      Object.values(popoverTypes).forEach(popoverType =>
+       (this.state.popovers[popoverType] = false)
+      );
     };
 
     initializeAnswer();
@@ -158,11 +158,11 @@ class ScribingAnswerForm extends React.Component {
         // Don't allow the canvas to initialize twice
         && !nextProps.scribingAnswer.is_canvas_loaded
         && nextProps.scribingAnswer.answer.answer_id
-        && nextProps.scribingAnswer.answer.image_path 
+        && nextProps.scribingAnswer.answer.image_path
       ) {
-        this.initializeCanvas(
-          nextProps.scribingAnswer.answer.answer_id,
-          nextProps.scribingAnswer.answer.image_path);
+      this.initializeCanvas(
+        nextProps.scribingAnswer.answer.answer_id,
+        nextProps.scribingAnswer.answer.image_path);
     } else if (this.props.scribingAnswer.is_canvas_loaded) {
       this.updateScribbles();
     }
@@ -177,7 +177,7 @@ class ScribingAnswerForm extends React.Component {
     }
 
     this.setState({
-      colors: { ...this.state.colors, [coloringTool]: this.getRgbaHelper(color.rgb)},
+      colors: { ...this.state.colors, [coloringTool]: this.getRgbaHelper(color.rgb) },
     });
   }
 
@@ -215,8 +215,8 @@ class ScribingAnswerForm extends React.Component {
 
     this.setState({
       popovers: { ...this.state.popovers, [popoverType]: true },
-      popoverAnchor: popoverType === popoverTypes.LAYER ? 
-            event.currentTarget : 
+      popoverAnchor: popoverType === popoverTypes.LAYER ?
+            event.currentTarget :
             event.currentTarget.parentElement.parentElement,
     });
   }
@@ -242,8 +242,8 @@ class ScribingAnswerForm extends React.Component {
     }
 
     this.setState({
-      thickness: { ...this.state.thickness, [toolType]: value }
-    })
+      thickness: { ...this.state.thickness, [toolType]: value },
+    });
   }
 
   onClickTypingMode = () => {
@@ -254,17 +254,16 @@ class ScribingAnswerForm extends React.Component {
   }
 
   onClickDrawingMode = () => {
-    // isDrawingMode automatically disables selection mode 
-    // in fabric.js library
+    // isDrawingMode automatically disables selection mode in fabric.js
     this.canvas.isDrawingMode = true;
-    this.setState({ selectedTool: tools.DRAW })
+    this.setState({ selectedTool: tools.DRAW });
   }
 
   onClickLineMode = () => {
     this.canvas.isDrawingMode = false;
     this.canvas.defaultCursor = 'crosshair';
     this.disableObjectSelection();
-    this.setState({ selectedTool: tools.LINE })
+    this.setState({ selectedTool: tools.LINE });
   }
 
   onClickShapeMode = () => {
@@ -278,18 +277,18 @@ class ScribingAnswerForm extends React.Component {
     this.canvas.isDrawingMode = false;
     this.canvas.defaultCursor = 'pointer';
     this.enableObjectSelection();
-    this.setState({ selectedTool: tools.SELECT })
+    this.setState({ selectedTool: tools.SELECT });
   }
 
   onClickPanMode = () => {
     this.canvas.isDrawingMode = false;
     this.canvas.defaultCursor = 'move';
     this.disableObjectSelection();
-    this.setState({ selectedTool: tools.PAN })
+    this.setState({ selectedTool: tools.PAN });
   }
 
   onClickZoomIn = () => {
-    let newZoom = this.canvas.getZoom() + 0.1;
+    const newZoom = this.canvas.getZoom() + 0.1;
     this.canvas.zoomToPoint({
       x: this.canvas.height / 2,
       y: this.canvas.width / 2,
@@ -297,7 +296,7 @@ class ScribingAnswerForm extends React.Component {
   }
 
   onClickZoomOut = () => {
-    let newZoom = Math.max(this.canvas.getZoom() - 0.1, 1);
+    const newZoom = Math.max(this.canvas.getZoom() - 0.1, 1);
     this.canvas.zoomToPoint({
       x: this.canvas.height / 2,
       y: this.canvas.width / 2,
@@ -312,13 +311,10 @@ class ScribingAnswerForm extends React.Component {
 
     if (activeObject) {
       canvas.remove(activeObject);
-    }
-    else if (activeGroup) {
+    } else if (activeGroup) {
       const objectsInGroup = activeGroup.getObjects();
       canvas.discardActiveGroup();
-      objectsInGroup.forEach(function(object) {
-        canvas.remove(object);
-      });
+      objectsInGroup.forEach(object => (canvas.remove(object)));
     }
   }
 
@@ -331,23 +327,23 @@ class ScribingAnswerForm extends React.Component {
   }
 
   setSelectedShape = (shape) => {
-   this.setState({
-    selectedShape: shape,
-   });
+    this.setState({
+      selectedShape: shape,
+    });
   }
 
   addText = () => {
-    this.canvas.add(new fabric.IText('Text', { 
+    this.canvas.add(new fabric.IText('Text', {
       fontFamily: this.state.fontFamily,
       fontSize: this.state.fontSize,
       fill: this.state.colors[toolColor.TYPE],
-      left: this.canvas.width / 2, 
-      top: this.canvas.height / 2 ,
+      left: this.canvas.width / 2,
+      top: this.canvas.height / 2,
     }));
   }
 
   // Canvas Event Handlers
-  
+
   onMouseDownCanvas = (options) => {
     this.mouseDragFlag = false;
     this.mouseCanvasDragStartPoint = this.getCanvasPoint(options.e);
@@ -363,13 +359,13 @@ class ScribingAnswerForm extends React.Component {
     this.mouseDragFlag = true;
 
     // Do panning action
-    let tryPan = (finalLeft, finalTop) => {
+    const tryPan = (left, top) => {
       // limit panning
-      finalLeft = Math.min(finalLeft, 0);
+      let finalLeft = Math.min(left, 0);
       finalLeft = Math.max(finalLeft, (this.canvas.getZoom() - 1) * this.canvas.getWidth() * -1);
-      finalTop = Math.min(finalTop, 0);
+      let finalTop = Math.min(top, 0);
       finalTop = Math.max(finalTop, (this.canvas.getZoom() - 1) * this.canvas.getHeight() * -1);
-      
+
       // apply calculated pan transforms
       this.canvas.viewportTransform[4] = finalLeft;
       this.canvas.viewportTransform[5] = finalTop;
@@ -377,11 +373,11 @@ class ScribingAnswerForm extends React.Component {
     };
 
     if (this.state.selectedTool === tools.PAN && this.mouseDownFlag) {
-      let mouseCurrentPoint = this.getMousePoint(options.e);
-      var deltaLeft = mouseCurrentPoint.x - this.mouseStartPoint.x;
-      var deltaTop = mouseCurrentPoint.y - this.mouseStartPoint.y;
-      var newLeft = this.viewportLeft + deltaLeft;
-      var newTop = this.viewportTop + deltaTop;
+      const mouseCurrentPoint = this.getMousePoint(options.e);
+      const deltaLeft = mouseCurrentPoint.x - this.mouseStartPoint.x;
+      const deltaTop = mouseCurrentPoint.y - this.mouseStartPoint.y;
+      const newLeft = this.viewportLeft + deltaLeft;
+      const newTop = this.viewportTop + deltaTop;
       tryPan(newLeft, newTop);
     } else if (options.isForced) {
       // Facilitates zooming out
@@ -394,9 +390,11 @@ class ScribingAnswerForm extends React.Component {
     this.mouseCanvasDragEndPoint = this.getCanvasPoint(options.e);
 
     const getVectorDist = () => (
-      Math.abs((this.mouseCanvasDragStartPoint.x - this.mouseCanvasDragEndPoint.x) << 1)
-        + Math.abs((this.mouseCanvasDragStartPoint.y - this.mouseCanvasDragEndPoint.y) << 1)
-    )
+      (this.mouseCanvasDragStartPoint.x - this.mouseCanvasDragEndPoint.x)
+      * (this.mouseCanvasDragStartPoint.x - this.mouseCanvasDragEndPoint.x)
+      + (this.mouseCanvasDragStartPoint.y - this.mouseCanvasDragEndPoint.y)
+      * (this.mouseCanvasDragStartPoint.y - this.mouseCanvasDragEndPoint.y)
+    );
 
     const getStrokeDashArray = (toolType) => {
       switch (this.state.lineStyles[toolType]) {
@@ -411,33 +409,37 @@ class ScribingAnswerForm extends React.Component {
           return [];
         }
       }
-    }
+    };
 
-    let minDistThreshold = 25;
-    let passedDistThreshold = getVectorDist() > minDistThreshold;
-    let isMouseDrag = this.mouseDragFlag === true && passedDistThreshold;
+    const minDistThreshold = 25;
+    const passedDistThreshold = getVectorDist() > minDistThreshold;
+    const isMouseDrag = this.mouseDragFlag === true && passedDistThreshold;
 
     if (isMouseDrag) {
-       if (this.state.selectedTool === tools.LINE) {
+      if (this.state.selectedTool === tools.LINE) {
         const strokeDashArray = getStrokeDashArray(toolLineStyle.LINE);
-        let line = new fabric.Line(
-          [this.mouseCanvasDragStartPoint.x, this.mouseCanvasDragStartPoint.y,
-           this.mouseCanvasDragEndPoint.x, this.mouseCanvasDragEndPoint.y],
+        const line = new fabric.Line(
+          [
+            this.mouseCanvasDragStartPoint.x, this.mouseCanvasDragStartPoint.y,
+            this.mouseCanvasDragEndPoint.x, this.mouseCanvasDragEndPoint.y,
+          ],
           {
             stroke: `${this.state.colors[toolColor.LINE]}`,
             strokeWidth: this.state.thickness[toolThickness.LINE],
             strokeDashArray,
-            selectable: false
+            selectable: false,
           }
         );
         this.canvas.add(line);
-
       } else if (this.state.selectedTool === tools.SHAPE) {
         const strokeDashArray = getStrokeDashArray(toolLineStyle.SHAPE_BORDER);
         switch (this.state.selectedShape) {
           case shapes.RECT: {
-            let dragProps = this.generateMouseDragProperties(this.mouseCanvasDragStartPoint, this.mouseCanvasDragEndPoint);
-            let rect = new fabric.Rect({
+            const dragProps = this.generateMouseDragProperties(
+              this.mouseCanvasDragStartPoint,
+              this.mouseCanvasDragEndPoint
+            );
+            const rect = new fabric.Rect({
               left: dragProps.left,
               top: dragProps.top,
               stroke: `${this.state.colors[toolColor.SHAPE_BORDER]}`,
@@ -452,8 +454,11 @@ class ScribingAnswerForm extends React.Component {
             break;
           }
           case shapes.ELLIPSE: {
-            let dragProps = this.generateMouseDragProperties(this.mouseCanvasDragStartPoint, this.mouseCanvasDragEndPoint);
-            let ellipse = new fabric.Ellipse({
+            const dragProps = this.generateMouseDragProperties(
+              this.mouseCanvasDragStartPoint,
+              this.mouseCanvasDragEndPoint
+            );
+            const ellipse = new fabric.Ellipse({
               left: dragProps.left,
               top: dragProps.top,
               stroke: `${this.state.colors[toolColor.SHAPE_BORDER]}`,
@@ -467,6 +472,9 @@ class ScribingAnswerForm extends React.Component {
             this.canvas.add(ellipse);
             break;
           }
+          default: {
+            break;
+          }
         }
       }
     }
@@ -474,21 +482,26 @@ class ScribingAnswerForm extends React.Component {
 
   // Limit moving of objects to within the canvas
   onObjectMovingCanvas = (options) => {
-    var obj = options.target;
+    const obj = options.target;
      // if object is too big ignore
-    if(obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width){
-        return;
-    }        
+    if (obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width) {
+      return;
+    }
     obj.setCoords();
     // top-left  corner
-    if(obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0){
-        obj.top = Math.max(obj.top, obj.top-obj.getBoundingRect().top);
-        obj.left = Math.max(obj.left, obj.left-obj.getBoundingRect().left);
+    if (obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0) {
+      obj.top = Math.max(obj.top, obj.top - obj.getBoundingRect().top);
+      obj.left = Math.max(obj.left, obj.left - obj.getBoundingRect().left);
     }
     // bot-right corner
-    if(obj.getBoundingRect().top+obj.getBoundingRect().height  > obj.canvas.height || obj.getBoundingRect().left+obj.getBoundingRect().width  > obj.canvas.width){
-        obj.top = Math.min(obj.top, obj.canvas.height-obj.getBoundingRect().height+obj.top-obj.getBoundingRect().top);
-        obj.left = Math.min(obj.left, obj.canvas.width-obj.getBoundingRect().width+obj.left-obj.getBoundingRect().left);
+    if (obj.getBoundingRect().top + obj.getBoundingRect().height > obj.canvas.height
+      || obj.getBoundingRect().left + obj.getBoundingRect().width > obj.canvas.width) {
+      obj.top = Math.min(obj.top,
+        (obj.canvas.height - obj.getBoundingRect().height
+        + obj.top - obj.getBoundingRect().top));
+      obj.left = Math.min(obj.left,
+        (obj.canvas.width - obj.getBoundingRect().width
+        + obj.left - obj.getBoundingRect().left));
     }
   }
 
@@ -497,18 +510,18 @@ class ScribingAnswerForm extends React.Component {
   // Function Helpers
 
   disableObjectSelection() {
-    this.canvas.forEachObject(function(object) {
-      object.selectable = false;
-    });
+    this.canvas.forEachObject(object => (
+      object.selectable = false
+    ));
   }
 
   // This method only enable selection for interactive texts
   enableTextSelection() {
     this.canvas.clear();
     this.initializeScribbles();
-    this.canvas.forEachObject(function(object) {
-      object.selectable = (object.type === 'i-text');
-    });
+    this.canvas.forEachObject(object => (
+      object.selectable = (object.type === 'i-text')
+    ));
   }
 
   // This method clears the selection-disabled scribbles
@@ -533,9 +546,9 @@ class ScribingAnswerForm extends React.Component {
     scribble.set({
       scaleX: scribble.scaleX * factor,
       scaleY: scribble.scaleY * factor,
-      left: scribble.left  * factor,
-      top: scribble.top  * factor
-    }); 
+      left: scribble.left * factor,
+      top: scribble.top * factor,
+    });
 
     return scribble;
   }
@@ -556,13 +569,13 @@ class ScribingAnswerForm extends React.Component {
         const fabricObjs = [];
 
         // Parse JSON to Fabric.js objects
-        for (var i = 0; i < objects.length; i++) {
-          var klass = fabric.util.getKlass(objects[i].type);
+        for (let i = 0; i < objects.length; i++) {
+          const klass = fabric.util.getKlass(objects[i].type);
           switch (objects[i].type) {
             case 'path': {
               klass.fromObject(objects[i], (obj) => {
-                this.denormaliseScribble(obj);
-                fabricObjs.push(obj);
+                const o = this.denormaliseScribble(obj);
+                fabricObjs.push(o);
               });
               break;
             }
@@ -570,9 +583,12 @@ class ScribingAnswerForm extends React.Component {
             case 'line':
             case 'rect':
             case 'ellipse': {
-              let obj = klass.fromObject(objects[i]);
-              this.denormaliseScribble(obj);
-              fabricObjs.push(obj);
+              const obj = klass.fromObject(objects[i]);
+              const o = this.denormaliseScribble(obj);
+              fabricObjs.push(o);
+              break;
+            }
+            default: {
               break;
             }
           }
@@ -589,16 +605,15 @@ class ScribingAnswerForm extends React.Component {
           const showLayer = (isShown) => {
             scribbleGroup._objects.forEach((obj) => (obj.visible = isShown));
             this.canvas.renderAll();
-          }
+          };
           // Populate layers list
           const newScribble = {
             ...scribble,
             isDisplayed: true,
             showLayer,
-          }
+          };
           this.layers = [...this.layers, newScribble];
           this.canvas.add(scribbleGroup);
-
         } else {
           // Hold user's scribble until all the other 
           // user's scribble layers have been added
@@ -606,13 +621,11 @@ class ScribingAnswerForm extends React.Component {
           // the user's scribbles
           userScribble = fabricObjs;
         }
-      })
+      });
 
       // Layer for current user's scribble
       // Enables scribble selection
-      userScribble.map((obj) => {
-        this.canvas.add(obj)
-      });
+      userScribble.map(obj => (this.canvas.add(obj)));
     }
     this.isScribblesLoaded = true;
   }
@@ -639,12 +652,12 @@ class ScribingAnswerForm extends React.Component {
       const canvas = new fabric.Canvas(`canvas-${answerId}`, {
         width: this.width,
         height: this.height,
-        preserveObjectStacking: true
+        preserveObjectStacking: true,
       });
 
       const fabricImage = new fabric.Image(
         this.image,
-        { opacity: 1, scaleX: this.scale, scaleY: this.scale },
+        { opacity: 1, scaleX: this.scale, scaleY: this.scale }
       );
       canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
 
@@ -662,7 +675,7 @@ class ScribingAnswerForm extends React.Component {
       _self.scaleCanvas();
 
       _self.props.actions.setCanvasLoaded(true);
-    }
+    };
   }
 
   // Adjusting canvas height after canvas initialization
@@ -674,9 +687,8 @@ class ScribingAnswerForm extends React.Component {
   }
 
   // Scribble Helpers
-  
+
   updateScribbles() {
-    const { user_id } = this.props.scribingAnswer.answer;
     const { layers } = this;
 
     if (layers) {
@@ -701,51 +713,51 @@ class ScribingAnswerForm extends React.Component {
       if (layer.creator_id !== this.props.scribingAnswer.answer.user_id) {
         layer.showLayer(false);
       }
-    })
+    });
 
     // Only save rescaled user scribings
-    const objects = this.canvas._objects;
-    objects.forEach((obj) => {
-      this.normaliseScribble(obj);
+    const objects = [];
+    this.canvas._objects.forEach((obj) => {
+      objects.push(this.normaliseScribble(obj));
     });
     const json = JSON.stringify(objects);
 
-    // Scale back user scribings
-    objects.forEach((obj) => {
-      this.denormaliseScribble(obj);
-    });
+    // // Scale back user scribings
+    // objects.forEach((obj) => {
+    //   this.denormaliseScribble(obj);
+    // });
 
     // Add back non-user scribings according canvas state
-    this.layers.forEach((layer) => (layer.showLayer(layer.isDisplayed)));
+    this.layers.forEach(layer => (layer.showLayer(layer.isDisplayed)));
 
-    return '{"objects":'+ json +'}';
+    return `{"objects": ${json}}`;
   }
 
   // Utility Helpers
 
-  getRgbaHelper(json) {
-    return 'rgba(' + json.r + ',' + json.g + ',' + json.b + ',' + json.a + ')';
-  }
+  getRgbaHelper = json => (
+    `rgba(${json.r},${json.g},${json.b},${json.a})`
+  );
 
-  getMousePoint(event) {
-    return {
+  getMousePoint = event => (
+    {
       x: event.clientX,
       y: event.clientY,
     }
-  }
+  );
 
   // Generates the left, top, width and height of the drag
-  generateMouseDragProperties(point1, point2) {
-    return {
+  generateMouseDragProperties = (point1, point2) => (
+    {
       left: point1.x < point2.x ? point1.x : point2.x,
       top: point1.y < point2.y ? point1.y : point2.y,
       width: Math.abs(point1.x - point2.x),
       height: Math.abs(point1.y - point2.y),
     }
-  }
+  );
 
   getCanvasPoint(event) {
-    let pointer = this.canvas.getPointer(event.e);
+    const pointer = this.canvas.getPointer(event.e);
     return {
       x: pointer.x,
       y: pointer.y,
@@ -755,10 +767,10 @@ class ScribingAnswerForm extends React.Component {
 
   renderToolBar() {
     const { intl } = this.props;
-    const lineToolStyle = { 
+    const lineToolStyle = {
       ...styles.custom_line,
       background: this.state.selectedTool === tools.LINE ? 'black' : 'rgba(0, 0, 0, 0.4)',
-    } 
+    };
 
     return (
       <Toolbar style={{ ...styles.toolbar, width: this.CANVAS_MAX_WIDTH }}>
@@ -771,8 +783,8 @@ class ScribingAnswerForm extends React.Component {
             onClick={this.onClickTypingMode}
             onClickIcon={this.addText}
             colorBar={this.state.colors[toolColor.TYPE]}
-            onTouchTapChevron={(event) => (this.onTouchTapPopover(event, popoverTypes.TYPE))}
-            iconClassname='fa fa-font'
+            onTouchTapChevron={event => (this.onTouchTapPopover(event, popoverTypes.TYPE))}
+            iconClassname="fa fa-font"
             onMouseEnter={() => this.onMouseEnter(tools.TYPE)}
             onMouseLeave={this.onMouseLeave}
             popoverComponent={() => (
@@ -784,12 +796,12 @@ class ScribingAnswerForm extends React.Component {
                 onChangeFontFamily={this.onChangeFontFamily}
                 fontSizeValue={this.state.fontSize}
                 onChangeFontSize={this.onChangeFontSize}
-                onClickColorPicker={(event) => (this.onClickColorPicker(event, toolColor.TYPE))}
+                onClickColorPicker={event => (this.onClickColorPicker(event, toolColor.TYPE))}
                 colorPickerPopoverOpen={this.state.colorDropdowns[toolColor.TYPE]}
                 colorPickerPopoverAnchorEl={this.state.popoverColorPickerAnchor}
                 onRequestCloseColorPickerPopover={() => (this.onRequestCloseColorPicker(toolColor.TYPE))}
                 colorPickerColor={this.state.colors[toolColor.TYPE]}
-                onChangeCompleteColorPicker={(color) => (this.onChangeCompleteColor(color, toolColor.TYPE))}
+                onChangeCompleteColorPicker={color => (this.onChangeCompleteColor(color, toolColor.TYPE))}
               />)}
           />
           <ToolDropdown
@@ -799,8 +811,8 @@ class ScribingAnswerForm extends React.Component {
             currentTool={this.state.selectedTool}
             onClick={this.onClickDrawingMode}
             colorBar={this.state.colors[toolColor.DRAW]}
-            onTouchTapChevron={(event) => (this.onTouchTapPopover(event, popoverTypes.DRAW))}
-            iconClassname='fa fa-pencil'
+            onTouchTapChevron={event => (this.onTouchTapPopover(event, popoverTypes.DRAW))}
+            iconClassname="fa fa-pencil"
             onMouseEnter={() => this.onMouseEnter(tools.DRAW)}
             onMouseLeave={this.onMouseLeave}
             popoverComponent={() => (
@@ -809,13 +821,15 @@ class ScribingAnswerForm extends React.Component {
                 anchorEl={this.state.popoverAnchor}
                 onRequestClose={() => (this.onRequestClosePopover(popoverTypes.DRAW))}
                 toolThicknessValue={this.state.thickness[toolThickness.DRAW]}
-                onChangeSliderThickness={(event, newValue) => (this.onChangeSliderThickness(event, toolThickness.DRAW, newValue))}
+                onChangeSliderThickness={(event, newValue) =>
+                  (this.onChangeSliderThickness(event, toolThickness.DRAW, newValue))
+                }
                 colorPickerColor={this.state.colors[toolColor.DRAW]}
-                onClickColorPicker={(event) => (this.onClickColorPicker(event, toolColor.DRAW))}
+                onClickColorPicker={event => (this.onClickColorPicker(event, toolColor.DRAW))}
                 colorPickerPopoverOpen={this.state.colorDropdowns[toolColor.DRAW]}
                 colorPickerPopoverAnchorEl={this.state.popoverColorPickerAnchor}
-                onRequestCloseColorPickerPopover={() => (this.onRequestCloseColorPicker(toolColor.DRAW)) }
-                onChangeCompleteColorPicker={(color) => (this.onChangeCompleteColor(color, toolColor.DRAW))}
+                onRequestCloseColorPickerPopover={() => (this.onRequestCloseColorPicker(toolColor.DRAW))}
+                onChangeCompleteColorPicker={color => (this.onChangeCompleteColor(color, toolColor.DRAW))}
               />
             )}
           />
@@ -826,8 +840,8 @@ class ScribingAnswerForm extends React.Component {
             currentTool={this.state.selectedTool}
             onClick={this.onClickLineMode}
             colorBar={this.state.colors[toolColor.LINE]}
-            onTouchTapChevron={(event) => (this.onTouchTapPopover(event, popoverTypes.LINE))}
-            iconComponent={() => (<div style={lineToolStyle}/>)}
+            onTouchTapChevron={event => (this.onTouchTapPopover(event, popoverTypes.LINE))}
+            iconComponent={() => (<div style={lineToolStyle} />)}
             onMouseEnter={() => this.onMouseEnter(tools.LINE)}
             onMouseLeave={this.onMouseLeave}
             popoverComponent={() => (
@@ -839,13 +853,15 @@ class ScribingAnswerForm extends React.Component {
                 selectedLineStyle={this.state.lineStyles[toolLineStyle.LINE]}
                 onTouchTapLineStyleChip={this.onTouchTapLineStyleChip}
                 toolThicknessValue={this.state.thickness[toolThickness.LINE]}
-                onChangeSliderThickness={(event, newValue) => (this.onChangeSliderThickness(event, toolThickness.LINE, newValue))}
+                onChangeSliderThickness={(event, newValue) =>
+                  (this.onChangeSliderThickness(event, toolThickness.LINE, newValue))
+                }
                 colorPickerColor={this.state.colors[toolColor.LINE]}
-                onClickColorPicker={(event) => (this.onClickColorPicker(event, toolColor.LINE))}
+                onClickColorPicker={event => (this.onClickColorPicker(event, toolColor.LINE))}
                 colorPickerPopoverOpen={this.state.colorDropdowns[toolColor.LINE]}
                 colorPickerPopoverAnchorEl={this.state.popoverColorPickerAnchor}
-                onRequestCloseColorPickerPopover={() => (this.onRequestCloseColorPicker(toolColor.LINE)) }
-                onChangeCompleteColorPicker={(color) => (this.onChangeCompleteColor(color, toolColor.LINE))}
+                onRequestCloseColorPickerPopover={() => (this.onRequestCloseColorPicker(toolColor.LINE))}
+                onChangeCompleteColorPicker={color => (this.onChangeCompleteColor(color, toolColor.LINE))}
               />
             )}
           />
@@ -857,50 +873,49 @@ class ScribingAnswerForm extends React.Component {
             onClick={this.onClickShapeMode}
             onMouseEnter={() => this.onMouseEnter(tools.SHAPE)}
             onMouseLeave={this.onMouseLeave}
-            colorBarComponent={() => (
-              <div style={
-                {
-                  width:'23px',
-                  height:'8px',
-                  border: `${this.state.colors[toolColor.SHAPE_BORDER]} 2px solid`,
-                  background: this.state.colors[toolColor.SHAPE_FILL]
-                }
-              }/>
-            )}
-            onTouchTapChevron={(event) => (this.onTouchTapPopover(event, popoverTypes.SHAPE))}
+            colorBarComponent={() =>
+            (<div style={{
+              width: '23px',
+              height: '8px',
+              border: `${this.state.colors[toolColor.SHAPE_BORDER]} 2px solid`,
+              background: this.state.colors[toolColor.SHAPE_FILL],
+            }}/>)}
+            onTouchTapChevron={event => (this.onTouchTapPopover(event, popoverTypes.SHAPE))}
             iconClassname={this.state.selectedShape === shapes.RECT ? 'fa fa-square-o' : 'fa fa-circle-o'}
-            popoverComponent={()=>(
+            popoverComponent={() => (
               <ShapePopover
                 lineToolType={toolThickness.SHAPE_BORDER}
                 open={this.state.popovers.SHAPE}
                 anchorEl={this.state.popoverAnchor}
                 onRequestClose={() => (this.onRequestClosePopover(popoverTypes.SHAPE))}
-                setSelectedShape={(shape) => (this.setSelectedShape(shape))}
+                setSelectedShape={shape => (this.setSelectedShape(shape))}
                 selectedLineStyle={this.state.lineStyles[toolLineStyle.SHAPE_BORDER]}
                 onTouchTapLineStyleChip={this.onTouchTapLineStyleChip}
                 toolThicknessValue={this.state.thickness[toolThickness.SHAPE_BORDER]}
-                onChangeSliderThickness={(event, newValue) => (this.onChangeSliderThickness(event, toolThickness.SHAPE_BORDER, newValue))}
+                onChangeSliderThickness={(event, newValue) =>
+                  (this.onChangeSliderThickness(event, toolThickness.SHAPE_BORDER, newValue))
+                }
                 borderColorPickerColor={this.state.colors[toolColor.SHAPE_BORDER]}
-                onClickBorderColorPicker={(event) => (this.onClickColorPicker(event, toolColor.SHAPE_BORDER))}
+                onClickBorderColorPicker={event => (this.onClickColorPicker(event, toolColor.SHAPE_BORDER))}
                 borderColorPickerPopoverOpen={this.state.colorDropdowns[toolColor.SHAPE_BORDER]}
                 borderColorPickerPopoverAnchorEl={this.state.popoverColorPickerAnchor}
-                onRequestCloseBorderColorPickerPopover={() => (this.onRequestCloseColorPicker(toolColor.SHAPE_BORDER)) }
-                onChangeCompleteBorderColorPicker={(color) => (this.onChangeCompleteColor(color, toolColor.SHAPE_BORDER))}
+                onRequestCloseBorderColorPickerPopover={() => (this.onRequestCloseColorPicker(toolColor.SHAPE_BORDER))}
+                onChangeCompleteBorderColorPicker={color => (this.onChangeCompleteColor(color, toolColor.SHAPE_BORDER))}
                 fillColorPickerColor={this.state.colors[toolColor.SHAPE_FILL]}
-                onClickFillColorPicker={(event) => (this.onClickColorPicker(event, toolColor.SHAPE_FILL))}
+                onClickFillColorPicker={event => (this.onClickColorPicker(event, toolColor.SHAPE_FILL))}
                 fillColorPickerPopoverOpen={this.state.colorDropdowns[toolColor.SHAPE_FILL]}
                 fillColorPickerPopoverAnchorEl={this.state.popoverColorPickerAnchor}
-                onRequestCloseFillColorPickerPopover={() => (this.onRequestCloseColorPicker(toolColor.SHAPE_FILL)) }
-                onChangeCompleteFillColorPicker={(color) => (this.onChangeCompleteColor(color, toolColor.SHAPE_FILL))}
+                onRequestCloseFillColorPickerPopover={() => (this.onRequestCloseColorPicker(toolColor.SHAPE_FILL))}
+                onChangeCompleteFillColorPicker={color => (this.onChangeCompleteColor(color, toolColor.SHAPE_FILL))}
               />
             )}
           />
         </ToolbarGroup>
         <ToolbarGroup>
           <FontIcon
-            className='fa fa-hand-pointer-o' 
+            className="fa fa-hand-pointer-o"
             style={this.state.selectedTool === tools.SELECT ?
-              {...styles.tool, color: 'black'} : styles.tool}
+              { ...styles.tool, color: 'black' } : styles.tool}
             onClick={this.onClickSelectionMode}
             onMouseEnter={() => this.onMouseEnter(tools.SELECT)}
             onMouseLeave={this.onMouseLeave}
@@ -913,14 +928,14 @@ class ScribingAnswerForm extends React.Component {
             />
           </FontIcon>
           <LayersComponent
-            onTouchTap={(event) => (this.onTouchTapPopover(event, popoverTypes.LAYER))}
+            onTouchTap={event => (this.onTouchTapPopover(event, popoverTypes.LAYER))}
             disabled={this.layers && this.layers.length === 0}
             open={this.state.popovers[popoverTypes.LAYER]}
             anchorEl={this.state.popoverAnchor}
             onRequestClose={() => (this.onRequestClosePopover(popoverTypes.LAYER))}
             layers={this.layers}
             onTouchTapLayer={(layer) => {
-              const temp = _.find(this.layers, {creator_id: layer.creator_id});
+              const temp = _.find(this.layers, { creator_id: layer.creator_id });
               temp.isDisplayed = !temp.isDisplayed;
               this.updateScribbles();
               this.forceUpdate();
@@ -928,14 +943,14 @@ class ScribingAnswerForm extends React.Component {
           />
         </ToolbarGroup>
         <ToolbarGroup>
-          <FontIcon 
-            className='fa fa-arrows'
+          <FontIcon
+            className="fa fa-arrows"
             style={this.state.selectedTool === tools.PAN ?
-              {color: 'black'} : {} }
+              { color: 'black' } : {}}
             onClick={this.onClickPanMode}
             onMouseEnter={() => this.onMouseEnter(tools.PAN)}
             onMouseLeave={this.onMouseLeave}
-          >            
+          >
             <MaterialTooltip
               horizontalPosition={'center'}
               label={intl.formatMessage(translations.pan)}
@@ -943,8 +958,8 @@ class ScribingAnswerForm extends React.Component {
               verticalPosition={'top'}
             />
           </FontIcon>
-          <FontIcon 
-            className='fa fa-search-plus'
+          <FontIcon
+            className="fa fa-search-plus"
             onClick={this.onClickZoomIn}
             onMouseEnter={() => this.onMouseEnter(tools.ZOOM_IN)}
             onMouseLeave={this.onMouseLeave}
@@ -957,7 +972,7 @@ class ScribingAnswerForm extends React.Component {
             />
           </FontIcon>
           <FontIcon
-            className='fa fa-search-minus'
+            className="fa fa-search-minus"
             onClick={this.onClickZoomOut}
             onMouseEnter={() => this.onMouseEnter(tools.ZOOM_OUT)}
             onMouseLeave={this.onMouseLeave}
@@ -972,7 +987,7 @@ class ScribingAnswerForm extends React.Component {
         </ToolbarGroup>
         <ToolbarGroup>
           <FontIcon
-            className='fa fa-trash-o'
+            className="fa fa-trash-o"
             onClick={this.onClickDelete}
             onMouseEnter={() => this.onMouseEnter(tools.DELETE)}
             onMouseLeave={this.onMouseLeave}
@@ -986,7 +1001,7 @@ class ScribingAnswerForm extends React.Component {
           </FontIcon>
         </ToolbarGroup>
         <ToolbarGroup>
-          <SavingIndicator 
+          <SavingIndicator
             is_saving={this.props.scribingAnswer.is_saving}
             is_saved={this.props.scribingAnswer.is_saved}
             save_errors={this.props.scribingAnswer.save_errors}
@@ -994,17 +1009,17 @@ class ScribingAnswerForm extends React.Component {
           />
         </ToolbarGroup>
       </Toolbar>
-    )
+    );
   }
 
   render() {
     const answerId = this.props.scribingAnswer.answer.answer_id;
     const isCanvasLoaded = this.props.scribingAnswer.is_canvas_loaded;
-    return (answerId ? 
+    return (answerId ?
       <div style={styles.canvas_div}>
         { this.renderToolBar() }
         { !isCanvasLoaded ? <LoadingIndicator /> : null }
-        <canvas style={styles.canvas} id={`canvas-${answerId}`} ref='canvas' />
+        <canvas style={styles.canvas} id={`canvas-${answerId}`} ref="canvas" />
       </div> : null
     );
   }

@@ -495,7 +495,6 @@ class ScribingAnswerForm extends React.Component {
     }
   }
 
-
   // Helpers
 
   // Function Helpers
@@ -565,7 +564,6 @@ class ScribingAnswerForm extends React.Component {
             case 'path': {
               klass.fromObject(objects[i], (obj)=>{
                 this.denormaliseScribble(obj);
-                this.scaleScribble(obj);
                 fabricObjs.push(obj);
               });
               break;
@@ -576,7 +574,6 @@ class ScribingAnswerForm extends React.Component {
             case 'ellipse': {
               let obj = klass.fromObject(objects[i]);
               this.denormaliseScribble(obj);
-              this.scaleScribble(obj);
               fabricObjs.push(obj);
               break;
             }
@@ -630,30 +627,30 @@ class ScribingAnswerForm extends React.Component {
   initializeCanvas(answerId, imagePath) {
     const _self = this;
     const imageUrl = 'https://coursemology.org/' + '\\' + imagePath;
-    const image = new Image();
-    image.src = imageUrl;
+    this.image = new Image();
+    this.image.src = imageUrl;
 
-    image.onload = () => {
+    this.image.onload = () => {
       // Get the calculated width of canvas, 750 is min width for scribing toolbar
       const element = document.getElementById(`canvas-${answerId}`);
       this.CANVAS_MAX_WIDTH = Math.max(element.getBoundingClientRect().width, 750);
 
-      const width = Math.min(image.width, this.CANVAS_MAX_WIDTH);
-      this.scale = Math.min(width / image.width, 1);
-      const height = this.scale * image.height;
+      this.width = Math.min(this.image.width, this.CANVAS_MAX_WIDTH);
+      this.scale = Math.min(this.width / this.image.width, 1);
+      this.height = this.scale * this.image.height;
 
-      _self.refs.canvas.width = width;
-      _self.refs.canvas.height = height;
+      _self.refs.canvas.width = this.image.width;
+      _self.refs.canvas.height = this.image.height;
 
       // Takes in canvas's id for initialization
       const canvas = new fabric.Canvas(`canvas-${answerId}`, {
-        width,
-        height,
+        width: this.width,
+        height: this.height,
         preserveObjectStacking: true
       });
 
       const fabricImage = new fabric.Image(
-        image,
+        this.image,
         {opacity: 1, scaleX: this.scale, scaleY: this.scale}
       );
       canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
@@ -665,27 +662,22 @@ class ScribingAnswerForm extends React.Component {
       _self.canvas.observe('object:moving', this.onObjectMovingCanvas);
 
       _self.initializeScribbles();
+      _self.scaleCanvas();
 
       _self.props.actions.setCanvasLoaded(true);
     }
   }
 
+  // Adjusting canvas height after canvas initialization
+  // helps to scale/move scribbles accordingly
+  scaleCanvas() {
+    this.canvas.setWidth(this.width);
+    this.canvas.setHeight(this.height);
+    this.canvas.renderAll();
+  }
+
   // Scribble Helpers
-
-  scaleScribble(scribble) {
-    scribble.scaleX *= this.scale;
-    scribble.scaleY *= this.scale;
-    scribble.left *= this.scale;
-    scribble.top *= this.scale;
-  }
-
-  rescaleScribble(scribble) {
-    scribble.scaleX /= this.scale;
-    scribble.scaleY /= this.scale;
-    scribble.left /= this.scale;
-    scribble.top /= this.scale;
-  }
-
+  
   updateScribbles() {
     const { user_id } = this.props.scribingAnswer.answer;
     const { layers } = this;
@@ -716,14 +708,12 @@ class ScribingAnswerForm extends React.Component {
     const objects = this.canvas._objects;
     objects.forEach((obj) => {
       this.normaliseScribble(obj);
-      this.rescaleScribble(obj);
     });
     const json = JSON.stringify(objects);
 
     // Scale back user scribings
     objects.forEach((obj) => {
       this.denormaliseScribble(obj);
-      this.scaleScribble(obj);
     });
 
     // Add back non-user scribings according canvas state
@@ -908,20 +898,21 @@ class ScribingAnswerForm extends React.Component {
           />
         </ToolbarGroup>
         <ToolbarGroup>
-          <div
+          <FontIcon
+            className="fa fa-hand-pointer-o" 
+            style={this.state.selectedTool === tools.SELECT ?
+              {...styles.tool, color: `black`} : styles.tool}
+            onClick={this.onClickSelectionMode}
             onMouseEnter={()=>(this.setState({hoveredToolTip: tools.SELECT}))}
             onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
-          > 
-            <FontIcon className="fa fa-hand-pointer-o" style={this.state.selectedTool === tools.SELECT ?
-                {...styles.tool, color: `black`} : styles.tool}
-              onClick={this.onClickSelectionMode}/>
+          >
             <MaterialTooltip
               horizontalPosition={'center'}
               label={intl.formatMessage(translations.select)}
               show={this.state.hoveredToolTip === tools.SELECT}
               verticalPosition={'top'}
             />
-          </div>
+          </FontIcon>
           <LayersComponent
             onTouchTap={(event) => (this.onTouchTapPopover(event, popoverTypes.LAYER))}
             disabled={this.layers && this.layers.length === 0}

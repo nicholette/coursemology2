@@ -938,72 +938,66 @@ class ScribingAnswerForm extends React.Component {
           />
         </ToolbarGroup>
         <ToolbarGroup>
-          <div style={styles.tool}>
-            <FontIcon 
-              className="fa fa-arrows"
-              style={this.state.selectedTool === tools.PAN ?
-                {color: `black`} :
-                {color: `rgba(0, 0, 0, 0.4)`}}
-              onClick={this.onClickPanMode}
-              onMouseEnter={()=>(this.setState({hoveredToolTip: tools.PAN}))}
-              onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
-            />
+          <FontIcon 
+            className="fa fa-arrows"
+            style={this.state.selectedTool === tools.PAN ?
+              {color: `black`} :
+              {color: `rgba(0, 0, 0, 0.4)`}}
+            onClick={this.onClickPanMode}
+            onMouseEnter={()=>(this.setState({hoveredToolTip: tools.PAN}))}
+            onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
+          >            
             <MaterialTooltip
               horizontalPosition={'center'}
               label={intl.formatMessage(translations.pan)}
               show={this.state.hoveredToolTip === tools.PAN}
               verticalPosition={'top'}
             />
-          </div>
-
-          <div style={styles.tool}>
-            <FontIcon 
-              className="fa fa-search-plus"
-              style={{color: `rgba(0, 0, 0, 0.4)`}}
-              onClick={this.onClickZoomIn}
-              onMouseEnter={()=>(this.setState({hoveredToolTip: tools.ZOOM_IN}))}
-              onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
-            />
+          </FontIcon>
+          <FontIcon 
+            className="fa fa-search-plus"
+            style={{color: `rgba(0, 0, 0, 0.4)`}}
+            onClick={this.onClickZoomIn}
+            onMouseEnter={()=>(this.setState({hoveredToolTip: tools.ZOOM_IN}))}
+            onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
+          >
             <MaterialTooltip
               horizontalPosition={'center'}
               label={intl.formatMessage(translations.zoomIn)}
               show={this.state.hoveredToolTip === tools.ZOOM_IN}
               verticalPosition={'top'}
             />
-          </div>
-
-          <div style={styles.tool}>
-            <FontIcon
-              className="fa fa-search-minus"
-              style={{color: `rgba(0, 0, 0, 0.4)`}}
-              onClick={this.onClickZoomOut}
-              onMouseEnter={()=>(this.setState({hoveredToolTip: tools.ZOOM_OUT}))}
-              onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
-            />
+          </FontIcon>
+          <FontIcon
+            className="fa fa-search-minus"
+            style={{color: `rgba(0, 0, 0, 0.4)`}}
+            onClick={this.onClickZoomOut}
+            onMouseEnter={()=>(this.setState({hoveredToolTip: tools.ZOOM_OUT}))}
+            onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
+          >
             <MaterialTooltip
               horizontalPosition={'center'}
               label={intl.formatMessage(translations.zoomOut)}
               show={this.state.hoveredToolTip === tools.ZOOM_OUT}
               verticalPosition={'top'}
             />
-          </div>
+          </FontIcon>
         </ToolbarGroup>
         <ToolbarGroup>
-          <div style={styles.tool}>
-            <FontIcon
-              className="fa fa-trash-o"
-              style={{color: `rgba(0, 0, 0, 0.4)`}}
-              onClick={this.onClickDelete}
-              onMouseEnter={()=>(this.setState({hoveredToolTip: tools.DELETE}))}
-              onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
-            />
+          <FontIcon
+            className="fa fa-trash-o"
+            style={{color: `rgba(0, 0, 0, 0.4)`}}
+            onClick={this.onClickDelete}
+            onMouseEnter={()=>(this.setState({hoveredToolTip: tools.DELETE}))}
+            onMouseLeave={()=>(this.setState({hoveredToolTip: ''}))}
+          >
             <MaterialTooltip
               horizontalPosition={'center'}
               label={intl.formatMessage(translations.delete)}
               show={this.state.hoveredToolTip === tools.DELETE}
               verticalPosition={'top'}
             />
-          </div>
+          </FontIcon>
         </ToolbarGroup>
         <ToolbarGroup>
           <SavingIndicator 

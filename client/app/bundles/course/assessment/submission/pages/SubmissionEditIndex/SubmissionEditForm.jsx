@@ -16,9 +16,10 @@ import { red100, red200, red900, yellow900, grey100, blue500, white } from 'mate
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import ConfirmationDialog from 'lib/components/ConfirmationDialog';
-import { explanationShape, questionShape, questionFlagsShape,
+import { explanationShape, questionShape, questionFlagsShape, scribingShape,
         questionGradeShape, topicShape } from '../../propTypes';
 import SubmissionAnswer from '../../components/SubmissionAnswer';
+import ScribingView from '../../components/ScribingView';
 import QuestionGrade from '../../containers/QuestionGrade';
 import GradingPanel from '../../containers/GradingPanel';
 import Comments from '../../containers/Comments';
@@ -476,6 +477,7 @@ SubmissionEditForm.propTypes = {
   questionIds: PropTypes.arrayOf(PropTypes.number),
   questions: PropTypes.objectOf(questionShape),
   questionsFlags: PropTypes.objectOf(questionFlagsShape),
+  scribing: PropTypes.objectOf(scribingShape),
   topics: PropTypes.objectOf(topicShape),
   isAutograding: PropTypes.bool.isRequired,
   isSaving: PropTypes.bool.isRequired,

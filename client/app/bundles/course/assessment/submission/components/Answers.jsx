@@ -19,6 +19,7 @@ import Editor from '../components/Editor';
 import TestCaseView from '../containers/TestCaseView';
 import ReadOnlyEditor from '../containers/ReadOnlyEditor';
 import UploadedFileView from '../containers/UploadedFileView';
+import ScribingView from '../containers/ScribingView';
 
 const translations = defineMessages({
   solutions: {
@@ -204,6 +205,12 @@ export default class Answers extends Component {
         />
         <TestCaseView questionId={question.id} />
       </div>
+    );
+  }
+
+  static renderScribing(scribing, readOnly, answerId) {
+    return (
+      <ScribingView scribing={scribing} readOnly={readOnly} answerId={answerId} />
     );
   }
 }

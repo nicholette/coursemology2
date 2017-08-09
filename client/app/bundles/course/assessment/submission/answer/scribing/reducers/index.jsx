@@ -1,10 +1,10 @@
-import { combineReducers } from 'redux';
-import scribingAnswerReducer, { initialState as scribingAnswerState } from './scribingAnswerReducer';
+// import { combineReducers } from 'redux';
+// import scribingAnswerReducer, { initialState as scribingAnswerState } from './scribingAnswerReducer';
 
-export const initialStates = {
-  scribingAnswer: scribingAnswerState,
-};
+// export const initialStates = {
+//   scribingAnswer: scribingAnswerState,
+// };
 
-export default combineReducers({
-  scribingAnswer: scribingAnswerReducer,
-});
+// export default combineReducers({
+//   scribingAnswer: scribingAnswerReducer,
+// });

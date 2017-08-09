@@ -12,6 +12,7 @@ import questions from './questions';
 import questionsFlags from './questionsFlags';
 import submission from './submission';
 import submissionFlags from './submissionFlags';
+import scribing from './scribing';
 import topics from './topics';
 import grading from './grading';
 import testCases from './testCases';
@@ -30,6 +31,7 @@ export default combineReducers({
   questionsFlags,
   submission,
   submissionFlags,
+  scribing,
   topics,
   grading,
   testCases,

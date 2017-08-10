@@ -778,11 +778,15 @@ class ScribingViewComponent extends React.Component {
 
 
   renderToolBar() {
-    const { intl } = this.props;
+    const { intl, readOnly } = this.props;
     const lineToolStyle = {
       ...styles.custom_line,
       background: this.state.selectedTool === scribingTools.LINE ? 'black' : 'rgba(0, 0, 0, 0.4)',
     };
+
+    if (readOnly) {
+      return null;
+    }
 
     return (
       <Toolbar style={{ ...styles.toolbar, width: this.CANVAS_MAX_WIDTH }}>

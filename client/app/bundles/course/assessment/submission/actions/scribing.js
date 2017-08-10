@@ -61,7 +61,10 @@ export function updateScribingAnswer(answerId, scribblesInJSON) {
   };
 
   return (dispatch) => {
-    dispatch({ type: actions.UPDATE_SCRIBING_ANSWER_REQUEST });
+    dispatch({
+      type: actions.UPDATE_SCRIBING_ANSWER_REQUEST,
+      payload: { answerId },
+    });
 
     return CourseAPI.answer.scribing.scribings.update(answerId, data)
     .then((response) => {

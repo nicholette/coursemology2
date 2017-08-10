@@ -707,7 +707,7 @@ class ScribingViewComponent extends React.Component {
     if (this.isScribblesLoaded) {
       const answerId = this.props.answerId;
       const json = this.getScribbleJSON();
-      this.props.updateScribingAnswerInLocal(json);
+      this.props.updateScribingAnswerInLocal(answerId, json);
       this.props.updateScribingAnswer(answerId, json);
     }
   }
@@ -1015,7 +1015,7 @@ class ScribingViewComponent extends React.Component {
             isSaving={this.props.scribing.isSaving}
             isSaved={this.props.scribing.isSaved}
             hasError={this.props.scribing.hasError}
-            clearSavingStatus={this.props.clearSavingStatus}
+            clearSavingStatus={() => this.props.clearSavingStatus(this.props.answerId)}
           />
         </ToolbarGroup>
       </Toolbar>

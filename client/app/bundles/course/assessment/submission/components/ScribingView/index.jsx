@@ -372,6 +372,7 @@ class ScribingViewComponent extends React.Component {
   }
 
   onMouseUpCanvas = (options) => {
+    console.log(this.canvas);
     this.mouseDownFlag = false;
     this.mouseCanvasDragEndPoint = this.getCanvasPoint(options.e);
 
@@ -417,6 +418,7 @@ class ScribingViewComponent extends React.Component {
           }
         );
         this.canvas.add(line);
+        this.canvas.renderAll();
       } else if (this.state.selectedTool === scribingTools.SHAPE) {
         const strokeDashArray = getStrokeDashArray(scribingToolLineStyle.SHAPE_BORDER);
         switch (this.state.selectedShape) {
@@ -437,6 +439,7 @@ class ScribingViewComponent extends React.Component {
               selectable: false,
             });
             this.canvas.add(rect);
+            this.canvas.renderAll();
             break;
           }
           case scribingShapes.ELLIPSE: {
@@ -456,6 +459,7 @@ class ScribingViewComponent extends React.Component {
               selectable: false,
             });
             this.canvas.add(ellipse);
+            this.canvas.renderAll();
             break;
           }
           default: {
@@ -504,7 +508,7 @@ class ScribingViewComponent extends React.Component {
   // This method only enable selection for interactive texts
   enableTextSelection() {
     this.canvas.clear();
-    this.initializeScribbles();
+    this.initializeScribbles(false);
     this.canvas.forEachObject(object => (
       // eslint-disable-next-line no-param-reassign
       object.selectable = (object.type === 'i-text')
@@ -515,7 +519,7 @@ class ScribingViewComponent extends React.Component {
   // and reloads them to enable selection again
   enableObjectSelection() {
     this.canvas.clear();
-    this.initializeScribbles();
+    this.initializeScribbles(false);
   }
 
   setSelectedShape = (shape) => {
@@ -559,13 +563,18 @@ class ScribingViewComponent extends React.Component {
     return this.normaliseScribble(scribble, true);
   }
 
-  initializeScribbles() {
+  initializeScribbles(isFirstInit) {
     const { scribbles } = this.props.scribing.answer;
     const userId = this.props.scribing.answer.user_id;
 
     this.isScribblesLoaded = false;
-    this.layers = [];
     let userScribble = [];
+
+    if (isFirstInit) {
+      this.layers = [];
+    } else {
+      this.layers.forEach((layer) => this.canvas.add(layer.scribbleGroup));
+    }
 
     if (scribbles) {
       scribbles.forEach((scribble) => {
@@ -603,7 +612,7 @@ class ScribingViewComponent extends React.Component {
 
         // Layer for other users' scribble
         // Disables scribble selection
-        if (scribble.creator_id !== userId) {
+        if (isFirstInit && scribble.creator_id !== userId) {
           // eslint-disable-next-line no-undef
           const scribbleGroup = new fabric.Group(fabricObjs);
           scribbleGroup.selectable = false;
@@ -618,6 +627,7 @@ class ScribingViewComponent extends React.Component {
             ...scribble,
             isDisplayed: true,
             showLayer,
+            scribbleGroup,
           };
           this.layers = [...this.layers, newScribble];
           this.canvas.add(scribbleGroup);
@@ -631,6 +641,7 @@ class ScribingViewComponent extends React.Component {
       // Enables scribble selection
       userScribble.map(obj => (this.canvas.add(obj)));
     }
+    this.canvas.renderAll();
     this.isScribblesLoaded = true;
   }
 
@@ -654,6 +665,8 @@ class ScribingViewComponent extends React.Component {
         width: this.width,
         height: this.height,
         preserveObjectStacking: true,
+        renderOnAddRemove: false,
+        objectCaching: false,
       });
 
       const fabricImage = new fabric.Image( // eslint-disable-line no-undef
@@ -671,7 +684,7 @@ class ScribingViewComponent extends React.Component {
       this.canvas.observe('object:removed', this.saveScribbles);
       this.canvas.observe('text:changed', this.saveScribbles);
 
-      this.initializeScribbles();
+      this.initializeScribbles(true);
       this.scaleCanvas();
 
       this.props.setCanvasLoaded(this.props.answerId, true);

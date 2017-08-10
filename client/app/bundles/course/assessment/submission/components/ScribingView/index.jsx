@@ -149,10 +149,7 @@ class ScribingViewComponent extends React.Component {
     initializeLineStyles();
     initializeColorDropdowns();
     initializePopovers();
-    console.log(this.props);
-  }
 
-  componentDidMount() {
     this.initializeCanvas(
         this.props.answerId,
         this.props.scribing.answer.image_path);
@@ -638,7 +635,6 @@ class ScribingViewComponent extends React.Component {
   }
 
   initializeCanvas(answerId, imagePath) {
-    const _self = this;
     const imageUrl = `https://coursemology.org/${imagePath}`;
     // const imageUrl = `${window.location.origin}/${imagePath}`;
     this.image = new Image(); // eslint-disable-line no-undef
@@ -654,7 +650,7 @@ class ScribingViewComponent extends React.Component {
       this.height = this.scale * this.image.height;
 
       // eslint-disable-next-line no-undef
-      const canvas = new fabric.Canvas(`canvas-${answerId}`, {
+      this.canvas = new fabric.Canvas(`canvas-${answerId}`, {
         width: this.width,
         height: this.height,
         preserveObjectStacking: true,
@@ -664,22 +660,21 @@ class ScribingViewComponent extends React.Component {
         this.image,
         { opacity: 1, scaleX: this.scale, scaleY: this.scale }
       );
-      canvas.setBackgroundImage(fabricImage, canvas.renderAll.bind(canvas));
+      this.canvas.setBackgroundImage(fabricImage, this.canvas.renderAll.bind(this.canvas));
 
-      _self.canvas = canvas;
-      _self.canvas.on('mouse:down', this.onMouseDownCanvas);
-      _self.canvas.on('mouse:move', this.onMouseMoveCanvas);
-      _self.canvas.on('mouse:up', this.onMouseUpCanvas);
-      _self.canvas.observe('object:moving', this.onObjectMovingCanvas);
-      _self.canvas.observe('object:modified', this.saveScribbles);
-      _self.canvas.observe('object:added', this.saveScribbles);
-      _self.canvas.observe('object:removed', this.saveScribbles);
-      _self.canvas.observe('text:changed', this.saveScribbles);
+      this.canvas.on('mouse:down', this.onMouseDownCanvas);
+      this.canvas.on('mouse:move', this.onMouseMoveCanvas);
+      this.canvas.on('mouse:up', this.onMouseUpCanvas);
+      this.canvas.observe('object:moving', this.onObjectMovingCanvas);
+      this.canvas.observe('object:modified', this.saveScribbles);
+      this.canvas.observe('object:added', this.saveScribbles);
+      this.canvas.observe('object:removed', this.saveScribbles);
+      this.canvas.observe('text:changed', this.saveScribbles);
 
-      _self.initializeScribbles();
-      _self.scaleCanvas();
+      this.initializeScribbles();
+      this.scaleCanvas();
 
-      _self.props.setCanvasLoaded(this.props.answerId, true);
+      this.props.setCanvasLoaded(this.props.answerId, true);
     };
   }
 

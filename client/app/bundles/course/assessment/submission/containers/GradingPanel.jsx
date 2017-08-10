@@ -170,6 +170,10 @@ class VisibleGradingPanel extends Component {
   renderGradeRow(question, showGrader) {
     const questionGrading = this.props.grading.questions[question.id];
     const questionGrade = questionGrading && questionGrading.grade !== null ? questionGrading.grade : '';
+    // TODO: REMOVE THIS WHEN DONE
+    if (questionGrading === undefined) {
+      return null;
+    }
     const grader = questionGrading.grader;
 
     const courseId = getCourseId();

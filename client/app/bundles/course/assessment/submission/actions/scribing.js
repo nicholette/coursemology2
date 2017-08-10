@@ -11,40 +11,6 @@ export function setCanvasLoaded(answerId, loaded) {
   };
 }
 
-// For using API call to get scribing answer
-
-// export function fetchScribingAnswer(answerId) {
-//   console.log('answerid', answerId);
-//   return (dispatch) => {
-//     dispatch({ type: actions.FETCH_SCRIBING_ANSWER_REQUEST });
-//     return CourseAPI.answer.scribing.scribings.fetch(answerId)
-//       .then((response) => {
-//         console.log('response', response);
-//         dispatch({
-//           answerId,
-//           type: actions.FETCH_SCRIBING_ANSWER_SUCCESS,
-//           data: response.data,
-//         });
-//       })
-//       .catch((error) => {
-//         dispatch({ type: actions.FETCH_SCRIBING_ANSWER_FAILURE });
-//         if (error.response && error.response.data) {
-//           throw new SubmissionError(error.response.data.errors);
-//         }
-//       });
-//   };
-// }
-
-// // For using data attribute to get scribing answer
-// export function setUpScribingAnswer(answerId, data) {
-//   return (dispatch) => {
-//     dispatch({
-//       type: actions.FETCH_SCRIBING_ANSWER_SUCCESS,
-//       payload: { answerId, data },
-//     });
-//   };
-// }
-
 export function clearSavingStatus(answerId) {
   return (dispatch) => {
     dispatch({

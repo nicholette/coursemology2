@@ -28,6 +28,7 @@ const styles = {
     padding: '10px',
   },
   menu: {
+    padding: '5px',
     maxHeight: '250px',
     overflowY: 'auto',
   },

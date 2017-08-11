@@ -26,6 +26,7 @@ import { scribingShape } from '../../propTypes';
 import { scribingTranslations as translations } from '../../translations';
 import { scribingTools, scribingShapes, scribingToolColor,
          scribingToolThickness, scribingToolLineStyle, scribingPopoverTypes } from '../../constants';
+import style from './ScribingView.scss';
 
 /* NOTE: Denormalizing and normalizing scribble code is brought over
   * from Coursemology v1. They are not needed for the scribing

@@ -352,6 +352,7 @@ class ScribingCanvas extends React.Component {
       left: this.canvas.width / 2,
       top: this.canvas.height / 2,
     }));
+    this.canvas.renderAll();
   }
 
   // Legacy code needed to support migrated v1 scribing questions.
@@ -435,7 +436,6 @@ class ScribingCanvas extends React.Component {
           const showLayer = (isShown) => {
             // eslint-disable-next-line no-param-reassign
             scribbleGroup._objects.forEach(obj => (obj.visible = isShown));
-            this.canvas.renderAll();
           };
           // Populate layers list
           const newScribble = {
@@ -493,19 +493,20 @@ class ScribingCanvas extends React.Component {
       );
       this.canvas.setBackgroundImage(fabricImage, this.canvas.renderAll.bind(this.canvas));
 
+      this.canvas.initializeScribbles = this.initializeScribbles;
+      this.canvas.initializeScribbles(true);
+
       this.canvas.on('mouse:down', this.onMouseDownCanvas);
       this.canvas.on('mouse:move', this.onMouseMoveCanvas);
       this.canvas.on('mouse:up', this.onMouseUpCanvas);
-      // this.canvas.observe('object:moving', this.onObjectMovingCanvas);
-      // this.canvas.observe('object:modified', this.saveScribbles);
-      // this.canvas.observe('object:added', this.saveScribbles);
-      // this.canvas.observe('object:removed', this.saveScribbles);
-      // this.canvas.observe('text:changed', this.saveScribbles);
+      this.canvas.on('object:moving', this.onObjectMovingCanvas);
+      this.canvas.on('object:modified', this.saveScribbles);
+      this.canvas.on('object:added', this.saveScribbles);
+      this.canvas.on('path:created', this.saveScribbles);
+      this.canvas.on('object:removed', this.saveScribbles);
+      this.canvas.on('text:changed', this.saveScribbles);
 
-      this.canvas.initializeScribbles = this.initializeScribbles;
-      this.canvas.initializeScribbles(true);
       this.scaleCanvas();
-
       this.props.setCanvasLoaded(this.props.answerId, true, this.canvas);
     };
   }
@@ -521,12 +522,15 @@ class ScribingCanvas extends React.Component {
   // Scribble Helpers
 
   saveScribbles = () => {
-    if (this.isScribblesLoaded) {
-      const answerId = this.props.answerId;
-      const json = this.getScribbleJSON();
-      this.props.updateScribingAnswerInLocal(answerId, json);
-      this.props.updateScribingAnswer(answerId, json);
-    }
+    return new Promise((resolve) => {
+      if (this.isScribblesLoaded) {
+        const answerId = this.props.answerId;
+        const json = this.getScribbleJSON();
+        this.props.updateScribingAnswerInLocal(answerId, json);
+        this.props.updateScribingAnswer(answerId, json);
+      }
+      resolve();
+    });
   }
 
   getScribbleJSON() {

@@ -239,6 +239,7 @@ class ScribingToolbar extends Component {
       this.props.scribing.canvas.discardActiveGroup();
       objectsInGroup.forEach(object => (this.props.scribing.canvas.remove(object)));
     }
+    this.props.scribing.canvas.renderAll();
   }
 
   onMouseEnter(toolType) {
@@ -467,6 +468,7 @@ class ScribingToolbar extends Component {
                 if (l.creator_id === layer.creator_id) {
                   l.isDisplayed = !l.isDisplayed;
                   l.showLayer(l.isDisplayed);
+                  this.props.scribing.canvas.renderAll();
                 }
               });
             }}

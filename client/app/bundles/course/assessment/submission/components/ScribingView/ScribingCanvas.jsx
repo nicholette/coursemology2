@@ -154,6 +154,17 @@ class ScribingCanvas extends React.Component {
     this.viewportLeft = this.canvas.viewportTransform[4];
     this.viewportTop = this.canvas.viewportTransform[5];
     this.mouseStartPoint = this.getMousePoint(options.e);
+
+    if (!this.isOverText && this.props.scribing.selectedTool === scribingTools.TYPE) {
+      this.canvas.add(new fabric.IText('Text', { // eslint-disable-line no-undef
+        fontFamily: this.props.scribing.fontFamily,
+        fontSize: this.props.scribing.fontSize,
+        fill: this.props.scribing.colors[scribingToolColor.TYPE],
+        left: this.mouseCanvasDragStartPoint.x,
+        top: this.mouseCanvasDragStartPoint.y,
+      }));
+      this.canvas.renderAll();
+    }
   }
 
   onMouseMoveCanvas = (options) => {
@@ -285,6 +296,16 @@ class ScribingCanvas extends React.Component {
     }
   }
 
+  onMouseOver = (options) => {
+    if (options.target.type === 'i-text') {
+      this.isOverText = true;
+    }
+  }
+
+  onMouseOut = (options) => {
+    this.isOverText = false;
+  }
+
   // Limit moving of objects to within the canvas
   onObjectMovingCanvas = (options) => {
     const obj = options.target;
@@ -341,18 +362,6 @@ class ScribingCanvas extends React.Component {
     this.setState({
       selectedShape: shape,
     });
-  }
-
-  addText = () => {
-    // eslint-disable-next-line no-undef
-    this.canvas.add(new fabric.IText('Text', { // eslint-disable-line no-undef
-      fontFamily: this.props.scribing.fontFamily,
-      fontSize: this.props.scribing.fontSize,
-      fill: this.props.scribing.colors[scribingToolColor.TYPE],
-      left: this.canvas.width / 2,
-      top: this.canvas.height / 2,
-    }));
-    this.canvas.renderAll();
   }
 
   // Legacy code needed to support migrated v1 scribing questions.
@@ -499,6 +508,8 @@ class ScribingCanvas extends React.Component {
       this.canvas.on('mouse:down', this.onMouseDownCanvas);
       this.canvas.on('mouse:move', this.onMouseMoveCanvas);
       this.canvas.on('mouse:up', this.onMouseUpCanvas);
+      this.canvas.on('mouse:over', this.onMouseOver);
+      this.canvas.on('mouse:out', this.onMouseOut);
       this.canvas.on('object:moving', this.onObjectMovingCanvas);
       this.canvas.on('object:modified', this.saveScribbles);
       this.canvas.on('object:added', this.saveScribbles);

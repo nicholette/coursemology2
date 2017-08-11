@@ -77,11 +77,11 @@ const styles = {
 
 class ScribingViewComponent extends React.Component {
   render() {
-    const answerId = this.props.answerId;
+    const { answerId, submission } = this.props;
     const isCanvasLoaded = this.props.scribing.isCanvasLoaded;
     return (answerId ?
       <div style={styles.canvas_div}>
-        <ScribingToolbar {...this.props} />
+        {submission.canUpdate ? <ScribingToolbar {...this.props} /> : null }
         { !isCanvasLoaded ? <LoadingIndicator /> : null }
         <ScribingCanvas {...this.props} />
       </div> : null

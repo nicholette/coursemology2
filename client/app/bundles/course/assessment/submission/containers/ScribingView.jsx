@@ -44,6 +44,7 @@ function mapStateToProps(state, ownProps) {
   const { answerId } = ownProps;
   return {
     scribing: state.scribing[answerId],
+    submission: state.submission,
   };
 }
 

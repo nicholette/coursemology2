@@ -36,6 +36,8 @@ class LayersComponent extends Component {
       onRequestClose, onTouchTapLayer,
     } = this.props;
 
+    console.log('layers open', open, layers);
+
     return layers && layers.length !== 0 ? (
       <Popover
         open={open}

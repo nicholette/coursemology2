@@ -81,7 +81,7 @@ class ScribingToolbar extends Component {
     if (coloringTool === scribingToolColor.DRAW) {
       this.props.scribing.canvas.freeDrawingBrush.color = this.getRgbaHelper(color.rgb);
     }
-    this.props.setColoringToolColor(this.props.answerId, coloringTool, color);
+    this.props.setColoringToolColor(this.props.answerId, coloringTool, this.getRgbaHelper(color.rgb));
   }
 
   onChangeFontFamily = (event, index, value) => (
@@ -221,6 +221,9 @@ class ScribingToolbar extends Component {
   // Helpers
 
   // Function Helpers
+  getRgbaHelper = json => (
+    `rgba(${json.r},${json.g},${json.b},${json.a})`
+  );
 
   disableObjectSelection() {
     this.props.scribing.canvas.forEachObject(object => (

@@ -11,7 +11,8 @@ export default class ScribingsAPI extends BaseAPI {
   }
 
   _getUrlPrefix() {
-    return `/courses/${getCourseId()}/assessments/${getAssessmentId()}
-            /submissions/${getSubmissionId()}/answers`;
+    const prefix = `/courses/${getCourseId()}/assessments/${getAssessmentId()}\
+/submissions/${getSubmissionId()}/answers`;
+    return prefix;
   }
 }

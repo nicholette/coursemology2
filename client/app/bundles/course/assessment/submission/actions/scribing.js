@@ -171,11 +171,11 @@ export function openPopover(answerId, popoverType, popoverAnchor) {
   );
 }
 
-export function closePopover(answerId, toolType) {
+export function closePopover(answerId, popoverType) {
   return dispatch => (
     dispatch({
       type: canvasActionTypes.CLOSE_POPOVER,
-      payload: { answerId, toolType },
+      payload: { answerId, popoverType },
     })
   );
 }

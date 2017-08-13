@@ -44,7 +44,7 @@ function initializePopovers() {
 
 export default function (state = {}, action) {
   switch (action.type) {
-    case actions.FETCH_SUBMISSION_SUCCESS:
+    case actions.FETCH_SUBMISSION_SUCCESS: {
       return {
         ...state,
         ...action.payload.answers.reduce((obj, answer) =>
@@ -59,7 +59,6 @@ export default function (state = {}, action) {
               imageHeight: 0,
               fontFamily: 'Arial',
               fontSize: 12,
-              layers: [],
               colors: initializeToolColor(),
               colorDropdowns: initializeColorDropdowns(),
               lineStyles: initializeLineStyles(),
@@ -67,8 +66,6 @@ export default function (state = {}, action) {
               popovers: initializePopovers(),
               popoverAnchor: undefined,
               popoverColorPickerAnchor: undefined,
-              viewportLeft: 0,
-              viewportTop: 0,
               isCanvasLoaded: false,
               isLoading: false,
               isSaving: false,
@@ -78,6 +75,7 @@ export default function (state = {}, action) {
           })
         , {}),
       };
+    }
     case actions.SET_CANVAS_LOADED: {
       const { answerId, loaded, canvas } = action.payload;
       return {
@@ -255,12 +253,12 @@ export default function (state = {}, action) {
     }
     case canvasActionTypes.OPEN_COLOR_PICKER: {
       const { answerId, toolType, popoverColorPickerAnchor } = action.payload;
-      const { popovers } = state;
+      const { colorDropdowns } = state;
       return {
         ...state,
         [answerId]: {
           ...state[answerId],
-          popovers: { ...popovers, [toolType]: true },
+          colorDropdowns: { ...colorDropdowns, [toolType]: true },
           popoverColorPickerAnchor,
         },
       };
@@ -277,15 +275,25 @@ export default function (state = {}, action) {
         },
       };
     }
-    case canvasActionTypes.CLOSE_COLOR_PICKER:
-    case canvasActionTypes.CLOSE_POPOVER: {
+    case canvasActionTypes.CLOSE_COLOR_PICKER: {
       const { answerId, toolType } = action.payload;
+      const { colorDropdowns } = state;
+      return {
+        ...state,
+        [answerId]: {
+          ...state[answerId],
+          colorDropdowns: { ...colorDropdowns, [toolType]: false },
+        },
+      };
+    }
+    case canvasActionTypes.CLOSE_POPOVER: {
+      const { answerId, popoverType } = action.payload;
       const { popovers } = state;
       return {
         ...state,
         [answerId]: {
           ...state[answerId],
-          popovers: { ...popovers, [toolType]: false },
+          popovers: { ...popovers, [popoverType]: false },
         },
       };
     }

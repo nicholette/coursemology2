@@ -82,10 +82,7 @@ export function fetchSubmission(id) {
           payload: data,
         });
       })
-      .catch((error) => {
-        console.log(error);
-        dispatch({ type: actionTypes.FETCH_SUBMISSION_FAILURE })
-      });
+      .catch(() => dispatch({ type: actionTypes.FETCH_SUBMISSION_FAILURE }));
   };
 }
 

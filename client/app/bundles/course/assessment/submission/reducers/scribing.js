@@ -2,23 +2,6 @@ import actions, { canvasActionTypes, scribingTools, scribingShapes,
       scribingToolColor, scribingToolThickness, scribingToolLineStyle,
       scribingPopoverTypes } from '../constants';
 
-// Shape of every scribing answer
-  // {
-  //    answer: {
-  //     scribbles: [],
-  //     image_path: '',
-  //     user_id: undefined,
-  //     answer_id: undefined,
-  //   },
-  //   canvas: fabric.Canvas
-  //   isCanvasLoaded: false,
-  //   isLoading: false,
-  //   isSaving: false,
-  //   isSaved: false,
-  //   hasError: false,
-  // }
-  // 
-
 function initializeToolColor() {
   const colors = {};
   Object.values(scribingToolColor).forEach(toolType =>
@@ -33,7 +16,7 @@ function initializeToolThickness() {
    (thickness[toolType] = 1)
   );
   return thickness;
-};
+}
 
 function initializeLineStyles() {
   const lineStyles = {};
@@ -41,7 +24,7 @@ function initializeLineStyles() {
    (lineStyles[toolType] = 'solid')
   );
   return lineStyles;
-};
+}
 
 function initializeColorDropdowns() {
   const colorDropdowns = {};
@@ -49,7 +32,7 @@ function initializeColorDropdowns() {
    (colorDropdowns[toolType] = false)
   );
   return colorDropdowns;
-};
+}
 
 function initializePopovers() {
   const popovers = {};
@@ -57,7 +40,7 @@ function initializePopovers() {
    (popovers[popoverType] = false)
   );
   return popovers;
-};
+}
 
 export default function (state = {}, action) {
   switch (action.type) {
@@ -97,27 +80,15 @@ export default function (state = {}, action) {
       };
     case actions.SET_CANVAS_LOADED: {
       const { answerId, loaded, canvas } = action.payload;
-      console.log('loaded', loaded);
       return {
         ...state,
         [answerId]: {
           ...state[answerId],
           canvas,
           isCanvasLoaded: loaded,
-        }
+        },
       };
     }
-    // case actions.FETCH_SCRIBING_ANSWER_REQUEST: {
-    //   const { answerId } = action.payload;
-    //   return {
-    //     ...state,
-    //     [answerId]: {
-    //       ...state[answerId],
-    //       isLoading: true,
-    //       hasError: false,
-    //     }
-    //   };
-    // }
     case actions.UPDATE_SCRIBING_ANSWER_REQUEST: {
       const { answerId } = action.payload;
       return {
@@ -127,22 +98,9 @@ export default function (state = {}, action) {
           isLoading: true,
           isSaving: true,
           hasError: false,
-        }
+        },
       };
     }
-    // case actions.FETCH_SCRIBING_ANSWER_SUCCESS: {
-    //   const answer = action.payload.data && action.payload.data.scribing_answer;
-    //   const answerId = action.payload.answerId;
-    //   return {
-    //     ...state,
-    //     [answerId]: {
-    //       ...state[answerId],
-    //       answer,
-    //       isLoading: false,
-    //       hasError: false,
-    //     }
-    //   };
-    // }
     case actions.UPDATE_SCRIBING_ANSWER_SUCCESS: {
       const { answerId } = action.payload;
       return {
@@ -153,10 +111,9 @@ export default function (state = {}, action) {
           isSaved: true,
           isLoading: false,
           hasError: false,
-        }
+        },
       };
     }
-    // case actions.FETCH_SCRIBING_ANSWER_FAILURE:
     case actions.UPDATE_SCRIBING_ANSWER_FAILURE: {
       const { answerId } = action.payload;
       return {
@@ -167,7 +124,7 @@ export default function (state = {}, action) {
           isSaved: false,
           isLoading: false,
           hasError: true,
-        }
+        },
       };
     }
     case actions.CLEAR_SAVING_STATUS: {
@@ -180,7 +137,7 @@ export default function (state = {}, action) {
           isSaved: false,
           isLoading: false,
           hasError: false,
-        }
+        },
       };
     }
     case actions.UPDATE_SCRIBING_ANSWER_IN_LOCAL: {
@@ -202,7 +159,6 @@ export default function (state = {}, action) {
         },
       };
     }
-
     case canvasActionTypes.SET_TOOL_SELECTED: {
       const { answerId, selectedTool } = action.payload;
       return {
@@ -211,9 +167,8 @@ export default function (state = {}, action) {
           ...state[answerId],
           selectedTool,
         },
-      }
+      };
     }
-
     case canvasActionTypes.SET_FONT_FAMILY: {
       const { answerId, fontFamily } = action.payload;
       return {
@@ -224,7 +179,6 @@ export default function (state = {}, action) {
         },
       };
     }
-
     case canvasActionTypes.SET_FONT_SIZE: {
       const { answerId, fontSize } = action.payload;
       return {
@@ -235,7 +189,6 @@ export default function (state = {}, action) {
         },
       };
     }
-
     case canvasActionTypes.SET_LINE_STYLE_CHIP: {
       const { answerId, toolType, style } = action.payload;
       const { lineStyles } = state[answerId];
@@ -247,7 +200,6 @@ export default function (state = {}, action) {
         },
       };
     }
-
     case canvasActionTypes.SET_COLORING_TOOL_COLOR: {
       const { answerId, coloringTool, color } = action.payload;
       const { colors } = state[answerId];
@@ -259,7 +211,6 @@ export default function (state = {}, action) {
         },
       };
     }
-
     case canvasActionTypes.SET_TOOL_THICKNESS: {
       const { answerId, toolType, value } = action.payload;
       const { thickness } = state[answerId];
@@ -282,7 +233,6 @@ export default function (state = {}, action) {
         },
       };
     }
-
     case canvasActionTypes.OPEN_HOVER_TOOL_TIP: {
       const { answerId, hoveredToolTip } = action.payload;
       return {
@@ -293,7 +243,6 @@ export default function (state = {}, action) {
         },
       };
     }
-
     case canvasActionTypes.CLOSE_HOVER_TOOL_TIP: {
       const { answerId } = action.payload;
       return {
@@ -304,8 +253,6 @@ export default function (state = {}, action) {
         },
       };
     }
-
-
     case canvasActionTypes.OPEN_COLOR_PICKER: {
       const { answerId, toolType, popoverColorPickerAnchor } = action.payload;
       const { popovers } = state;
@@ -318,12 +265,11 @@ export default function (state = {}, action) {
         },
       };
     }
-
     case canvasActionTypes.OPEN_POPOVER: {
       const { answerId, popoverType, popoverAnchor } = action.payload;
       const { popovers } = state;
       return {
-        ...state,        
+        ...state,
         [answerId]: {
           ...state[answerId],
           popovers: { ...popovers, [popoverType]: true },
@@ -331,7 +277,6 @@ export default function (state = {}, action) {
         },
       };
     }
-
     case canvasActionTypes.CLOSE_COLOR_PICKER:
     case canvasActionTypes.CLOSE_POPOVER: {
       const { answerId, toolType } = action.payload;
@@ -349,102 +294,3 @@ export default function (state = {}, action) {
     }
   }
 }
-
-
-
-// const initialState = {
-//   answer: {
-//     scribbles: [],
-//     image_path: '',
-//     user_id: undefined,
-//     answer_id: undefined,
-//   },
-//   isCanvasLoaded: false,
-//   isLoading: false,
-//   isSaving: false,
-//   isSaved: false,
-//   hasError: false,
-// };
-
-// export default function (state = initialState, action) {
-//   const { type } = action;
-
-//   switch (type) {
-//     case actions.SET_CANVAS_LOADED: {
-//       return {
-//         ...state,
-//         isCanvasLoaded: action.loaded,
-//       };
-//     }
-//     case actions.FETCH_SCRIBING_ANSWER_REQUEST: {
-//       return {
-//         ...state,
-//         isLoading: true,
-//         hasError: false,
-//       };
-//     }
-//     case actions.UPDATE_SCRIBING_ANSWER_REQUEST: {
-//       return {
-//         ...state,
-//         isLoading: true,
-//         isSaving: true,
-//         hasError: false,
-//       };
-//     }
-//     case actions.FETCH_SCRIBING_ANSWER_SUCCESS: {
-//       const answer = action.data && action.data.scribing_answer;
-//       return {
-//         ...state,
-//         answer,
-//         isLoading: false,
-//         hasError: false,
-//       };
-//     }
-//     case actions.UPDATE_SCRIBING_ANSWER_SUCCESS: {
-//       return {
-//         ...state,
-//         isSaving: false,
-//         isSaved: true,
-//         isLoading: false,
-//         hasError: false,
-//       };
-//     }
-//     case actions.FETCH_SCRIBING_ANSWER_FAILURE:
-//     case actions.UPDATE_SCRIBING_ANSWER_FAILURE: {
-//       return {
-//         ...state,
-//         isSaving: false,
-//         isSaved: false,
-//         isLoading: false,
-//         hasError: true,
-//       };
-//     }
-//     case actions.CLEAR_SAVING_STATUS: {
-//       return {
-//         ...state,
-//         isSaving: false,
-//         isSaved: false,
-//         isLoading: false,
-//         hasError: false,
-//       };
-//     }
-//     case actions.UPDATE_SCRIBING_ANSWER_IN_LOCAL: {
-//       const scribbles = [];
-//       state.answer.scribbles.forEach((scribble) => {
-//         scribbles.push({
-//           ...scribble,
-//           content: scribble.creator_id === state.answer.user_id ?
-//             action.data : scribble.content,
-//         });
-//       });
-
-//       return {
-//         ...state,
-//         answer: { ...state.answer, scribbles },
-//       };
-//     }
-//     default: {
-//       return state;
-//     }
-//   }
-// }

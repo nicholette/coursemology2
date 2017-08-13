@@ -139,10 +139,10 @@ export const scribingAnswerShape = PropTypes.shape({
 
 export const scribingShape = PropTypes.shape({
   answer: scribingAnswerShape,
+  canvas: PropTypes.object,
   isCanvasLoaded: PropTypes.bool,
   isLoading: PropTypes.bool,
   isSaving: PropTypes.bool,
   isSaved: PropTypes.bool,
   hasError: PropTypes.bool,
-})
-
+});

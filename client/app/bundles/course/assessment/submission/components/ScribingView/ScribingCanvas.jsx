@@ -1,67 +1,21 @@
 /* eslint no-mixed-operators: "off" */
 /* eslint react/sort-comp: "off" */
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { Canvas } from 'react-fabricjs'; // eslint-disable-line no-unused-vars
-import { injectIntl, intlShape } from 'react-intl';
 
-import FontIcon from 'material-ui/FontIcon';
-import { Toolbar, ToolbarGroup } from 'material-ui/Toolbar';
-import MaterialTooltip from 'material-ui/internal/Tooltip';
 import LoadingIndicator from 'lib/components/LoadingIndicator';
-
-import SavingIndicator from './SavingIndicator';
-import ToolDropdown from './ToolDropdown';
-import LayersComponent from './LayersComponent';
-import TypePopover from './popovers/TypePopover';
-import DrawPopover from './popovers/DrawPopover';
-import LinePopover from './popovers/LinePopover';
-import ShapePopover from './popovers/ShapePopover';
-
-// import { setCanvasLoaded, fetchScribingAnswer, clearSavingStatus,
-//          updateScribingAnswer, updateScribingAnswerInLocal } = '../actions/scribing';
-import { scribingShape } from '../../propTypes';
-import { scribingTranslations as translations } from '../../translations';
 import { scribingTools, scribingShapes, scribingToolColor,
-         scribingToolThickness, scribingToolLineStyle, scribingPopoverTypes } from '../../constants';
+         scribingToolThickness, scribingToolLineStyle } from '../../constants';
 
-/* NOTE: Denormalizing and normalizing scribble code is brought over
-  * from Coursemology v1. They are not needed for the scribing
-  * question to work but it is required to support scribing questions
-  * that were migrated over.
-*/
+import { scribingShape } from '../../propTypes';
 
 const propTypes = {
-  intl: intlShape.isRequired,
-  // scribing: PropTypes.shape({
-  //   answer: scribingShape,
-  //   isLoading: PropTypes.bool,
-  //   isCanvasLoaded: PropTypes.bool,
-  //   isSaving: PropTypes.bool,
-  //   isSaved: PropTypes.bool,
-  //   hasError: PropTypes.bool,
-  // }),
-  // readOnly: PropTypes.bool.isRequired,
-  // answerId: PropTypes.number,
-  // data: scribingShape.isRequired,
+  answerId: PropTypes.number.isRequired,
+  scribing: scribingShape,
   setCanvasLoaded: PropTypes.func.isRequired,
-  // fetchScribingAnswer: PropTypes.func.isRequired,
-  clearSavingStatus: PropTypes.func.isRequired,
   updateScribingAnswer: PropTypes.func.isRequired,
   updateScribingAnswerInLocal: PropTypes.func.isRequired,
-
-  setToolSelected: PropTypes.func.isRequired,
-  setFontFamily: PropTypes.func.isRequired,
-  setFontSize: PropTypes.func.isRequired,
-  setLineStyleChip: PropTypes.func.isRequired,
-  setColoringToolColor: PropTypes.func.isRequired,
-  setToolThickness: PropTypes.func.isRequired,
-  setSelectedShape: PropTypes.func.isRequired,
-  openHoverToolTip: PropTypes.func.isRequired,
-  closeHoverToolTip: PropTypes.func.isRequired,
-  openColorPicker: PropTypes.func.isRequired,
-  closeColorPicker: PropTypes.func.isRequired,
-  openPopover: PropTypes.func.isRequired,
-  closePopover: PropTypes.func.isRequired,
 };
 
 const styles = {
@@ -98,25 +52,9 @@ const styles = {
   },
 };
 
-class ScribingCanvas extends React.Component {
+export default class ScribingCanvas extends React.Component {
   constructor() {
     super();
-    // this.state = {
-    //   selectedTool: scribingTools.SELECT,
-    //   selectedShape: scribingShapes.RECT,
-    //   hoveredToolTip: '',
-    //   imageWidth: 0,
-    //   imageHeight: 0,
-    //   fontFamily: 'Arial',
-    //   fontSize: 12,
-    //   colors: [],
-    //   colorDropdowns: [],
-    //   lineStyles: [],
-    //   thickness: [],
-    //   popovers: [],
-    //   popoverAnchor: undefined,
-    //   popoverColorPickerAnchor: undefined,
-    // };
 
     this.viewportLeft = 0;
     this.viewportTop = 0;
@@ -128,10 +66,7 @@ class ScribingCanvas extends React.Component {
         this.props.scribing.answer.image_path);
   }
 
-  shouldComponentUpdate(nextProps) {
-    // if (this.props.scribing.isCanvasLoaded) {
-    //   // this.updateScribbles();
-    // }
+  shouldComponentUpdate() {
     return !this.props.scribing.isCanvasLoaded;
   }
 
@@ -248,7 +183,6 @@ class ScribingCanvas extends React.Component {
         const strokeDashArray = getStrokeDashArray(scribingToolLineStyle.SHAPE_BORDER);
         switch (this.props.scribing.selectedShape) {
           case scribingShapes.RECT: {
-                      console.log('selected SHAPE');
             const dragProps = this.generateMouseDragProperties(
               this.mouseCanvasDragStartPoint,
               this.mouseCanvasDragEndPoint
@@ -302,9 +236,7 @@ class ScribingCanvas extends React.Component {
     }
   }
 
-  onMouseOut = (options) => {
-    this.isOverText = false;
-  }
+  onMouseOut = () => (this.isOverText = false)
 
   // Limit moving of objects to within the canvas
   onObjectMovingCanvas = (options) => {
@@ -398,7 +330,7 @@ class ScribingCanvas extends React.Component {
     if (isFirstInit) {
       this.canvas.layers = [];
     } else {
-      this.canvas.layers.forEach((layer) => this.canvas.add(layer.scribbleGroup));
+      this.canvas.layers.forEach(layer => this.canvas.add(layer.scribbleGroup));
     }
 
     if (scribbles) {
@@ -478,9 +410,9 @@ class ScribingCanvas extends React.Component {
     this.image.onload = () => {
       // Get the calculated width of canvas, 750 is min width for scribing toolbar
       const element = document.getElementById(`canvas-${answerId}`);
-      this.CANVAS_MAX_WIDTH = Math.max(element.getBoundingClientRect().width, 750);
+      const maxWidth = Math.max(element.getBoundingClientRect().width, 750);
 
-      this.width = Math.min(this.image.width, this.CANVAS_MAX_WIDTH);
+      this.width = Math.min(this.image.width, maxWidth);
       this.scale = Math.min(this.width / this.image.width, 1);
       this.height = this.scale * this.image.height;
 
@@ -495,6 +427,8 @@ class ScribingCanvas extends React.Component {
         noScaleCache: true,
         needsItsOwnCache: false,
       });
+
+      this.canvas.maxWidth = maxWidth;
 
       const fabricImage = new fabric.Image( // eslint-disable-line no-undef
         this.image,
@@ -532,8 +466,8 @@ class ScribingCanvas extends React.Component {
 
   // Scribble Helpers
 
-  saveScribbles = () => {
-    return new Promise((resolve) => {
+  saveScribbles = () => (
+    new Promise((resolve) => {
       if (this.isScribblesLoaded) {
         const answerId = this.props.answerId;
         const json = this.getScribbleJSON();
@@ -541,8 +475,8 @@ class ScribingCanvas extends React.Component {
         this.props.updateScribingAnswer(answerId, json);
       }
       resolve();
-    });
-  }
+    })
+  )
 
   getScribbleJSON() {
     // Remove non-user scribings in canvas
@@ -613,4 +547,3 @@ class ScribingCanvas extends React.Component {
 }
 
 ScribingCanvas.propTypes = propTypes;
-export default injectIntl(ScribingCanvas);

@@ -1,10 +1,10 @@
+/* eslint react/sort-comp: "off" */
 import React, { Component, PropTypes } from 'react';
 import { injectIntl, intlShape } from 'react-intl';
 
 import FontIcon from 'material-ui/FontIcon';
 import { Toolbar, ToolbarGroup } from 'material-ui/Toolbar';
 import MaterialTooltip from 'material-ui/internal/Tooltip';
-import LoadingIndicator from 'lib/components/LoadingIndicator';
 
 import SavingIndicator from './SavingIndicator';
 import ToolDropdown from './ToolDropdown';
@@ -16,17 +16,13 @@ import ShapePopover from './popovers/ShapePopover';
 
 import { scribingShape } from '../../propTypes';
 import { scribingTranslations as translations } from '../../translations';
-import { scribingTools, scribingShapes, scribingToolColor, scribingToolThickness, scribingToolLineStyle, scribingPopoverTypes } from '../../constants';
-
-/* NOTE: Denormalizing and normalizing scribble code is brought over
-  * from Coursemology v1. They are not needed for the scribing
-  * question to work but it is required to support scribing questions
-  * that were migrated over.
-*/
+import { scribingTools, scribingShapes, scribingToolColor, scribingToolThickness,
+         scribingToolLineStyle, scribingPopoverTypes } from '../../constants';
 
 const propTypes = {
   intl: intlShape.isRequired,
-
+  answerId: PropTypes.number.isRequired,
+  scribing: scribingShape,
   setToolSelected: PropTypes.func.isRequired,
   setFontFamily: PropTypes.func.isRequired,
   setFontSize: PropTypes.func.isRequired,
@@ -40,35 +36,7 @@ const propTypes = {
   closeColorPicker: PropTypes.func.isRequired,
   openPopover: PropTypes.func.isRequired,
   closePopover: PropTypes.func.isRequired,
-
   clearSavingStatus: PropTypes.func.isRequired,
-  updateScribingAnswer: PropTypes.func.isRequired,
-  updateScribingAnswerInLocal: PropTypes.func.isRequired,
-
-  scribing: PropTypes.shape({
-    canvas: PropTypes.object,
-    selectedTool: PropTypes.string.isRequired,
-    selectedShape: PropTypes.string.isRequired,
-    hoveredToolTip: PropTypes.string,
-    imageWidth: PropTypes.number,
-    imageHeight: PropTypes.number,
-    fontFamily: PropTypes.string,
-    fontSize: PropTypes.number,
-    colors: PropTypes.object.isRequired,
-    colorDropdowns: PropTypes.object.isRequired,
-    lineStyles: PropTypes.object.isRequired,
-    thickness: PropTypes.object.isRequired,
-    popovers: PropTypes.object.isRequired,
-    popoverAnchor: PropTypes.object,
-    popoverColorPickerAnchor: PropTypes.object,
-    isCanvasLoaded: PropTypes.bool,
-
-    // answer: answerShape,
-    isLoading: PropTypes.bool,
-    isSaving: PropTypes.bool,
-    isSaved: PropTypes.bool,
-    hasError: PropTypes.bool,
-  }),
 };
 
 const styles = {
@@ -300,7 +268,12 @@ class ScribingToolbar extends Component {
     };
 
     return (
-      <Toolbar style={{ ...styles.toolbar, width: this.props.scribing.canvas_MAX_WIDTH }}>
+      <Toolbar
+        style={{
+          ...styles.toolbar,
+          width: this.props.scribing.canvas && this.props.scribing.canvas.maxWidth,
+        }}
+      >
         <ToolbarGroup>
           <ToolDropdown
             toolType={scribingTools.TYPE}
@@ -410,7 +383,10 @@ class ScribingToolbar extends Component {
               />
             )}
             onTouchTapChevron={event => (this.onTouchTapPopover(event, scribingPopoverTypes.SHAPE))}
-            iconClassname={this.props.scribing.selectedShape === scribingShapes.RECT ? 'fa fa-square-o' : 'fa fa-circle-o'}
+            iconClassname={
+              this.props.scribing.selectedShape === scribingShapes.RECT ?
+              'fa fa-square-o' : 'fa fa-circle-o'
+            }
             popoverComponent={() => (
               <ShapePopover
                 lineToolType={scribingToolThickness.SHAPE_BORDER}
@@ -428,14 +404,22 @@ class ScribingToolbar extends Component {
                 onClickBorderColorPicker={event => (this.onClickColorPicker(event, scribingToolColor.SHAPE_BORDER))}
                 borderColorPickerPopoverOpen={this.props.scribing.colorDropdowns[scribingToolColor.SHAPE_BORDER]}
                 borderColorPickerPopoverAnchorEl={this.props.scribing.popoverColorPickerAnchor}
-                onRequestCloseBorderColorPickerPopover={() => (this.onRequestCloseColorPicker(scribingToolColor.SHAPE_BORDER))}
-                onChangeCompleteBorderColorPicker={color => (this.onChangeCompleteColor(color, scribingToolColor.SHAPE_BORDER))}
+                onRequestCloseBorderColorPickerPopover={
+                  () => (this.onRequestCloseColorPicker(scribingToolColor.SHAPE_BORDER))
+                }
+                onChangeCompleteBorderColorPicker={
+                  color => (this.onChangeCompleteColor(color, scribingToolColor.SHAPE_BORDER))
+                }
                 fillColorPickerColor={this.props.scribing.colors[scribingToolColor.SHAPE_FILL]}
                 onClickFillColorPicker={event => (this.onClickColorPicker(event, scribingToolColor.SHAPE_FILL))}
                 fillColorPickerPopoverOpen={this.props.scribing.colorDropdowns[scribingToolColor.SHAPE_FILL]}
                 fillColorPickerPopoverAnchorEl={this.props.scribing.popoverColorPickerAnchor}
-                onRequestCloseFillColorPickerPopover={() => (this.onRequestCloseColorPicker(scribingToolColor.SHAPE_FILL))}
-                onChangeCompleteFillColorPicker={color => (this.onChangeCompleteColor(color, scribingToolColor.SHAPE_FILL))}
+                onRequestCloseFillColorPickerPopover={
+                  () => (this.onRequestCloseColorPicker(scribingToolColor.SHAPE_FILL))
+                }
+                onChangeCompleteFillColorPicker={
+                  color => (this.onChangeCompleteColor(color, scribingToolColor.SHAPE_FILL))
+                }
               />
             )}
           />
@@ -458,15 +442,18 @@ class ScribingToolbar extends Component {
           </FontIcon>
           <LayersComponent
             onTouchTap={event => (this.onTouchTapPopover(event, scribingPopoverTypes.LAYER))}
-            disabled={this.props.scribing.canvas && this.props.scribing.canvas.layers && this.props.scribing.canvas.layers.length === 0}
+            disabled={
+              this.props.scribing.canvas
+              && this.props.scribing.canvas.layers
+              && this.props.scribing.canvas.layers.length === 0}
             open={this.props.scribing.popovers[scribingPopoverTypes.LAYER]}
             anchorEl={this.props.scribing.popoverAnchor}
             onRequestClose={() => (this.onRequestClosePopover(scribingPopoverTypes.LAYER))}
             layers={this.props.scribing.canvas && this.props.scribing.canvas.layers}
             onTouchTapLayer={(layer) => {
-              this.props.scribing.canvas.layers.forEach(l => {
+              this.props.scribing.canvas.layers.forEach((l) => {
                 if (l.creator_id === layer.creator_id) {
-                  l.isDisplayed = !l.isDisplayed;
+                  l.isDisplayed = !l.isDisplayed; // eslint-disable-line no-param-reassign
                   l.showLayer(l.isDisplayed);
                   this.props.scribing.canvas.renderAll();
                 }

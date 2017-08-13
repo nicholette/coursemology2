@@ -8,7 +8,7 @@ import LessonPlanAPI from './LessonPlan';
 import SurveyAPI from './Survey';
 import AdminAPI from './Admin';
 import ScribingQuestionAPI from './Assessment/question/scribing';
-import ScribingAnswerAPI from './assessment/submission/answer/scribing';
+import ScribingAnswerAPI from './Assessment/submission/answer/scribing';
 
 const CourseAPI = {
   achievements: new AchievementsAPI(),

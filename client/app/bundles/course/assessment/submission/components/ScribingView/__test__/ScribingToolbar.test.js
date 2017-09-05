@@ -10,7 +10,7 @@ import store from 'course/assessment/submission/store';
 import ScribingView from 'course/assessment/submission/containers/ScribingView';
 import ScribingToolbar from 'course/assessment/submission/components/ScribingView/ScribingToolbar';
 import { setColoringToolColor } from '../../../actions/scribing';
-import actionTypes, { scribingToolColor, scribingToolThickness,
+import actionTypes, { scribingTools, scribingToolColor, scribingToolThickness,
       scribingToolLineStyle, scribingPopoverTypes } from '../../../constants';
 
 const client = CourseAPI.assessment.answer.scribing.getClient();
@@ -110,6 +110,7 @@ const props = {
     isSaving: false,
     isSaved: false,
     hasError: false,
+    selectedTool: scribingTools.SELECT,
   },
   setLayerDisplay: jest.fn(),
   setToolSelected: jest.fn(),
